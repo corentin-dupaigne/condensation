@@ -9,6 +9,8 @@ import {
   type DLCItem,
   type Achievement,
   type RelatedGame,
+  type SearchResultGame,
+  type RecentlyViewedGame,
 } from "./types";
 
 export const heroSlides: HeroSlide[] = [
@@ -921,5 +923,81 @@ export const relatedGames: RelatedGame[] = [
     price: 24.99,
     badges: [],
     genreBadge: "ADVENTURE",
+  },
+];
+
+/* ── Search Results Page ── */
+
+export const searchResultGames: SearchResultGame[] = [
+  {
+    id: "sr1",
+    title: "Cyberpunk 2077",
+    slug: "cyberpunk-2077",
+    platforms: ["PC", "PS5"],
+    price: 29.99,
+    originalPrice: 59.99,
+    discountPercent: 50,
+    badge: "ultimate-edition",
+  },
+  {
+    id: "sr2",
+    title: "Phantom Liberty",
+    slug: "phantom-liberty",
+    platforms: ["PC"],
+    price: 25.49,
+    badge: "standard",
+  },
+  {
+    id: "sr3",
+    title: "Void Runner",
+    slug: "void-runner",
+    platforms: ["XBOX"],
+    price: 44.99,
+    originalPrice: 89.99,
+    discountPercent: 50,
+    badge: "legendary-bundle",
+  },
+  {
+    id: "sr4",
+    title: "Neural Link VR",
+    slug: "neural-link-vr",
+    platforms: ["STEAM DECK"],
+    price: 19.0,
+  },
+];
+
+export const popularSearches: string[] = [
+  "ELDEN RING",
+  "FC 24",
+  "STEAM DECK",
+  "HORROR GAMES",
+  "GTAVI",
+  "COSMETIC SKINS",
+];
+
+export const recentlyViewedGames: RecentlyViewedGame[] = [
+  {
+    id: "rv1",
+    title: "Elden Ring: Shadow of the Erdtree",
+    label: "PRE-ORDER",
+    price: 39.99,
+  },
+  {
+    id: "rv2",
+    title: "Modern Warfare III",
+    label: "BUNDLE",
+    price: 69.99,
+  },
+  {
+    id: "rv3",
+    title: "Forza Motorsport",
+    label: "PREMIUM",
+    price: 89.99,
+  },
+  {
+    id: "rv4",
+    title: "Hollow Knight",
+    label: "DIGITAL CODE",
+    price: 14.99,
   },
 ];

@@ -114,3 +114,26 @@ export interface Achievement {
 }
 
 export type RelatedGame = Game & { genreBadge: string };
+
+/* ── Search Results Page ── */
+
+export type SearchBadgeType = "ultimate-edition" | "standard" | "legendary-bundle";
+
+export interface SearchResultGame {
+  id: string;
+  title: string;
+  slug: string;
+  platforms: string[];
+  price: number;
+  originalPrice?: number;
+  discountPercent?: number;
+  badge?: SearchBadgeType;
+  wishlistAdded?: boolean;
+}
+
+export interface RecentlyViewedGame {
+  id: string;
+  title: string;
+  label: string;
+  price: number;
+}
