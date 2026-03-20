@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0c0e11;
+  --foreground: #f9f9fd;
+
+  --surface: #0c0e11;
+  --surface-bright: #292c31;
+  --surface-dim: #0c0e11;
+  --surface-container: #171a1d;
+  --surface-container-high: #1d2024;
+  --surface-container-highest: #23262a;
+  --surface-container-low: #111417;
+  --surface-container-lowest: #000000;
+  --surface-variant: #23262a;
+  --surface-tint: #a1faff;
+
+  --primary: #a1faff;
+  --primary-container: #00f4fe;
+  --primary-dim: #00e5ee;
+  --on-primary: #006165;
+  --on-primary-container: #00575b;
+  --on-primary-fixed: #004346;
+  --inverse-primary: #006a6e;
+
+  --secondary: #d575ff;
+  --secondary-container: #9800d0;
+  --secondary-dim: #b90afc;
+  --on-secondary: #390050;
+  --on-secondary-container: #fff5fc;
+  --on-secondary-fixed: #58007a;
+
+  --tertiary: #f3ffca;
+  --tertiary-container: #cafd00;
+  --tertiary-dim: #beee00;
+  --on-tertiary: #516700;
+  --on-tertiary-container: #4a5e00;
+  --on-tertiary-fixed: #3a4a00;
+
+  --error: #ff716c;
+  --error-container: #9f0519;
+  --on-error: #490006;
+  --on-error-container: #ffa8a3;
+
+  --on-surface: #f9f9fd;
+  --on-surface-variant: #aaabaf;
+  --on-background: #f9f9fd;
+  --inverse-surface: #f9f9fd;
+  --inverse-on-surface: #535559;
+
+  --outline: #747579;
+  --outline-variant: #46484b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-surface: var(--surface);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-variant: var(--surface-variant);
+
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-primary-dim: var(--primary-dim);
+  --color-on-primary: var(--on-primary);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-secondary-dim: var(--secondary-dim);
+  --color-on-secondary: var(--on-secondary);
+  --color-on-secondary-container: var(--on-secondary-container);
+
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-tertiary-dim: var(--tertiary-dim);
+  --color-on-tertiary: var(--on-tertiary);
+
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-on-background: var(--on-background);
+
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  --font-headline: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes ripple {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
 }
