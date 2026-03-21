@@ -51,11 +51,7 @@ export function ProductHero({ game }: { game: GameDetail }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="font-headline text-4xl font-bold uppercase leading-none tracking-tight text-on-surface">
-              Cyber
-              <br />
-              Stellar
-              <br />
-              2088
+              {game.title}
             </h1>
             <div className="mt-2 flex items-center gap-2">
               <span className="flex items-center gap-1 text-primary">

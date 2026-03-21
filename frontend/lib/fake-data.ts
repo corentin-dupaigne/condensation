@@ -13,8 +13,6 @@ import {
   type RecentlyViewedGame,
 } from "./types";
 
-import rawData from "../fakedata.json";
-
 /* ── helpers ── */
 
 interface RawItem {
@@ -35,7 +33,14 @@ interface RawItem {
   discount_expiration?: number;
 }
 
-function slugify(name: string): string {
+interface RawFeaturedData {
+  specials: { items: RawItem[] };
+  top_sellers: { items: RawItem[] };
+  new_releases: { items: RawItem[] };
+  coming_soon: { items: RawItem[] };
+}
+
+export function slugify(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -47,9 +52,7 @@ function centsToPrice(cents: number | null): number {
   return cents / 100;
 }
 
-function detectPlatform(item: RawItem): Platform {
-  if (item.mac_available) return "steam";
-  if (item.linux_available) return "steam";
+function detectPlatform(_item: RawItem): Platform {
   return "steam";
 }
 
@@ -78,7 +81,22 @@ function rawToGame(item: RawItem, index: number): Game {
   };
 }
 
-/* ── Hero Slides (first 5 specials with big discounts) ── */
+/* ── In-memory cache for featured data ── */
+
+let cachedFeaturedData: RawFeaturedData | null = null;
+
+async function fetchFeaturedData(): Promise<RawFeaturedData> {
+  if (cachedFeaturedData) return cachedFeaturedData;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/steam/featured`, {
+    next: { revalidate: 3600 },
+  });
+  cachedFeaturedData = await res.json();
+  return cachedFeaturedData as RawFeaturedData;
+}
+
+/* ── Hero Slides ── */
 
 const heroGradients = [
   { from: "#0f2027", to: "#203a43" },
@@ -88,86 +106,141 @@ const heroGradients = [
   { from: "#1a0000", to: "#330011" },
 ];
 
-export const heroSlides: HeroSlide[] = rawData.specials.items
-  .slice(0, 5)
-  .map((item, i) => ({
+export async function getHeroSlides(): Promise<HeroSlide[]> {
+  const rawData = await fetchFeaturedData();
+  return rawData.specials.items.slice(0, 5).map((item, i) => ({
     id: String(item.id),
     title: item.name,
     subtitle: `Save ${item.discount_percent}% on ${item.name}. Limited time offer — grab your key before the deal expires!`,
     ctaText: "Buy Now",
-    ctaLink: "#",
+    ctaLink: `/games/${slugify(item.name)}`,
     price: centsToPrice(item.final_price),
     gradientFrom: heroGradients[i % heroGradients.length].from,
     gradientTo: heroGradients[i % heroGradients.length].to,
     image: item.header_image,
   }));
+}
 
 /* ── Specials → Recommended games ── */
 
-export const recommendedGames: Game[] = rawData.specials.items.map(rawToGame);
+export async function getRecommendedGames(): Promise<Game[]> {
+  const rawData = await fetchFeaturedData();
+  return rawData.specials.items.map(rawToGame);
+}
 
 /* ── Top Sellers → Bestsellers ── */
 
-export const bestsellerGames: BestsellerGame[] = rawData.top_sellers.items
-  .slice(0, 10)
-  .map((item, i) => ({
-    ...rawToGame(item, i),
-    rank: i + 1,
-  }))
-  .filter((game) => game.price < 150).slice(0, 5);
+export async function getBestsellerGames(): Promise<BestsellerGame[]> {
+  const rawData = await fetchFeaturedData();
+  return rawData.top_sellers.items
+    .slice(0, 10)
+    .map((item, i) => ({ ...rawToGame(item, i), rank: i + 1 }))
+    .filter((game) => game.price < 150)
+    .slice(0, 5);
+}
 
 /* ── New Releases ── */
 
-export const newReleases: Game[] = rawData.new_releases.items
-  .slice(0, 6)
-  .map((item, i) => ({
+export async function getNewReleases(): Promise<Game[]> {
+  const rawData = await fetchFeaturedData();
+  return rawData.new_releases.items.slice(0, 6).map((item, i) => ({
     ...rawToGame(item, i),
     badges: ["new" as const],
     releasedAgo: "Just Released",
   }));
+}
 
 /* ── Coming Soon → Pre-orders ── */
 
-export const preOrders: Game[] = rawData.coming_soon.items
-  .slice(0, 6)
-  .map((item, i) => ({
+export async function getPreOrders(): Promise<Game[]> {
+  const rawData = await fetchFeaturedData();
+  return rawData.coming_soon.items.slice(0, 6).map((item, i) => ({
     ...rawToGame(item, i),
     badges: ["pre-order" as const],
     timeLeft: item.discount_expiration
       ? `${Math.max(1, Math.ceil((item.discount_expiration * 1000 - Date.now()) / 86400000))} Days Left`
       : "Coming Soon",
   }));
+}
 
-/* ── Budget Deals (grouped by price tier from specials) ── */
+/* ── Budget Deals ── */
 
-function buildDealTier(label: string, maxCents: number, items: RawItem[]): DealTier {
+function buildDealTier(
+  label: string,
+  maxCents: number,
+  items: RawItem[]
+): DealTier {
   return {
     label,
     maxPrice: maxCents / 100,
     games: items
-      .filter((it) => it.final_price > 0 && it.final_price <= maxCents && it.discounted)
+      .filter(
+        (it) => it.final_price > 0 && it.final_price <= maxCents && it.discounted
+      )
       .slice(0, 6)
-      .map((it, i) => ({
-        ...rawToGame(it, i),
-        badges: ["discount" as const],
-      })),
+      .map((it, i) => ({ ...rawToGame(it, i), badges: ["discount" as const] })),
   };
 }
 
-const allDiscountedItems = [
-  ...rawData.specials.items,
-  ...rawData.new_releases.items,
-  ...rawData.top_sellers.items,
-].filter((it) => it.discounted && it.final_price > 0);
+export async function getDealTiers(): Promise<DealTier[]> {
+  const rawData = await fetchFeaturedData();
+  const allDiscountedItems = [
+    ...rawData.specials.items,
+    ...rawData.new_releases.items,
+    ...rawData.top_sellers.items,
+  ].filter((it) => it.discounted && it.final_price > 0);
+  return [
+    buildDealTier("Under $5", 500, allDiscountedItems),
+    buildDealTier("Under $10", 1000, allDiscountedItems),
+    buildDealTier("Under $20", 2000, allDiscountedItems),
+    buildDealTier("Under $50", 5000, allDiscountedItems),
+  ];
+}
 
-export const dealTiers: DealTier[] = [
-  buildDealTier("Under $5", 500, allDiscountedItems),
-  buildDealTier("Under $10", 1000, allDiscountedItems),
-  buildDealTier("Under $20", 2000, allDiscountedItems),
-  buildDealTier("Under $50", 5000, allDiscountedItems),
-];
+/* ── Catalog ── */
 
-/* ── Genres ── */
+export async function getCatalogGames(): Promise<Game[]> {
+  const rawData = await fetchFeaturedData();
+  const allRawItems = [
+    ...rawData.specials.items,
+    ...rawData.top_sellers.items,
+    ...rawData.new_releases.items,
+    ...rawData.coming_soon.items,
+  ];
+  const seenIds = new Set<number>();
+  return allRawItems
+    .filter((it) => {
+      if (seenIds.has(it.id)) return false;
+      seenIds.add(it.id);
+      return true;
+    })
+    .map(rawToGame);
+}
+
+/* ── Look up a game by slug ── */
+
+export async function getGameBySlug(
+  slug: string
+): Promise<{ game: Game; steamAppId: number } | undefined> {
+  const rawData = await fetchFeaturedData();
+  const allRawItems = [
+    ...rawData.specials.items,
+    ...rawData.top_sellers.items,
+    ...rawData.new_releases.items,
+    ...rawData.coming_soon.items,
+  ];
+  const seenIds = new Set<number>();
+  const unique = allRawItems.filter((it) => {
+    if (seenIds.has(it.id)) return false;
+    seenIds.add(it.id);
+    return true;
+  });
+  const found = unique.find((it) => slugify(it.name) === slug);
+  if (!found) return undefined;
+  return { game: rawToGame(found, 0), steamAppId: found.id };
+}
+
+/* ── Genres / UI constants (static) ── */
 
 export const genres = [
   "All Genres",
@@ -207,25 +280,7 @@ export const allGenres: string[] = [
   "Fighting",
 ];
 
-/* ── Catalog (union of all known items, deduplicated) ── */
-
-const allRawItems = [
-  ...rawData.specials.items,
-  ...rawData.top_sellers.items,
-  ...rawData.new_releases.items,
-  ...rawData.coming_soon.items,
-];
-
-const seenIds = new Set<number>();
-export const catalogGames: Game[] = allRawItems
-  .filter((it) => {
-    if (seenIds.has(it.id)) return false;
-    seenIds.add(it.id);
-    return true;
-  })
-  .map(rawToGame);
-
-/* ── Product Detail Page: Cyber Stellar 2088 (kept as-is) ── */
+/* ── Product Detail: static placeholder data ── */
 
 export const cyberStellarDetail: GameDetail = {
   id: "pd1",
@@ -296,18 +351,20 @@ export const achievements: Achievement[] = [
   { id: "a10", title: "Endgame", icon: "emoji_events", unlocked: true },
 ];
 
-export const relatedGames: RelatedGame[] = rawData.specials.items
-  .slice(0, 4)
-  .map((item, i) => ({
-    ...rawToGame(item, i),
-    genreBadge: ["RPG", "ACTION", "SHOOTER", "ADVENTURE"][i % 4],
-  }));
+/* ── Search / Recently Viewed ── */
 
-/* ── Search Results Page ── */
+export const popularSearches: string[] = [
+  "ELDEN RING",
+  "Cyberpunk 2077",
+  "Baldur's Gate 3",
+  "Red Dead Redemption 2",
+  "Crimson Desert",
+  "Slay the Spire 2",
+];
 
-export const searchResultGames: SearchResultGame[] = rawData.top_sellers.items
-  .slice(0, 4)
-  .map((item) => ({
+export async function getSearchResultGames(): Promise<SearchResultGame[]> {
+  const rawData = await fetchFeaturedData();
+  return rawData.top_sellers.items.slice(0, 4).map((item) => ({
     id: String(item.id),
     title: item.name,
     slug: slugify(item.name),
@@ -320,21 +377,22 @@ export const searchResultGames: SearchResultGame[] = rawData.top_sellers.items
     originalPrice: item.discounted ? centsToPrice(item.original_price) : undefined,
     discountPercent: item.discounted ? item.discount_percent : undefined,
   }));
+}
 
-export const popularSearches: string[] = [
-  "ELDEN RING",
-  "Cyberpunk 2077",
-  "Baldur's Gate 3",
-  "Red Dead Redemption 2",
-  "Crimson Desert",
-  "Slay the Spire 2",
-];
-
-export const recentlyViewedGames: RecentlyViewedGame[] = rawData.specials.items
-  .slice(0, 4)
-  .map((item) => ({
+export async function getRecentlyViewedGames(): Promise<RecentlyViewedGame[]> {
+  const rawData = await fetchFeaturedData();
+  return rawData.specials.items.slice(0, 4).map((item) => ({
     id: String(item.id),
     title: item.name,
     label: item.discounted ? `${item.discount_percent}% OFF` : "FULL PRICE",
     price: centsToPrice(item.final_price),
   }));
+}
+
+export async function getRelatedGames(): Promise<RelatedGame[]> {
+  const rawData = await fetchFeaturedData();
+  return rawData.specials.items.slice(0, 4).map((item, i) => ({
+    ...rawToGame(item, i),
+    genreBadge: ["RPG", "ACTION", "SHOOTER", "ADVENTURE"][i % 4],
+  }));
+}

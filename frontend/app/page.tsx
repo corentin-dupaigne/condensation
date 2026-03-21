@@ -12,16 +12,26 @@ import { TrustBar } from "@/components/home/TrustBar";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 
 import {
-  heroSlides,
-  recommendedGames,
-  bestsellerGames,
-  newReleases,
-  preOrders,
-  dealTiers,
+  getHeroSlides,
+  getRecommendedGames,
+  getBestsellerGames,
+  getNewReleases,
+  getPreOrders,
+  getDealTiers,
   genres,
 } from "@/lib/fake-data";
 
-export default function Home() {
+export default async function Home() {
+  const [heroSlides, recommendedGames, bestsellerGames, newReleases, preOrders, dealTiers] =
+    await Promise.all([
+      getHeroSlides(),
+      getRecommendedGames(),
+      getBestsellerGames(),
+      getNewReleases(),
+      getPreOrders(),
+      getDealTiers(),
+    ]);
+
   return (
     <>
       <Header />

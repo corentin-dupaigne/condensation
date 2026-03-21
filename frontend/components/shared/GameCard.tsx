@@ -15,7 +15,7 @@ export function GameCard({
 
   return (
     <a
-      href="#"
+      href={`/games/${game.slug}`}
       className={`group flex shrink-0 flex-col gap-2 rounded-lg bg-surface-container-high p-3 transition-colors hover:bg-surface-bright ${className ?? "w-[200px]"}`}
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded">

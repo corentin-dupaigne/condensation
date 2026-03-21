@@ -3,8 +3,10 @@
 import { useState } from "react";
 
 export function GameDescription({
+  title,
   descriptions,
 }: {
+  title: string;
   descriptions: string[];
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -13,7 +15,7 @@ export function GameDescription({
     <section className="space-y-4">
       <h2 className="flex items-center gap-3 font-headline text-lg font-bold uppercase tracking-tight text-on-surface">
         <span className="text-on-surface-variant">—</span>
-        The Last Light of Stellaris
+        {title}
       </h2>
 
       <div className="space-y-4 text-sm leading-relaxed text-on-surface-variant">

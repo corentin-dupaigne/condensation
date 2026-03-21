@@ -14,7 +14,7 @@ export function BestsellersSection({ games }: { games: BestsellerGame[] }) {
           {games.map((game) => (
             <a
               key={game.id}
-              href="#"
+              href={`/games/${game.slug}`}
               className="group flex items-center gap-5 rounded-xl bg-surface-container-high p-4 transition-colors hover:bg-surface-bright"
             >
               <span className="flex h-12 w-12 shrink-0 items-center justify-center font-headline text-3xl font-bold text-on-surface-variant/30">
