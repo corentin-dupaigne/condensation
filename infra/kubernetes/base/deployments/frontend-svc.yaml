@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: frontend-svc
+  name: frontend-svc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend-svc
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: frontend-svc
+    spec:
+      containers:
+      - image: juicybkrr/condensation-frontend
+        name: condensation-frontend
+        resources: {}
+status: {}
