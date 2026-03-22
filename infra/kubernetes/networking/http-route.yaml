@@ -1,0 +1,31 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-route
+spec:
+  parentRefs:
+  - name: gateway
+  hostnames:
+  - "www.fullstack.corentindupaigne.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /login
+    backendRefs:
+    - name: auth-svc
+      port: 8080
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /register
+    backendRefs:
+    - name: auth-svc
+      port: 8080
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ui
+    backendRefs:
+    - name: frontend-svc
+      port: 80
