@@ -14,29 +14,44 @@ import { TrustBar } from "@/components/home/TrustBar";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 
 import {
-  getHeroSlides,
-  getRecommendedGames,
-  getBestsellerGames,
-  getNewReleases,
-  getPreOrders,
-  getDealTiers,
+  heroSlides,
+  recommendedGames,
+  bestsellerGames,
+  newReleases,
+  preOrders,
+  dealTiers,
   genres,
 } from "@/lib/fake-data";
 
+import { cookies } from "next/headers";
+
 export default async function Home() {
-  const [heroSlides, recommendedGames, bestsellerGames, newReleases, preOrders, dealTiers] =
-    await Promise.all([
-      getHeroSlides(),
-      getRecommendedGames(),
-      getBestsellerGames(),
-      getNewReleases(),
-      getPreOrders(),
-      getDealTiers(),
-    ]);
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
+  let userName = null;
+
+  if (token) {
+    try {
+      // Internally ping the backend Laravel API securely to pull the user profile
+      const backendAuth = process.env.API_URL || process.env.AUTH_URL || 'http://localhost:8000';
+      const res = await fetch(`${backendAuth}/api/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const user = await res.json();
+        userName = user.name;
+      }
+    } catch (e) {
+      console.error("Failed to fetch user data", e);
+    }
+  }
+
+  const isLoggedIn = !!token;
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} userName={userName} />
       <main>
         <HeroCarousel slides={heroSlides} />
         <PromoBanner />

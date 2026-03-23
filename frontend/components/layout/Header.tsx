@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function Header() {
+export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: boolean, userName?: string | null }) {
   const [searchFocused, setSearchFocused] = useState(false);
 
   return (
@@ -53,18 +53,34 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <a
-            href="/login"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface"
-          >
-            Sign In
-          </a>
-          <a
-            href="/register"
-            className="rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary transition-opacity hover:opacity-90"
-          >
-            Sign Up
-          </a>
+          {!isLoggedIn ? (
+            <>
+              <a
+                href="/api/auth/login"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface"
+              >
+                Sign In
+              </a>
+              <a
+                href="/api/auth/login"
+                className="rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary transition-opacity hover:opacity-90"
+              >
+                Sign Up
+              </a>
+            </>
+          ) : (
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-semibold text-primary">
+                Hello, {userName || "Player"}!
+              </span>
+              <a
+                href="/api/auth/logout"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-error transition-colors hover:bg-error/10"
+              >
+                Sign Out
+              </a>
+            </div>
+          )}
           <button
             className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-surface-container-highest text-on-surface-variant transition-colors hover:text-on-surface"
             aria-label="Cart"
