@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@custom-variant media-paused (:where([data-paused]) &);
+@custom-variant media-muted (:where([data-muted]) &);
+@custom-variant media-fullscreen (:where([data-fullscreen]) &);
+
 @font-face {
   font-family: "Space Grotesk";
   font-style: normal;

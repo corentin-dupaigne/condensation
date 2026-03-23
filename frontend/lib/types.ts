@@ -101,6 +101,16 @@ export interface SteamRequirements {
   recommended?: string;
 }
 
+export interface SteamMovie {
+  id: number;
+  name: string;
+  thumbnail: string;
+  dash_av1?: string;
+  dash_h264?: string;
+  hls_h264?: string;
+  highlight: boolean;
+}
+
 export interface GameDetail extends Omit<Game, "genres"> {
   detailed_description: string;
   about_the_game: string;
@@ -112,6 +122,7 @@ export interface GameDetail extends Omit<Game, "genres"> {
   platforms: SteamPlatforms;
   price_overview: SteamPriceOverview;
   screenshots: SteamScreenshot[];
+  movies?: SteamMovie[];
   pc_requirements: SteamRequirements;
   mac_requirements?: SteamRequirements;
   linux_requirements?: SteamRequirements;

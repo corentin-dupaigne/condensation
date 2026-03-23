@@ -32,6 +32,15 @@ interface SteamAppData {
     final_formatted?: string;
   };
   screenshots?: { id: number; path_thumbnail: string; path_full: string }[];
+  movies?: {
+    id: number;
+    name: string;
+    thumbnail: string;
+    dash_av1?: string;
+    dash_h264?: string;
+    hls_h264?: string;
+    highlight: boolean;
+  }[];
   pc_requirements?: { minimum?: string; recommended?: string };
   mac_requirements?: { minimum?: string; recommended?: string };
   linux_requirements?: { minimum?: string; recommended?: string };
@@ -73,6 +82,7 @@ function steamDataToGameDetail(
         appData.price_overview?.final_formatted ?? `$${basePrice.toFixed(2)}`,
     },
     screenshots: appData.screenshots ?? [],
+    movies: appData.movies ?? [],
     pc_requirements: appData.pc_requirements ?? {},
     mac_requirements: appData.mac_requirements,
     linux_requirements: appData.linux_requirements,
@@ -161,7 +171,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
         <ProductHero game={gameDetail} />
 
-        <div className="mx-auto flex max-w-7xl gap-8 mb-8">
+        <div className="mx-auto flex max-w-7xl gap-20 mb-8">
           <div className="w-2/3">
             <GameDescription
               title={gameDetail.title}
