@@ -1,0 +1,19 @@
+name: Dev — Build & Push Auth Image
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "authentication/**"
+
+jobs:
+  build-auth-dev:
+    name: Build auth image (dev)
+    uses: ./.github/workflows/docker-build-template.yaml
+    with:
+      image-name: ghcr.io/${{ github.repository_owner }}/fullstack_project/auth
+      image-tag: dev
+      dockerfile-context: ./authentication
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
