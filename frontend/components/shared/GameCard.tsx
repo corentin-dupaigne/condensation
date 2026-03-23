@@ -21,7 +21,7 @@ export function GameCard({
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded">
         {game.image ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
+          <img src={game.image} alt={game.title} width={200} height={267} className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-surface-container-highest via-surface-bright to-surface-container" />
         )}
@@ -48,7 +48,7 @@ export function GameCard({
         {game.genres.map((genre) => (
           <span
             key={genre}
-            className="text-[10px] text-on-surface-variant"
+            className="text-xs text-on-surface-variant"
           >
             {genre}
           </span>
@@ -67,7 +67,7 @@ export function GameCard({
           </span>
         </div>
         <button
-          className="flex h-7 w-7 items-center justify-center rounded bg-surface-container-highest text-on-surface-variant transition-colors hover:bg-primary hover:text-on-primary"
+          className="flex h-11 w-11 items-center justify-center rounded bg-surface-container-highest text-on-surface-variant transition-colors hover:bg-cta hover:text-on-cta"
           aria-label={`Add ${game.title} to cart`}
         >
           <svg

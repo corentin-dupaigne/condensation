@@ -21,22 +21,25 @@
   --surface-container-low: #111417;
   --surface-container-lowest: #000000;
   --surface-variant: #23262a;
-  --surface-tint: #a1faff;
+  --surface-tint: #d575ff;
 
-  --primary: #a1faff;
-  --primary-container: #00f4fe;
-  --primary-dim: #00e5ee;
-  --on-primary: #00393b;
-  --on-primary-container: #00575b;
-  --on-primary-fixed: #004346;
-  --inverse-primary: #006a6e;
+  --primary: #d575ff;
+  --primary-container: #9800d0;
+  --primary-dim: #b90afc;
+  --on-primary: #fff5fc;
+  --on-primary-container: #390050;
+  --on-primary-fixed: #58007a;
+  --inverse-primary: #9800d0;
 
-  --secondary: #d575ff;
-  --secondary-container: #9800d0;
-  --secondary-dim: #b90afc;
-  --on-secondary: #390050;
-  --on-secondary-container: #fff5fc;
-  --on-secondary-fixed: #58007a;
+  --secondary: #a1faff;
+  --secondary-container: #00f4fe;
+  --secondary-dim: #00e5ee;
+  --on-secondary: #00393b;
+  --on-secondary-container: #00575b;
+  --on-secondary-fixed: #004346;
+
+  --cta: #F43F5E;
+  --on-cta: #ffffff;
 
   --tertiary: #f3ffca;
   --tertiary-container: #cafd00;
@@ -99,6 +102,9 @@
 
   --color-outline: var(--outline);
   --color-outline-variant: var(--outline-variant);
+
+  --color-cta: var(--cta);
+  --color-on-cta: var(--on-cta);
 
   --font-headline: "Space Grotesk", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
