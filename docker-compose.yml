@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  auth:
+    build:
+      context: ./authentication
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    environment:
+      - APP_NAME=Laravel
+      - APP_ENV=local
+      - APP_KEY=base64:9FmWeE2e3HkFtk58XQjWxwZkG/f2iK45Lq/GgqPqF+o=
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=auth_db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - CACHE_STORE=database
+      - SESSION_DRIVER=database
+      - QUEUE_CONNECTION=database
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: deps
+    # We override the command to start the Next.js development server locally
+    command: bun run dev
+    ports:
+      - "4000:3000"
+    environment:
+      - AUTH_URL=http://localhost:8000
+      - API_URL=http://auth:80
+      - CLIENT_ID=ead85488-0ee1-41f9-9703-eac26103f5f4
+      - REDIRECT_URI=http://localhost:4000/api/auth/callback
+      - NODE_ENV=development
+    volumes:
+      # We mount the source code for hot-reloading in dev
+      - ./frontend:/app
+      # We protect the inside container's node_modules from being overwritten by the host
+      - /app/node_modules
+    depends_on:
+      - auth
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

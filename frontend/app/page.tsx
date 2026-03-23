@@ -21,10 +21,35 @@ import {
   genres,
 } from "@/lib/fake-data";
 
-export default function Home() {
+import { cookies } from "next/headers";
+
+export default async function Home() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
+  let userName = null;
+
+  if (token) {
+    try {
+      // Internally ping the backend Laravel API securely to pull the user profile
+      const backendAuth = process.env.API_URL || process.env.AUTH_URL || 'http://localhost:8000';
+      const res = await fetch(`${backendAuth}/api/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const user = await res.json();
+        userName = user.name;
+      }
+    } catch (e) {
+      console.error("Failed to fetch user data", e);
+    }
+  }
+
+  const isLoggedIn = !!token;
+
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} userName={userName} />
       <main>
         <HeroCarousel slides={heroSlides} />
         <PromoBanner />
