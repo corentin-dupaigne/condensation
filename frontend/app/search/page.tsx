@@ -6,7 +6,7 @@ import { SearchResultsGrid } from "@/components/search/SearchResultsGrid";
 import { PopularSearches } from "@/components/search/PopularSearches";
 
 import { searchSteamGames } from "@/lib/steam-api";
-import { popularSearches } from "@/lib/fake-data";
+import { popularSearches } from "@/lib/game-data";
 
 type Props = { searchParams: Promise<{ q?: string }> };
 

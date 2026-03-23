@@ -1,11 +1,9 @@
 import type { CatalogFilters, Platform } from "@/lib/types";
 
 const platformLabels: Record<Platform, string> = {
-  steam: "Steam",
-  epic: "Epic Games",
-  xbox: "Xbox",
-  playstation: "PlayStation",
-  switch: "Nintendo Switch",
+  windows: "Windows",
+  mac: "macOS",
+  linux: "Linux",
 };
 
 interface ActiveFilterBarProps {

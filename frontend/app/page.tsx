@@ -21,7 +21,7 @@ import {
   getPreOrders,
   getDealTiers,
   genres,
-} from "@/lib/fake-data";
+} from "@/lib/game-data";
 
 export default async function Home() {
   const [heroSlides, recommendedGames, bestsellerGames, newReleases, preOrders, dealTiers] =
@@ -40,7 +40,6 @@ export default async function Home() {
       <main>
         <HeroCarousel slides={heroSlides} />
         <PromoBanner />
-        <CategoryPillRow genres={genres} />
         <GameCardGrid title="Recommended For You" games={recommendedGames} />
         <BestsellersSection games={bestsellerGames} />
         <NewReleasesSection games={newReleases} />

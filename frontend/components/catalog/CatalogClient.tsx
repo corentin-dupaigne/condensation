@@ -33,7 +33,7 @@ export function CatalogClient({ games, platforms, genres }: CatalogClientProps) 
 
   const filtered = useMemo(() => {
     const result = games.filter((game) => {
-      if (filters.platforms.length > 0 && !filters.platforms.includes(game.platform))
+      if (filters.platforms.length > 0 && !game.platforms.some((p) => filters.platforms.includes(p)))
         return false;
       if (filters.genres.length > 0 && !game.genres.some((g) => filters.genres.includes(g)))
         return false;
