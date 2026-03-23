@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CatalogClient } from "@/components/catalog/CatalogClient";
-import { getCatalogGames, allPlatforms, allGenres } from "@/lib/fake-data";
+import { getCatalogGames, allPlatforms, allGenres } from "@/lib/game-data";
 
 export const metadata: Metadata = {
   title: "Catalog — Condensation",

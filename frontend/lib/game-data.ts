@@ -184,11 +184,9 @@ export const genres = [
 ];
 
 export const allPlatforms: { value: Platform; label: string }[] = [
-  { value: "steam", label: "Steam" },
-  { value: "epic", label: "Epic Games" },
-  { value: "xbox", label: "Xbox" },
-  { value: "playstation", label: "PlayStation" },
-  { value: "switch", label: "Nintendo Switch" },
+  { value: "windows", label: "Windows" },
+  { value: "mac", label: "macOS" },
+  { value: "linux", label: "Linux" },
 ];
 
 export const allGenres: string[] = [

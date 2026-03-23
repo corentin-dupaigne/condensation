@@ -1,4 +1,4 @@
-import type { Game, Platform, SearchResultGame } from "./types";
+import type { Game, GameDetail, Platform, SteamAppData } from "./types";
 
 /* ── Raw Steam featured API types ── */
 
@@ -66,8 +66,12 @@ export function centsToPrice(cents: number | null): number {
   return cents / 100;
 }
 
-function detectPlatform(_item: RawItem): Platform {
-  return "steam";
+function detectPlatforms(item: RawItem): Platform[] {
+  const out: Platform[] = [];
+  if (item.windows_available) out.push("windows");
+  if (item.mac_available) out.push("mac");
+  if (item.linux_available) out.push("linux");
+  return out;
 }
 
 export function rawToGame(item: RawItem, index: number): Game {
@@ -84,7 +88,7 @@ export function rawToGame(item: RawItem, index: number): Game {
     id: `${item.id}-${index}`,
     title: item.name,
     slug: slugify(item.name),
-    platform: detectPlatform(item),
+    platforms: detectPlatforms(item),
     genres: [],
     price,
     originalPrice,
@@ -95,15 +99,15 @@ export function rawToGame(item: RawItem, index: number): Game {
   };
 }
 
-function searchItemPlatforms(item: SteamSearchItem): string[] {
-  const out: string[] = [];
-  if (item.platforms.windows) out.push("PC");
-  if (item.platforms.mac) out.push("Mac");
-  if (item.platforms.linux) out.push("Linux");
+function searchItemPlatforms(item: SteamSearchItem): Platform[] {
+  const out: Platform[] = [];
+  if (item.platforms.windows) out.push("windows");
+  if (item.platforms.mac) out.push("mac");
+  if (item.platforms.linux) out.push("linux");
   return out;
 }
 
-function searchItemToGame(item: SteamSearchItem): SearchResultGame {
+function searchItemToGame(item: SteamSearchItem): Game {
   const finalCents = item.price?.final ?? 0;
   const initialCents = item.price?.initial ?? 0;
   const price = centsToPrice(finalCents);
@@ -119,9 +123,11 @@ function searchItemToGame(item: SteamSearchItem): SearchResultGame {
     title: item.name,
     slug: slugify(item.name),
     platforms: searchItemPlatforms(item),
+    genres: [],
     price,
     originalPrice,
     discountPercent,
+    badges: discountPercent ? ["discount"] : [],
   };
 }
 
@@ -139,11 +145,57 @@ export async function fetchFeaturedData(): Promise<RawFeaturedData> {
   return cachedFeaturedData as RawFeaturedData;
 }
 
+/* ── Steam app details ── */
+
+export async function fetchSteamAppDetails(
+  appid: number
+): Promise<SteamAppData | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/steam/${appid}`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export function steamDataToGameDetail(
+  appData: SteamAppData,
+  basePrice: number
+): Partial<GameDetail> {
+  return {
+    detailed_description: appData.detailed_description ?? "",
+    about_the_game: appData.about_the_game ?? "",
+    supported_languages: appData.supported_languages ?? "English",
+    developers: appData.developers ?? ["Unknown"],
+    publishers: appData.publishers ?? ["Unknown"],
+    releaseDate: appData.release_date?.date,
+    genres: appData.genres ?? [],
+    categories: appData.categories ?? [],
+    platforms: appData.platforms ?? { windows: true, mac: false, linux: false },
+    price_overview: {
+      currency: appData.price_overview?.currency ?? "USD",
+      initial: appData.price_overview?.initial ?? Math.round(basePrice * 100),
+      final: appData.price_overview?.final ?? Math.round(basePrice * 100),
+      discount_percent: appData.price_overview?.discount_percent ?? 0,
+      initial_formatted: appData.price_overview?.initial_formatted ?? "",
+      final_formatted:
+        appData.price_overview?.final_formatted ?? `$${basePrice.toFixed(2)}`,
+    },
+    screenshots: appData.screenshots ?? [],
+    movies: appData.movies ?? [],
+    pc_requirements: appData.pc_requirements ?? {},
+    mac_requirements: appData.mac_requirements,
+    linux_requirements: appData.linux_requirements,
+    recommendations_total: appData.recommendations?.total ?? 0,
+    metacritic_score: appData.metacritic?.score ?? 0,
+    required_age: appData.required_age ?? "",
+    headerImage: appData.header_image,
+  };
+}
+
 /* ── Steam store search ── */
 
 export async function searchSteamGames(
   term: string
-): Promise<{ total: number; games: SearchResultGame[] }> {
+): Promise<{ total: number; games: Game[] }> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const res = await fetch(
     `${baseUrl}/api/steam/search?q=${encodeURIComponent(term)}`,

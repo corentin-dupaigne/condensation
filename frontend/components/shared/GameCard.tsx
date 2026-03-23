@@ -18,7 +18,7 @@ export function GameCard({
       href={`/games/${game.slug}`}
       className={`group flex shrink-0 flex-col gap-2 rounded-lg bg-surface-container-high p-3 transition-colors hover:bg-surface-bright ${className ?? "w-[200px]"}`}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded">
+      <div className="relative aspect-3/2 w-full overflow-hidden rounded">
         {game.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={game.image} alt={game.title} width={200} height={267} className="h-full w-full object-cover" />
@@ -30,28 +30,20 @@ export function GameCard({
             <Badge type="discount">-{game.discountPercent}%</Badge>
           </div>
         )}
-        {game.badges.includes("rare") && (
+        {game.badges?.includes("rare") && (
           <div className="absolute top-2 left-2">
             <Badge type="rare">Rare</Badge>
           </div>
         )}
-        <div className="absolute top-2 right-2">
-          <PlatformBadge platform={game.platform} />
-        </div>
       </div>
 
       <h3 className="truncate font-headline text-sm font-semibold text-on-surface">
         {game.title}
       </h3>
 
-      <div className="flex flex-wrap gap-1">
-        {game.genres.map((genre) => (
-          <span
-            key={genre}
-            className="text-xs text-on-surface-variant"
-          >
-            {genre}
-          </span>
+      <div className="flex items-center gap-1.5">
+        {game.platforms.map((p) => (
+          <PlatformBadge key={p} platform={p} />
         ))}
       </div>
 

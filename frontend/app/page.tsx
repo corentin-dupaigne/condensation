@@ -21,7 +21,7 @@ import {
   getPreOrders,
   getDealTiers,
   genres,
-} from "@/lib/fake-data";
+} from "@/lib/game-data";
 
 import { cookies } from "next/headers";
 
@@ -72,7 +72,6 @@ export default async function Home() {
       <main>
         <HeroCarousel slides={heroSlides} />
         <PromoBanner />
-        <CategoryPillRow genres={genres} />
         <GameCardGrid title="Recommended For You" games={recommendedGames} />
         <BestsellersSection games={bestsellerGames} />
         <NewReleasesSection games={newReleases} />

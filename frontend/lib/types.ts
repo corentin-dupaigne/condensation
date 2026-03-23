@@ -1,4 +1,4 @@
-export type Platform = "steam" | "epic" | "xbox" | "playstation" | "switch";
+export type Platform = "windows" | "mac" | "linux";
 
 export type BadgeType =
   | "discount"
@@ -12,7 +12,7 @@ export interface Game {
   id: string;
   title: string;
   slug: string;
-  platform: Platform;
+  platforms: Platform[];
   genres: string[];
   price: number;
   originalPrice?: number;
@@ -111,7 +111,7 @@ export interface SteamMovie {
   highlight: boolean;
 }
 
-export interface GameDetail extends Omit<Game, "genres"> {
+export interface GameDetail extends Omit<Game, "genres" | "platforms"> {
   detailed_description: string;
   about_the_game: string;
   supported_languages: string;
@@ -152,25 +152,28 @@ export interface Achievement {
 
 export type RelatedGame = Game & { genreBadge: string };
 
-/* ── Search Results Page ── */
+/* ── Steam App Details API response ── */
 
-export type SearchBadgeType = "ultimate-edition" | "standard" | "legendary-bundle";
-
-export interface SearchResultGame {
-  id: string;
-  title: string;
-  slug: string;
-  platforms: string[];
-  price: number;
-  originalPrice?: number;
-  discountPercent?: number;
-  badge?: SearchBadgeType;
-  wishlistAdded?: boolean;
+export interface SteamAppData {
+  name: string;
+  detailed_description?: string;
+  about_the_game?: string;
+  supported_languages?: string;
+  developers?: string[];
+  publishers?: string[];
+  genres?: SteamGenre[];
+  categories?: SteamCategory[];
+  platforms?: SteamPlatforms;
+  price_overview?: SteamPriceOverview;
+  screenshots?: SteamScreenshot[];
+  movies?: SteamMovie[];
+  pc_requirements?: SteamRequirements;
+  mac_requirements?: SteamRequirements;
+  linux_requirements?: SteamRequirements;
+  recommendations?: { total?: number };
+  metacritic?: { score?: number };
+  required_age?: number | string;
+  header_image?: string;
+  release_date?: { date: string };
 }
 
-export interface RecentlyViewedGame {
-  id: string;
-  title: string;
-  label: string;
-  price: number;
-}
