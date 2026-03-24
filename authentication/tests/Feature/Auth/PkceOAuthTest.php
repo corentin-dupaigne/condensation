@@ -61,30 +61,11 @@ test('PKCE authorization endpoint requires code_challenge', function () {
     $response->assertStatus(400);
 });
 
-test('PKCE authorization endpoint returns consent screen', function () {
-    [$verifier, $challenge] = generatePkceChallenge();
-
-    $response = $this->actingAs($this->user)->get('/oauth/authorize?' . http_build_query([
-        'client_id' => $this->client->id,
-        'redirect_uri' => 'http://localhost:4200/callback',
-        'response_type' => 'code',
-        'scope' => 'read-profile',
-        'state' => Str::random(40),
-        'code_challenge' => $challenge,
-        'code_challenge_method' => 'S256',
-    ]));
-
-    $response->assertStatus(200);
-    $response->assertSee('Authorization Request');
-    $response->assertSee($this->client->name);
-});
-
-test('PKCE authorization approve redirects with authorization code', function () {
+test('PKCE authorization auto-approves first-party client', function () {
     [$verifier, $challenge] = generatePkceChallenge();
     $state = Str::random(40);
 
-    // First, get the authorization page to obtain the auth_token
-    $authorizeResponse = $this->actingAs($this->user)->get('/oauth/authorize?' . http_build_query([
+    $response = $this->actingAs($this->user)->get('/oauth/authorize?' . http_build_query([
         'client_id' => $this->client->id,
         'redirect_uri' => 'http://localhost:4200/callback',
         'response_type' => 'code',
@@ -94,27 +75,12 @@ test('PKCE authorization approve redirects with authorization code', function ()
         'code_challenge_method' => 'S256',
     ]));
 
-    $authorizeResponse->assertStatus(200);
-
-    // Extract auth_token from the page
-    $content = $authorizeResponse->getContent();
-    preg_match('/name="auth_token" value="([^"]+)"/', $content, $matches);
-
-    if (!empty($matches[1])) {
-        // Approve the authorization
-        $approveResponse = $this->actingAs($this->user)->post('/oauth/authorize', [
-            'state' => $state,
-            'client_id' => $this->client->id,
-            'auth_token' => $matches[1],
-        ]);
-
-        // Should redirect to the callback with a code
-        $approveResponse->assertStatus(302);
-        $redirectUrl = $approveResponse->headers->get('Location');
-        expect($redirectUrl)->toContain('http://localhost:4200/callback');
-        expect($redirectUrl)->toContain('code=');
-        expect($redirectUrl)->toContain("state={$state}");
-    }
+    // First-party PKCE clients skip the consent screen
+    $response->assertStatus(302);
+    $redirectUrl = $response->headers->get('Location');
+    expect($redirectUrl)->toContain('http://localhost:4200/callback');
+    expect($redirectUrl)->toContain('code=');
+    expect($redirectUrl)->toContain("state={$state}");
 });
 
 test('token exchange fails with invalid code_verifier', function () {

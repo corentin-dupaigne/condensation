@@ -37,18 +37,27 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
     }
   }, [playing]);
 
+  const stopAndShowControls = useCallback(() => {
+    setPlaying(false);
+    setControlsVisible(true);
+    if (hideTimeout.current) clearTimeout(hideTimeout.current);
+  }, []);
+
+  const togglePlaying = useCallback(() => {
+    setPlaying((p) => {
+      if (p) {
+        setControlsVisible(true);
+        if (hideTimeout.current) clearTimeout(hideTimeout.current);
+      }
+      return !p;
+    });
+  }, []);
+
   useEffect(() => {
     return () => {
       if (hideTimeout.current) clearTimeout(hideTimeout.current);
     };
   }, []);
-
-  useEffect(() => {
-    if (!playing) {
-      setControlsVisible(true);
-      if (hideTimeout.current) clearTimeout(hideTimeout.current);
-    }
-  }, [playing]);
 
   useEffect(() => {
     const onFsChange = () => setFullscreen(!!document.fullscreenElement);
@@ -125,7 +134,7 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
         onDurationChange={(e) => setDuration(e.currentTarget.duration)}
         onWaiting={() => setBuffering(true)}
         onCanPlay={() => setBuffering(false)}
-        onEnded={() => setPlaying(false)}
+        onEnded={stopAndShowControls}
       />
 
       {/* Buffering spinner */}
@@ -138,7 +147,7 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
       {/* Centre play/pause click zone */}
       <div
         className="absolute inset-0 z-20 flex items-center justify-center"
-        onClick={() => setPlaying((p) => !p)}
+        onClick={togglePlaying}
       >
         <span
           className={`flex h-16 w-16 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm ring-1 ring-white/20 transition-all duration-200 hover:scale-110 ${
@@ -182,7 +191,7 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
         <div className="pointer-events-auto flex items-center gap-2">
           {/* Play/Pause */}
           <button
-            onClick={() => setPlaying((p) => !p)}
+            onClick={togglePlaying}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-white/80 transition-colors hover:text-white"
           >
             {playing ? (
