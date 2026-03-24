@@ -1,0 +1,17 @@
+name: CI — Auth
+
+on:
+  push:
+    paths:
+      - "authentication/**"
+  pull_request:
+    paths:
+      - "authentication/**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test & audit
+    uses: ./.github/workflows/_test-php.yaml
+    with:
+      working-directory: ./authentication

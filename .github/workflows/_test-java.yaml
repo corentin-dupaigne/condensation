@@ -1,0 +1,37 @@
+name: _Test Java
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Directory containing the Maven project root"
+        required: false
+        type: string
+        default: "."
+
+jobs:
+  test:
+    name: Test (Java/Maven)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles(format('{0}/**/pom.xml', inputs.working-directory)) }}
+          restore-keys: maven-
+
+      - name: Run tests
+        run: ./mvnw test --no-transfer-progress

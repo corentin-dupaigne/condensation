@@ -1,0 +1,51 @@
+name: _Test PHP
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Directory containing the Laravel app"
+        required: false
+        type: string
+        default: "."
+
+jobs:
+  test:
+    name: Lint & Test (PHP)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo_sqlite, pdo_pgsql, zip, mbstring, xml
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.working-directory }}/vendor
+          key: php-${{ hashFiles(format('{0}/composer.lock', inputs.working-directory)) }}
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Dependency vulnerability scan
+        run: composer audit
+
+      - name: Prepare environment
+        run: cp .env.example .env
+
+      - name: Run tests
+        run: php artisan test
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:9FmWeE2e3HkFtk58XQjWxwZkG/f2iK45Lq/GgqPqF+o=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"

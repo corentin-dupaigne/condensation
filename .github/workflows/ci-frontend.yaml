@@ -1,0 +1,17 @@
+name: CI — Frontend
+
+on:
+  push:
+    paths:
+      - "frontend/**"
+  pull_request:
+    paths:
+      - "frontend/**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test & audit
+    uses: ./.github/workflows/_test-node.yaml
+    with:
+      working-directory: ./frontend
