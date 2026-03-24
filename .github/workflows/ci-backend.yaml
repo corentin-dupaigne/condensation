@@ -1,0 +1,13 @@
+name: CI — Backend
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test & audit
+    uses: ./.github/workflows/_test-java.yaml
+    with:
+      working-directory: ./backend

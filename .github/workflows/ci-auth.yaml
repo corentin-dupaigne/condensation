@@ -1,0 +1,13 @@
+name: CI — Auth
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test & audit
+    uses: ./.github/workflows/_test-php.yaml
+    with:
+      working-directory: ./authentication
