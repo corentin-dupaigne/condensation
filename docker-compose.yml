@@ -135,6 +135,19 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
     depends_on:
       - kafka
+
+  e2e-tests:
+    build:
+      context: ./e2e-tests
+      dockerfile: Dockerfile
+    network_mode: host
+    environment:
+      - E2E_BASE_URL=http://localhost:4000
+      - E2E_TIMEOUT=3000
+    profiles:
+      - e2e
+
+
 volumes:
   postgres_data:
   postgres_game_data:
