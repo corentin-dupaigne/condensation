@@ -43,12 +43,14 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
     };
   }, []);
 
-  useEffect(() => {
+  const prevPlayingRef = useRef(playing);
+  if (prevPlayingRef.current !== playing) {
+    prevPlayingRef.current = playing;
     if (!playing) {
       setControlsVisible(true);
       if (hideTimeout.current) clearTimeout(hideTimeout.current);
     }
-  }, [playing]);
+  }
 
   useEffect(() => {
     const onFsChange = () => setFullscreen(!!document.fullscreenElement);
