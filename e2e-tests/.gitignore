@@ -1,0 +1,21 @@
+## .NET
+bin/
+obj/
+
+## NuGet
+*.nupkg
+**/packages/
+
+## IDE
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+## Test results
+TestResults/
+
+## Playwright
+playwright-report/
+test-results/
