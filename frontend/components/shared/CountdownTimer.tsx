@@ -7,22 +7,29 @@ export function CountdownTimer({
 }: {
   targetDate: Date;
 }) {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(targetDate));
+  const [timeLeft, setTimeLeft] = useState<{
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
 
   useEffect(() => {
+    setTimeLeft(getTimeLeft(targetDate));
     const interval = setInterval(() => {
       setTimeLeft(getTimeLeft(targetDate));
     }, 1000);
     return () => clearInterval(interval);
   }, [targetDate]);
 
+  const display = timeLeft ?? { hours: 0, minutes: 0, seconds: 0 };
+
   return (
     <div className="flex items-center gap-1 font-headline tabular-nums">
-      <TimeUnit value={timeLeft.hours} />
+      <TimeUnit value={display.hours} />
       <span className="text-on-surface-variant">:</span>
-      <TimeUnit value={timeLeft.minutes} />
+      <TimeUnit value={display.minutes} />
       <span className="text-on-surface-variant">:</span>
-      <TimeUnit value={timeLeft.seconds} />
+      <TimeUnit value={display.seconds} />
     </div>
   );
 }

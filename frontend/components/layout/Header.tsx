@@ -13,13 +13,18 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
         </a>
 
         <nav className="hidden items-center gap-5 md:flex">
-          {["Store", "Browse", "Deals", "Support"].map((link) => (
+          {[
+            { label: "Store", href: "/" },
+            { label: "Browse", href: "/games" },
+            { label: "Deals", href: "/deals" },
+            { label: "Support", href: "/support" },
+          ].map((link) => (
             <a
-              key={link}
-              href="#"
+              key={link.label}
+              href={link.href}
               className="text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface"
             >
-              {link}
+              {link.label}
             </a>
           ))}
         </nav>

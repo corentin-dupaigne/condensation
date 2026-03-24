@@ -169,6 +169,59 @@ export async function getRelatedGames(): Promise<RelatedGame[]> {
   }));
 }
 
+/* ── Deals Page ── */
+
+export interface DealsPageData {
+  flashDeals: Game[];
+  weeklyDeals: Game[];
+  clearanceDeals: Game[];
+  flashDealsExpiry: string;
+}
+
+export async function getDealsPageData(): Promise<DealsPageData> {
+  const rawData = await fetchFeaturedData();
+
+  const specials = rawData.specials.items.filter(
+    (it) => it.discounted && it.final_price > 0
+  );
+  const topSellers = rawData.top_sellers.items.filter(
+    (it) => it.discounted && it.final_price > 0
+  );
+
+  // Flash deals: highest discount specials
+  const flashDeals = [...specials]
+    .sort((a, b) => b.discount_percent - a.discount_percent)
+    .slice(0, 6)
+    .map((it, i) => ({
+      ...rawToGame(it, i),
+      badges: ["discount" as const],
+    }));
+
+  // Weekly deals: top sellers that are discounted
+  const weeklyDeals = topSellers.slice(0, 8).map((it, i) => ({
+    ...rawToGame(it, i),
+    badges: ["discount" as const, "popular" as const],
+  }));
+
+  // Clearance: cheapest discounted games
+  const clearanceDeals = [...specials, ...topSellers]
+    .filter((it) => it.final_price <= 1000)
+    .sort((a, b) => a.final_price - b.final_price)
+    .slice(0, 12)
+    .map((it, i) => ({
+      ...rawToGame(it, i),
+      badges: ["discount" as const],
+    }));
+
+  // Flash deal expiry: use first item's discount_expiration or fallback to 24h from now
+  const firstExpiry = specials[0]?.discount_expiration;
+  const flashDealsExpiry = firstExpiry
+    ? new Date(firstExpiry * 1000).toISOString()
+    : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  return { flashDeals, weeklyDeals, clearanceDeals, flashDealsExpiry };
+}
+
 /* ── Static UI constants ── */
 
 export const genres = [

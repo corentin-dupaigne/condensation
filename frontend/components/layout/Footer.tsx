@@ -8,18 +8,21 @@ export function Footer() {
               Marketplace
             </h4>
             <ul className="space-y-2">
-              {["Browse Games", "Deals", "New Releases", "Pre-orders"].map(
-                (item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="text-sm text-on-surface-variant transition-colors hover:text-on-surface"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                )
-              )}
+              {[
+                { label: "Browse Games", href: "/games" },
+                { label: "Deals", href: "/deals" },
+                { label: "New Releases", href: "/games" },
+                { label: "Pre-orders", href: "/games" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    className="text-sm text-on-surface-variant transition-colors hover:text-on-surface"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
@@ -46,18 +49,21 @@ export function Footer() {
               Support
             </h4>
             <ul className="space-y-2">
-              {["Help Center", "FAQ", "Contact Us", "How It Works"].map(
-                (item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="text-sm text-on-surface-variant transition-colors hover:text-on-surface"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                )
-              )}
+              {[
+                { label: "Help Center", href: "/support" },
+                { label: "FAQ", href: "/support" },
+                { label: "Contact Us", href: "/support" },
+                { label: "How It Works", href: "/support" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    className="text-sm text-on-surface-variant transition-colors hover:text-on-surface"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
