@@ -62,7 +62,7 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
                 Sign In
               </a>
               <a
-                href="/api/auth/login"
+                href="/api/auth/register"
                 className="rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary transition-opacity hover:opacity-90"
               >
                 Sign Up
