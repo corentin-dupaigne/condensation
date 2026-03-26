@@ -15,8 +15,10 @@ spec:
       labels:
         app: auth-svc
     spec:
+      imagePullSecrets:
+      - name: ghcr-secret
       containers:
-      - image: juicybkrr/condensation-auth
+      - image: ghcr.io/corentin-dupaigne/fullstack_project/auth
         name: condensation-auth
         resources: {}
 status: {}

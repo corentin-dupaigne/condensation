@@ -1,6 +1,7 @@
 resources:
   - deployments/auth-svc.yaml
   - deployments/frontend-svc.yaml
+  - deployments/postgres.yaml
   - services/auth-svc.yaml
   - services/frontend-svc.yaml
   - services/postgres-svc.yaml

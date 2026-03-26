@@ -15,8 +15,10 @@ spec:
       labels:
         app: frontend-svc
     spec:
+      imagePullSecrets:
+      - name: ghcr-secret
       containers:
-      - image: juicybkrr/condensation-frontend
+      - image: ghcr.io/corentin-dupaigne/fullstack_project/frontend
         name: condensation-frontend
         resources: {}
 status: {}

@@ -36,5 +36,8 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ]
+  ],
+  "overrides": {
+    "picomatch": "^2.3.2"
+  }
 }
