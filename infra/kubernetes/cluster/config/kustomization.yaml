@@ -1,3 +1,4 @@
 resources:
   - gateway-class.yaml
   - gateway.yaml
+  - metallb-config.yaml

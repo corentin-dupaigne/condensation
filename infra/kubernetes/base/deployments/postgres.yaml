@@ -5,7 +5,7 @@ metadata:
     app: postgres
   name: postgres
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: postgres
@@ -13,7 +13,7 @@ spec:
   template:
     metadata:
       labels:
-        app: postgres
+        app: postgres-svc
     spec:
       containers:
       - image: postgres
