@@ -136,9 +136,9 @@ INSERT INTO games (
     release_date, release_date_raw,
     metacritic_score, recommendations_total,
     platform_windows, platform_mac, platform_linux,
-    currency, price_initial, price_final, discount_percent,
+    currency, price_initial,
     pc_requirements, mac_requirements, linux_requirements,
-    reduction_percentage, steam_key
+    reduction_percentage
 ) VALUES (
     {sql_int(app_id)}, {sql_str(name)}, {sql_str(slug)},
     {sql_str(d.get('detailed_description'))}, {sql_str(d.get('about_the_game'))}, {sql_str(d.get('supported_languages'))},
@@ -146,9 +146,9 @@ INSERT INTO games (
     {release_date}, {release_date_raw},
     {sql_int(metacritic_score)}, {sql_int(recommendations_total)},
     {sql_bool(platforms.get('windows'))}, {sql_bool(platforms.get('mac'))}, {sql_bool(platforms.get('linux'))},
-    {sql_str(currency)}, {sql_int(price_initial)}, {sql_int(price_final)}, {sql_int(discount_percent)},
+    {sql_str(currency)}, {sql_int(price_initial)},
     {sql_json(d.get('pc_requirements'))}, {sql_json(d.get('mac_requirements'))}, {sql_json(d.get('linux_requirements'))},
-    {sql_int(random.randint(15, 85))}, {sql_str(generate_steam_key())}
+    {sql_int(random.randint(15, 85))}
 ) ON CONFLICT (steam_app_id) DO UPDATE SET
     name = EXCLUDED.name,
     detailed_description = EXCLUDED.detailed_description,
@@ -165,13 +165,18 @@ INSERT INTO games (
     platform_linux = EXCLUDED.platform_linux,
     currency = EXCLUDED.currency,
     price_initial = EXCLUDED.price_initial,
-    price_final = EXCLUDED.price_final,
-    discount_percent = EXCLUDED.discount_percent,
     pc_requirements = EXCLUDED.pc_requirements,
     mac_requirements = EXCLUDED.mac_requirements,
     linux_requirements = EXCLUDED.linux_requirements,
-    reduction_percentage = EXCLUDED.reduction_percentage,
-    steam_key = EXCLUDED.steam_key;""")
+    reduction_percentage = EXCLUDED.reduction_percentage;""")
+        lines.append("")
+
+        # Steam Keys
+        for _ in range(random.randint(5, 20)):
+            lines.append(
+                f"INSERT INTO steamkeys (key, games_id) "
+                f"SELECT {sql_str(generate_steam_key())}, id FROM games WHERE steam_app_id = {sql_int(app_id)};"
+            )
         lines.append("")
 
         # Developers & publishers

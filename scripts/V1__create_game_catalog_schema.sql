@@ -29,27 +29,16 @@ CREATE TABLE games (
     -- Price (stored in cents to avoid floating-point issues)
     currency              VARCHAR(10),
     price_initial         INTEGER,
-    price_final           INTEGER,
-    discount_percent      SMALLINT     DEFAULT 0,
 
     -- System requirements (HTML content from Steam, rarely filtered)
     pc_requirements       JSONB,
     mac_requirements      JSONB,
     linux_requirements    JSONB,
 
-    -- Store / key
-    reduction_percentage  INTEGER,
-    steam_key             VARCHAR(17),
-
     -- Crawl metadata
-    crawled_at            TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at            TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
 
-    -- Auto-maintained full-text search vector
-    search_vector         TSVECTOR GENERATED ALWAYS AS (
-        setweight(to_tsvector('english', coalesce(name, '')), 'A') ||
-        setweight(to_tsvector('english', coalesce(about_the_game, '')), 'B')
-    ) STORED
+    reduction_percentage  INTEGER
 );
 
 -- ──────────────────────────────────────────────────────────────
@@ -128,20 +117,12 @@ CREATE TABLE movies (
 -- ══════════════════════════════════════════════════════════════
 
 -- Catalog sorting
-CREATE INDEX idx_games_price_final     ON games (price_final);
-CREATE INDEX idx_games_discount        ON games (discount_percent DESC) WHERE discount_percent > 0;
 CREATE INDEX idx_games_release_date    ON games (release_date DESC NULLS LAST);
 CREATE INDEX idx_games_metacritic      ON games (metacritic_score DESC NULLS LAST);
 CREATE INDEX idx_games_recommendations ON games (recommendations_total DESC);
 
 -- Platform filtering
 CREATE INDEX idx_games_platforms ON games (platform_windows, platform_mac, platform_linux);
-
--- Price range filtering
-CREATE INDEX idx_games_price_range ON games (price_final) WHERE price_final IS NOT NULL;
-
--- Full-text search
-CREATE INDEX idx_games_search ON games USING GIN (search_vector);
 
 -- Genre filtering (most common catalog filter)
 CREATE INDEX idx_game_genres_genre ON game_genres (genre_id);
@@ -165,3 +146,31 @@ CREATE TRIGGER trg_games_updated_at
     BEFORE UPDATE ON games
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
+
+-- ──────────────────────────────────────────────────────────────
+-- Steam Keys
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE steamkeys (
+    id       SERIAL       PRIMARY KEY,
+    key      VARCHAR(17)  NOT NULL,
+    games_id BIGINT       REFERENCES games(id) ON DELETE CASCADE
+);
+
+-- ──────────────────────────────────────────────────────────────
+-- Orders
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE orders (
+    id       SERIAL       PRIMARY KEY,
+    user_id  INTEGER      NOT NULL,
+    games_id BIGINT       REFERENCES games(id) ON DELETE CASCADE,
+    key      VARCHAR(17)  NOT NULL
+);
+
+-- ──────────────────────────────────────────────────────────────
+-- Balance
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE balance (
+    id       SERIAL       PRIMARY KEY,
+    user_id  INTEGER      UNIQUE NOT NULL,
+    balance  INTEGER      NOT NULL DEFAULT 0
+);
