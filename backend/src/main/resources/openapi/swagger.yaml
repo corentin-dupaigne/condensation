@@ -1,0 +1,288 @@
+openapi: 3.0.3
+info:
+  title: Steam Game Catalog API
+  description: API de consultation du catalogue de jeux Steam
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+tags:
+  - name: Games
+    description: Consultation et suppression des jeux
+paths:
+  /games:
+    get:
+      tags:
+        - Games
+      summary: Récupérer le catalogue de jeux (GetAll)
+      description: Liste paginée des jeux avec filtres optionnels.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          description: Recherche full-text
+          schema:
+            type: string
+        - name: genreId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Liste paginée récupérée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageGameSummary'
+
+  /games/{id}:
+    get:
+      tags:
+        - Games
+      summary: Obtenir TOUS les détails d'un jeu
+      description: Renvoie l'intégralité des données d'un jeu, y compris ses médias, catégories, entreprises et métadonnées de crawl.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Détails complets du jeu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameDetail'
+        '404':
+          description: Jeu non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      tags:
+        - Games
+      summary: Supprimer un jeu
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Jeu supprimé avec succès
+        '404':
+          description: Jeu non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+components:
+  schemas:
+    GameSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        steamAppId:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        headerImage:
+          type: string
+        priceFinal:
+          type: integer
+          description: Prix en centimes
+        discountPercent:
+          type: integer
+        platformWindows:
+          type: boolean
+        platformMac:
+          type: boolean
+        platformLinux:
+          type: boolean
+    GameDetail:
+      allOf:
+        - $ref: '#/components/schemas/GameSummary'
+        - type: object
+          properties:
+            detailedDescription:
+              type: string
+            aboutTheGame:
+              type: string
+            supportedLanguages:
+              type: string
+            requiredAge:
+              type: integer
+            releaseDate:
+              type: string
+              format: date
+            releaseDateRaw:
+              type: string
+            metacriticScore:
+              type: integer
+            recommendationsTotal:
+              type: integer
+            currency:
+              type: string
+            priceInitial:
+              type: integer
+            reductionPercentage:
+              type: integer
+            steamKey:
+              type: string
+            pcRequirements:
+              type: object
+            macRequirements:
+              type: object
+            linuxRequirements:
+              type: object
+            crawledAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+            companies:
+              type: array
+              items:
+                $ref: '#/components/schemas/GameCompany'
+            genres:
+              type: array
+              items:
+                $ref: '#/components/schemas/Genre'
+            categories:
+              type: array
+              items:
+                $ref: '#/components/schemas/Category'
+            screenshots:
+              type: array
+              items:
+                $ref: '#/components/schemas/Screenshot'
+            movies:
+              type: array
+              items:
+                $ref: '#/components/schemas/Movie'
+    GameCompany:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/Company'
+        role:
+          type: string
+          enum: [developer, publisher]
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Genre:
+      type: object
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+
+    Screenshot:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        steamId:
+          type: integer
+        pathThumbnail:
+          type: string
+        pathFull:
+          type: string
+        position:
+          type: integer
+
+    Movie:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        steamId:
+          type: integer
+        name:
+          type: string
+        thumbnail:
+          type: string
+        dashAv1:
+          type: string
+        dashH264:
+          type: string
+        hlsH264:
+          type: string
+        highlight:
+          type: boolean
+        position:
+          type: integer
+
+    PageGameSummary:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameSummary'
+        pageable:
+          type: object
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+    ApiError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: "Not Found"
+        message:
+          type: string
+          example: "Le jeu avec l'ID 999 est introuvable."
+        path:
+          type: string
+          example: "/api/v1/games/999"
+        timestamp:
+          type: string
+          format: date-time
