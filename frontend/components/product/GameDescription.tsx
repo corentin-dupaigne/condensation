@@ -1,7 +1,3 @@
-"use client";
-
-import { useState } from "react";
-
 export function GameDescription({
   title,
   detailedDescription,
@@ -11,8 +7,6 @@ export function GameDescription({
   detailedDescription: string;
   aboutTheGame: string;
 }) {
-  const [expanded, setExpanded] = useState(false);
-
   return (
     <>
       <h2 className="flex items-center gap-3 font-headline text-lg font-bold uppercase tracking-tight text-on-surface mb-4">
@@ -22,6 +16,9 @@ export function GameDescription({
 
       <div className="text-sm leading-relaxed text-on-surface-variant">
         <div dangerouslySetInnerHTML={{ __html: detailedDescription }} />
+        {aboutTheGame && aboutTheGame !== detailedDescription ? (
+          <div className="mt-6" dangerouslySetInnerHTML={{ __html: aboutTheGame }} />
+        ) : null}
       </div>
     </>
   );

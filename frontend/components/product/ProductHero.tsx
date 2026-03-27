@@ -172,7 +172,7 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
 
       {/* Bottom control bar */}
       <div
-        className={`pointer-events-none absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-3 pb-3 pt-8 transition-all duration-200 ${
+        className={`pointer-events-none absolute bottom-0 left-0 right-0 z-30 bg-linear-to-t from-black/80 via-black/40 to-transparent px-3 pb-3 pt-8 transition-all duration-200 ${
           showOverlay ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
         }`}
       >
@@ -297,6 +297,8 @@ export function ProductHero({ game }: { game: GameDetail }) {
               <VideoPlayer src={active.hls} poster={active.thumbnail} />
             ) : (
               <>
+                {/* External storefront media URLs are rendered directly here. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={
                     active?.kind === "screenshot"
@@ -333,6 +335,7 @@ export function ProductHero({ game }: { game: GameDetail }) {
                     : "opacity-60 hover:opacity-100"
                 }`}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.thumbnail}
                   alt={

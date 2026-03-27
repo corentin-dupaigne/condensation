@@ -4,7 +4,6 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { PromoBanner } from "@/components/home/PromoBanner";
-import { CategoryPillRow } from "@/components/home/CategoryPillRow";
 import { GameCardGrid } from "@/components/home/GameCardGrid";
 import { BestsellersSection } from "@/components/home/BestsellersSection";
 import { NewReleasesSection } from "@/components/home/NewReleasesSection";
@@ -20,7 +19,6 @@ import {
   getNewReleases,
   getPreOrders,
   getDealTiers,
-  genres,
 } from "@/lib/game-data";
 
 import { getAuthState } from "@/lib/auth";
