@@ -7,13 +7,18 @@ export function CountdownTimer({
 }: {
   targetDate: Date;
 }) {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(targetDate));
+  const [timeLeft, setTimeLeft] = useState(() => ({ hours: 0, minutes: 0, seconds: 0 }));
 
   useEffect(() => {
+    const tick = () => setTimeLeft(getTimeLeft(targetDate));
+    const timeout = setTimeout(tick, 0);
     const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(targetDate));
+      tick();
     }, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [targetDate]);
 
   return (

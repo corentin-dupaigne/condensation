@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CatalogClient } from "@/components/catalog/CatalogClient";
 import { getCatalogGames, allPlatforms, allGenres } from "@/lib/game-data";
+import { getAuthState } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Catalog — Condensation",
@@ -13,11 +14,14 @@ export const metadata: Metadata = {
 };
 
 export default async function CatalogPage() {
-  const games = await getCatalogGames();
+  const [games, { isLoggedIn, userName }] = await Promise.all([
+    getCatalogGames(),
+    getAuthState(),
+  ]);
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} userName={userName} />
       <main>
         <CatalogClient
           games={games}

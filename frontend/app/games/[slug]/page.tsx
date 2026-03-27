@@ -13,6 +13,7 @@ import { GameInfoSidebar } from "@/components/product/GameInfoSidebar";
 import { getGameBySlug, getRelatedGames } from "@/lib/game-data";
 import { fetchSteamAppDetails, steamDataToGameDetail } from "@/lib/steam-api";
 import type { GameDetail } from "@/lib/types";
+import { getAuthState } from "@/lib/auth";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -66,7 +67,10 @@ export default async function ProductDetailPage({ params }: Props) {
     ...steamDetails,
   };
 
-  const relatedGames = await getRelatedGames();
+  const [relatedGames, { isLoggedIn, userName }] = await Promise.all([
+    getRelatedGames(),
+    getAuthState(),
+  ]);
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -84,7 +88,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} userName={userName} />
       <main className="min-h-screen">
         <div className="mx-auto max-w-7xl">
           <Breadcrumb items={breadcrumbItems} />

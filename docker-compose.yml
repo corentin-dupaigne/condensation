@@ -70,5 +70,25 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  postgres-game:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: game_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d game_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_game_data:/var/lib/postgresql/data
+      - ./scripts/V1__create_game_catalog_schema.sql:/docker-entrypoint-initdb.d/V1__create_game_catalog_schema.sql:ro
+      - ./scripts/seed_games.sql:/docker-entrypoint-initdb.d/seed_games.sql:ro
+
 volumes:
   postgres_data:
+  postgres_game_data:

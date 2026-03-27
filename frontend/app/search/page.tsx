@@ -7,6 +7,7 @@ import { PopularSearches } from "@/components/search/PopularSearches";
 
 import { searchSteamGames } from "@/lib/steam-api";
 import { popularSearches } from "@/lib/game-data";
+import { getAuthState } from "@/lib/auth";
 
 type Props = { searchParams: Promise<{ q?: string }> };
 
@@ -14,13 +15,15 @@ export default async function SearchPage({ searchParams }: Props) {
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
-  const { total, games } = query
-    ? await searchSteamGames(query)
-    : { total: 0, games: [] };
+  const [searchResult, { isLoggedIn, userName }] = await Promise.all([
+    query ? searchSteamGames(query) : Promise.resolve({ total: 0, games: [] }),
+    getAuthState(),
+  ]);
+  const { total, games } = searchResult;
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} userName={userName} />
       <main>
         <SearchHero query={query} total={total} />
         <SearchFilterBar />
