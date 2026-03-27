@@ -13,21 +13,22 @@
     "@fortawesome/free-brands-svg-icons": "^7.2.0",
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.3.0",
-    "lightningcss-darwin-arm64": "^1.31.1",
-    "next": "16.1.7",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-player": "^3.4.0"
+    "lightningcss-darwin-arm64": "^1.32.0",
+    "next": "16.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-player": "^3.4.0",
+    "typescript-eslint": "^8.57.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "eslint": "^9",
-    "eslint-config-next": "16.1.7",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2"
   },
   "ignoreScripts": [
     "sharp",
@@ -36,5 +37,9 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ]
+  ],
+  "overrides": {
+    "picomatch": "^2.3.2",
+    "minimatch": "^10.0.1"
+  }
 }

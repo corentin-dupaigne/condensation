@@ -1,0 +1,28 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway
+  namespace: default
+spec:
+  gatewayClassName: gateway-class
+  listeners:
+  - name: http-dev
+    protocol: HTTP
+    port: 80
+    hostname: "dev.condensation.corentindupaigne.com"
+    allowedRoutes:
+      namespaces:
+        from: Selector
+        selector:
+          matchLabels:
+            kubernetes.io/metadata.name: dev
+  - name: http-prod
+    protocol: HTTP
+    port: 80
+    hostname: "condensation.corentindupaigne.com"
+    allowedRoutes:
+      namespaces:
+        from: Selector
+        selector:
+          matchLabels:
+            kubernetes.io/metadata.name: prod

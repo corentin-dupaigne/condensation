@@ -1,0 +1,10 @@
+namespace: prod
+resources:
+  - namespace.yaml
+  - http-route.yaml
+  - ../../base
+images:
+  - name: ghcr.io/corentin-dupaigne/fullstack_project/auth
+    newTag: latest
+  - name: ghcr.io/corentin-dupaigne/fullstack_project/frontend
+    newTag: latest

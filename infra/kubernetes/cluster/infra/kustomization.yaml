@@ -1,0 +1,3 @@
+resources:
+  - https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
+  - https://github.com/envoyproxy/gateway/releases/latest/download/install.yaml

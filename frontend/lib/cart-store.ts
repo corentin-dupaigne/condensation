@@ -1,0 +1,202 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
+import type { Game, GameDetail, Platform, SteamPlatforms } from "@/lib/types";
+
+export type CartItem = {
+  id: string;
+  title: string;
+  image?: string | null;
+  platforms: Platform[];
+  price: number;
+  originalPrice?: number | null;
+  discountPercent?: number | null;
+  qty: number;
+};
+
+type CartState = {
+  items: CartItem[];
+  updatedAt: number;
+};
+
+const STORAGE_KEY = "condensation.cart.v1";
+const EVENT_NAME = "condensation:cart";
+
+const EMPTY_STATE: CartState = { items: [], updatedAt: 0 };
+
+let cachedRaw: string | null | undefined = undefined;
+let cachedState: CartState = EMPTY_STATE;
+
+function now() {
+  return Date.now();
+}
+
+function safeParse(json: string | null): CartState | null {
+  if (!json) return null;
+  try {
+    const parsed = JSON.parse(json) as unknown;
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "items" in parsed &&
+      Array.isArray((parsed as { items: unknown }).items)
+    ) {
+      const state = parsed as CartState;
+      return {
+        items: state.items.filter(Boolean),
+        updatedAt: typeof state.updatedAt === "number" ? state.updatedAt : now(),
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function readRaw(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(STORAGE_KEY);
+}
+
+function ensureCache() {
+  if (typeof window === "undefined") {
+    cachedRaw = null;
+    cachedState = EMPTY_STATE;
+    return;
+  }
+
+  const raw = readRaw();
+  if (cachedRaw === raw) return;
+
+  cachedRaw = raw;
+  cachedState = safeParse(raw) ?? EMPTY_STATE;
+
+  // #region agent log H1
+  fetch('http://127.0.0.1:7883/ingest/ca05ea8e-7a42-4710-9f28-9ec27b8a94c5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'33e9cf'},body:JSON.stringify({sessionId:'33e9cf',runId:'pre-fix',hypothesisId:'H1',location:'frontend/lib/cart-store.ts:cache',message:'Cart cache refreshed',data:{rawLen:raw?.length??0,items:cachedState.items.length,updatedAt:cachedState.updatedAt},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion agent log H1
+}
+
+function readState(): CartState {
+  ensureCache();
+  return cachedState;
+}
+
+function writeState(next: CartState) {
+  if (typeof window === "undefined") return;
+  const raw = JSON.stringify(next);
+  window.localStorage.setItem(STORAGE_KEY, raw);
+  cachedRaw = raw;
+  cachedState = next;
+
+  // #region agent log H2
+  fetch('http://127.0.0.1:7883/ingest/ca05ea8e-7a42-4710-9f28-9ec27b8a94c5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'33e9cf'},body:JSON.stringify({sessionId:'33e9cf',runId:'pre-fix',hypothesisId:'H2',location:'frontend/lib/cart-store.ts:writeState',message:'Cart writeState',data:{items:next.items.length,updatedAt:next.updatedAt},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion agent log H2
+  window.dispatchEvent(new Event(EVENT_NAME));
+}
+
+export function subscribeCart(listener: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const handler = () => {
+    const before = cachedRaw;
+    ensureCache();
+    const changed = before !== cachedRaw;
+
+    // #region agent log H3
+    fetch('http://127.0.0.1:7883/ingest/ca05ea8e-7a42-4710-9f28-9ec27b8a94c5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'33e9cf'},body:JSON.stringify({sessionId:'33e9cf',runId:'pre-fix',hypothesisId:'H3',location:'frontend/lib/cart-store.ts:subscribeCart',message:'Cart event received',data:{changed,items:cachedState.items.length,updatedAt:cachedState.updatedAt},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion agent log H3
+
+    if (changed) listener();
+  };
+
+  window.addEventListener(EVENT_NAME, handler);
+  window.addEventListener("storage", handler);
+  return () => {
+    window.removeEventListener(EVENT_NAME, handler);
+    window.removeEventListener("storage", handler);
+  };
+}
+
+export function getCart(): CartState {
+  return readState();
+}
+
+export function clearCart() {
+  writeState({ items: [], updatedAt: now() });
+}
+
+export function removeFromCart(id: string) {
+  const state = readState();
+  const nextItems = state.items.filter((it) => it.id !== id);
+  writeState({ items: nextItems, updatedAt: now() });
+}
+
+export function setCartItemQty(id: string, qty: number) {
+  const clampedQty = Math.max(1, Math.min(99, Math.floor(qty)));
+  const state = readState();
+  const nextItems = state.items.map((it) =>
+    it.id === id ? { ...it, qty: clampedQty } : it,
+  );
+  writeState({ items: nextItems, updatedAt: now() });
+}
+
+export function addToCart(item: Omit<CartItem, "qty">, qty = 1) {
+  const addQty = Math.max(1, Math.min(99, Math.floor(qty)));
+  const state = readState();
+  const existing = state.items.find((it) => it.id === item.id);
+  const nextItems = existing
+    ? state.items.map((it) =>
+        it.id === item.id
+          ? { ...it, qty: Math.max(1, Math.min(99, it.qty + addQty)) }
+          : it,
+      )
+    : [...state.items, { ...item, qty: addQty }];
+
+  writeState({ items: nextItems, updatedAt: now() });
+}
+
+export function cartItemFromGame(game: Game | GameDetail): Omit<CartItem, "qty"> {
+  const platforms = normalizePlatforms(game.platforms);
+  return {
+    id: game.slug,
+    title: game.title,
+    image: game.image ?? (("headerImage" in game ? game.headerImage : undefined) as
+      | string
+      | undefined) ?? null,
+    platforms,
+    price: game.price,
+    originalPrice: game.originalPrice ?? null,
+    discountPercent: game.discountPercent ?? null,
+  };
+}
+
+function normalizePlatforms(platforms: Platform[] | SteamPlatforms): Platform[] {
+  if (Array.isArray(platforms)) return platforms;
+  const list: Platform[] = [];
+  if (platforms.windows) list.push("windows");
+  if (platforms.mac) list.push("mac");
+  if (platforms.linux) list.push("linux");
+  return list;
+}
+
+export function getCartCount(state: CartState): number {
+  return state.items.reduce((sum, it) => sum + (it.qty || 0), 0);
+}
+
+export function getCartSubtotal(state: CartState): number {
+  return state.items.reduce((sum, it) => sum + it.price * it.qty, 0);
+}
+
+export function useCartState(): CartState {
+  return useSyncExternalStore(subscribeCart, getCart, () => EMPTY_STATE);
+}
+
+export function useCartCount(): number {
+  const state = useCartState();
+  return getCartCount(state);
+}
+
+export function useCartSubtotal(): number {
+  const state = useCartState();
+  return getCartSubtotal(state);
+}
+

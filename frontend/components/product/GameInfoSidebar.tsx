@@ -18,6 +18,44 @@ export function GameInfoSidebar({ game }: { game: GameDetail }) {
 
   return (
     <>
+      {/* Genres */}
+      {game.genres?.length > 0 && (
+        <div className="mb-6">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-on-surface-variant">
+            Genres
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {game.genres.map((genre) => (
+              <span
+                key={genre.id}
+                className="rounded-full bg-surface-container-highest px-3 py-1 text-xs font-medium text-on-surface-variant"
+              >
+                {genre.description}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Categories */}
+      {game.categories?.length > 0 && (
+        <div className="mb-6">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-on-surface-variant">
+            Categories
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {game.categories.map((cat) => (
+              <span
+                key={cat.id}
+                className="rounded-full bg-surface-container-highest px-3 py-1 text-xs font-medium text-on-surface-variant"
+              >
+                {cat.description}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Languages */}
       <div className="mb-6">
         <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-on-surface-variant">
