@@ -19,6 +19,7 @@ spec:
       - name: ghcr-secret
       containers:
       - image: ghcr.io/corentin-dupaigne/fullstack_project/frontend
+        imagePullPolicy: Always
         env:
           - name: HOSTNAME
             value: "0.0.0.0"
