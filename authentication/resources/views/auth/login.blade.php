@@ -1,4 +1,13 @@
 <x-condensation-guest-layout>
+  <a href="{{ config('app.frontend_url', '/') }}"
+     class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface">
+    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5" /><path d="m12 19-7-7 7-7" />
+    </svg>
+    {{ __('Return to Home') }}
+  </a>
+
   <div class="glass-panel rounded-2xl border border-outline-variant/10 p-10 shadow-2xl">
     <header class="mb-10 text-center">
       <h1 class="mb-2 font-headline text-5xl font-black uppercase tracking-tighter text-on-surface">Sign In</h1>
@@ -37,10 +46,10 @@
           <input id="password" type="password" name="password"
                  required autocomplete="current-password"
                  placeholder="{{ __('Password') }}"
-                 class="w-full rounded-xl border-0 bg-surface-container-highest px-4 py-4 pr-12 text-sm text-on-surface placeholder:text-outline/50 outline-none transition-all focus:ring-1 focus:ring-primary/40" />
-          <button type="button" aria-label="{{ __('Show password') }}"
+                 class="w-full rounded-lg border-0 bg-surface-container-highest px-4 py-4 pr-12 font-headline text-sm text-on-surface placeholder:text-on-surface-variant/60 outline-none transition-all focus:ring-1 focus:ring-primary/40" />
+          <button type="button" tabindex="-1" aria-label="{{ __('Show password') }}"
                   onclick="togglePassword('password', this)"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-bright hover:text-on-surface">
+                  class="absolute right-3 top-1/2 -translate-y-1/2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-bright hover:text-on-surface">
             <svg class="eye-open hidden h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />

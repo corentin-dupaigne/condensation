@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <meta name="theme-color" content="#0e0e12">
+  <meta name="theme-color" content="#0c0e11">
   <title>{{ config('app.name', 'Condensation') }}</title>
 
   <!-- Fonts -->
@@ -15,21 +15,25 @@
   <style>
     :root {
       --primary:                    #d575ff;
-      --primary-container:          #a020f0;
-      --on-primary:                 #ffffff;
-      --secondary:                  #f472b6;
-      --tertiary:                   #34d399;
-      --surface:                    #0e0e12;
-      --surface-container:          #1a1a24;
-      --surface-container-highest:  #2a2a38;
-      --surface-bright:             #32324a;
-      --on-surface:                 #e8e8f0;
-      --on-surface-variant:         #9090a8;
-      --outline:                    #505068;
-      --outline-variant:            #3a3a50;
+      --primary-container:          #9800d0;
+      --on-primary:                 #fff5fc;
+      --secondary:                  #a1faff;
+      --tertiary:                   #f3ffca;
+      --cta:                        #F43F5E;
+      --error:                      #ff716c;
+      --surface:                    #0c0e11;
+      --surface-container:          #171a1d;
+      --surface-container-high:     #1d2024;
+      --surface-container-highest:  #23262a;
+      --surface-container-low:      #111417;
+      --surface-bright:             #292c31;
+      --on-surface:                 #f9f9fd;
+      --on-surface-variant:         #aaabaf;
+      --outline:                    #747579;
+      --outline-variant:            #46484b;
     }
     .glass-panel {
-      background: rgba(20, 20, 32, 0.70);
+      background: rgba(23, 26, 29, 0.70);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
     }
@@ -50,8 +54,12 @@
             'tertiary':                  'var(--tertiary)',
             'surface':                   'var(--surface)',
             'surface-container':         'var(--surface-container)',
+            'surface-container-high':    'var(--surface-container-high)',
             'surface-container-highest': 'var(--surface-container-highest)',
+            'surface-container-low':     'var(--surface-container-low)',
             'surface-bright':            'var(--surface-bright)',
+            'cta':                       'var(--cta)',
+            'error':                     'var(--error)',
             'on-surface':                'var(--on-surface)',
             'on-surface-variant':        'var(--on-surface-variant)',
             'outline':                   'var(--outline)',
@@ -92,7 +100,7 @@
     }
   </script>
 </head>
-<body class="font-body antialiased bg-surface text-on-surface">
+<body class="font-headline antialiased bg-surface text-on-surface">
 
   <!-- Ambient glow blobs -->
   <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -110,12 +118,12 @@
     <footer class="flex flex-col items-center gap-3 py-8">
       <div class="flex flex-wrap justify-center gap-6">
         @foreach(['Terms of Service', 'Privacy Policy', 'Cookie Settings', 'Support'] as $label)
-          <a href="#" class="text-xs font-body uppercase tracking-widest text-primary/60 transition-all hover:text-secondary">
+          <a href="#" class="text-xs uppercase tracking-widest text-primary/60 transition-all hover:text-secondary">
             {{ $label }}
           </a>
         @endforeach
       </div>
-      <p class="text-xs font-body uppercase tracking-widest text-on-surface-variant/40">
+      <p class="text-xs uppercase tracking-widest text-on-surface-variant/40">
         &copy; {{ date('Y') }} Condensation. All rights reserved.
       </p>
     </footer>
