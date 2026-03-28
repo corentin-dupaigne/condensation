@@ -70,10 +70,6 @@ function ensureCache() {
 
   cachedRaw = raw;
   cachedState = safeParse(raw) ?? EMPTY_STATE;
-
-  // #region agent log H1
-  fetch('http://127.0.0.1:7883/ingest/ca05ea8e-7a42-4710-9f28-9ec27b8a94c5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'33e9cf'},body:JSON.stringify({sessionId:'33e9cf',runId:'pre-fix',hypothesisId:'H1',location:'frontend/lib/cart-store.ts:cache',message:'Cart cache refreshed',data:{rawLen:raw?.length??0,items:cachedState.items.length,updatedAt:cachedState.updatedAt},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion agent log H1
 }
 
 function readState(): CartState {
@@ -85,12 +81,9 @@ function writeState(next: CartState) {
   if (typeof window === "undefined") return;
   const raw = JSON.stringify(next);
   window.localStorage.setItem(STORAGE_KEY, raw);
-  cachedRaw = raw;
   cachedState = next;
-
-  // #region agent log H2
-  fetch('http://127.0.0.1:7883/ingest/ca05ea8e-7a42-4710-9f28-9ec27b8a94c5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'33e9cf'},body:JSON.stringify({sessionId:'33e9cf',runId:'pre-fix',hypothesisId:'H2',location:'frontend/lib/cart-store.ts:writeState',message:'Cart writeState',data:{items:next.items.length,updatedAt:next.updatedAt},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion agent log H2
+  // Invalidate cachedRaw so subscribers detect the change via ensureCache()
+  cachedRaw = undefined;
   window.dispatchEvent(new Event(EVENT_NAME));
 }
 
@@ -100,10 +93,6 @@ export function subscribeCart(listener: () => void) {
     const before = cachedRaw;
     ensureCache();
     const changed = before !== cachedRaw;
-
-    // #region agent log H3
-    fetch('http://127.0.0.1:7883/ingest/ca05ea8e-7a42-4710-9f28-9ec27b8a94c5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'33e9cf'},body:JSON.stringify({sessionId:'33e9cf',runId:'pre-fix',hypothesisId:'H3',location:'frontend/lib/cart-store.ts:subscribeCart',message:'Cart event received',data:{changed,items:cachedState.items.length,updatedAt:cachedState.updatedAt},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion agent log H3
 
     if (changed) listener();
   };

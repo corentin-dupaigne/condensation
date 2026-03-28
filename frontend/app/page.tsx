@@ -10,7 +10,6 @@ import { NewReleasesSection } from "@/components/home/NewReleasesSection";
 import { PreOrdersSection } from "@/components/home/PreOrdersSection";
 import { BudgetDeals } from "@/components/home/BudgetDeals";
 import { TrustBar } from "@/components/home/TrustBar";
-import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 
 import {
   getHeroSlides,
@@ -55,7 +54,6 @@ export default async function Home() {
         <PreOrdersSection games={preOrders} />
         <BudgetDeals tiers={dealTiers} />
         <TrustBar />
-        <NewsletterSignup />
       </main>
       <Footer />
     </>

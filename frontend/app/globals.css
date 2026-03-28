@@ -120,6 +120,15 @@ body {
   font-family: var(--font-body);
 }
 
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
+
 @keyframes pulse-glow {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -159,4 +168,46 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--primary-dim);
+}
+
+/* Video.js dark theme overrides */
+.video-js {
+  --vjs-theme-color: var(--primary);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.video-js .vjs-big-play-button {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 4rem;
+  height: 4rem;
+  line-height: 4rem;
+  font-size: 2rem;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.video-js .vjs-big-play-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+
+.video-js .vjs-control-bar {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  height: 3.5em;
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--primary);
+}
+
+.video-js .vjs-slider {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.video-js .vjs-load-progress div {
+  background: rgba(255, 255, 255, 0.1);
 }

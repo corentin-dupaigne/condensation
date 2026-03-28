@@ -2,20 +2,7 @@
 
 import { formatPrice } from "@/lib/format-price";
 
-export function OrderSummaryCard({
-  subtotal,
-  shieldEnabled,
-  shieldPrice,
-  couponDiscount,
-}: {
-  subtotal: number;
-  shieldEnabled: boolean;
-  shieldPrice: number;
-  couponDiscount: number;
-}) {
-  const shieldCost = shieldEnabled ? shieldPrice : 0;
-  const total = Math.max(0, subtotal - couponDiscount + shieldCost);
-
+export function OrderSummaryCard({ subtotal }: { subtotal: number }) {
   return (
     <div className="sticky top-24 rounded-xl border border-outline-variant/20 p-8 shadow-2xl glass-panel space-y-8">
       <h2 className="border-b border-outline-variant/20 pb-4 font-headline text-xl font-bold uppercase tracking-widest">
@@ -29,24 +16,6 @@ export function OrderSummaryCard({
             {formatPrice(subtotal)}
           </span>
         </div>
-
-        {couponDiscount > 0 ? (
-          <div className="flex justify-between text-on-surface-variant">
-            <span>Coupon</span>
-            <span className="font-headline font-bold text-secondary">
-              -{formatPrice(couponDiscount)}
-            </span>
-          </div>
-        ) : null}
-
-        {shieldEnabled ? (
-          <div className="flex justify-between text-on-surface-variant">
-            <span>Shield Protection</span>
-            <span className="font-headline font-bold text-on-surface">
-              {formatPrice(shieldPrice)}
-            </span>
-          </div>
-        ) : null}
       </div>
 
       <div className="border-t border-outline-variant/20 pt-6">
@@ -56,7 +25,7 @@ export function OrderSummaryCard({
           </span>
           <div className="text-right">
             <span className="block font-headline text-4xl font-black text-secondary">
-              {formatPrice(total)}
+              {formatPrice(subtotal)}
             </span>
             <span className="text-[10px] uppercase tracking-tight text-on-surface-variant">
               VAT included where applicable
@@ -74,4 +43,3 @@ export function OrderSummaryCard({
     </div>
   );
 }
-

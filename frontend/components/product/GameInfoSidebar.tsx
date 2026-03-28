@@ -61,7 +61,7 @@ export function GameInfoSidebar({ game }: { game: GameDetail }) {
         <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-on-surface-variant">
           Supported Languages
         </p>
-        <table className="w-full text-xs">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-outline-variant/20">
               <th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Language</th>
@@ -96,18 +96,17 @@ export function GameInfoSidebar({ game }: { game: GameDetail }) {
             <button
               key={tab}
               onClick={() => setReqTab(tab)}
-              className={`flex-1 rounded-md py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-all ${
-                reqTab === tab
-                  ? "bg-surface-container-highest text-on-surface"
-                  : "text-on-surface-variant hover:text-on-surface"
-              }`}
+              className={`flex-1 rounded-md py-1.5 text-xs font-semibold uppercase tracking-wider transition-all ${reqTab === tab
+                ? "bg-surface-container-highest text-on-surface"
+                : "text-on-surface-variant hover:text-on-surface"
+                }`}
             >
               {tab}
             </button>
           ))}
         </div>
         <div
-          className="text-xs text-on-surface-variant [&>strong]:mb-2 [&>strong]:block [&>strong]:text-[10px] [&>strong]:font-bold [&>strong]:uppercase [&>strong]:tracking-widest [&>strong]:text-primary [&_br]:hidden [&_li]:flex [&_li]:gap-2 [&_li]:py-0.5 [&_li]:before:shrink-0 [&_li]:before:text-primary [&_li]:before:content-['▸'] [&_li>strong]:font-semibold [&_li>strong]:text-on-surface [&_ul]:space-y-0.5"
+          className="text-sm text-on-surface-variant [&>strong]:mb-2 [&>strong]:block [&>strong]:text-[10px] [&>strong]:font-bold [&>strong]:uppercase [&>strong]:tracking-widest [&>strong]:text-primary [&_br]:hidden [&_li]:flex [&_li]:gap-2 [&_li]:py-0.5 [&_li]:before:shrink-0 [&_li]:before:text-primary [&_li]:before:content-['▸'] [&_li>strong]:font-semibold [&_li>strong]:text-on-surface [&_ul]:space-y-0.5"
           dangerouslySetInnerHTML={{ __html: reqs }}
         />
         <div className="flex gap-2 pt-2">

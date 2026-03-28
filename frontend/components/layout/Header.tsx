@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useCartCount } from "@/lib/cart-store";
+import { useBalance, addBalance } from "@/lib/balance-store";
 
 const navLinks = [
   { label: "Store", href: "/" },
@@ -14,18 +15,33 @@ const navLinks = [
 export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: boolean, userName?: string | null }) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [balanceOpen, setBalanceOpen] = useState(false);
+  const [addAmount, setAddAmount] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const balanceRef = useRef<HTMLDivElement>(null);
   const cartCount = useCartCount();
+  const balance = useBalance();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
+      if (balanceRef.current && !balanceRef.current.contains(e.target as Node)) {
+        setBalanceOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  function handleAddBalance() {
+    const value = parseFloat(addAmount);
+    if (!Number.isFinite(value) || value <= 0) return;
+    addBalance(value);
+    setAddAmount("");
+    setBalanceOpen(false);
+  }
 
   const initials = userName ? userName.charAt(0).toUpperCase() : "P";
 
@@ -93,6 +109,71 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
               </a>
             </>
           ) : null}
+
+          {isLoggedIn && (
+            <div className="relative" ref={balanceRef}>
+              <button
+                onClick={() => setBalanceOpen(!balanceOpen)}
+                className="flex items-center gap-2 rounded-lg bg-surface-container-highest px-3 py-2 text-sm font-medium text-on-surface transition-colors hover:bg-surface-bright"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-primary"
+                >
+                  <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2.5" />
+                  <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+                </svg>
+                <span className="tabular-nums">${balance.toFixed(2)}</span>
+              </button>
+
+              {balanceOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-lg border border-outline-variant/20 bg-surface-container-high p-4 shadow-xl">
+                  <p className="mb-3 text-sm font-semibold text-on-surface">Add Funds</p>
+                  <div className="mb-3 flex gap-2">
+                    {[5, 10, 25, 50, 100].map((preset) => (
+                      <button
+                        key={preset}
+                        onClick={() => setAddAmount(String(preset))}
+                        className={`flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
+                          addAmount === String(preset)
+                            ? "bg-primary/20 text-primary"
+                            : "bg-surface-container-highest text-on-surface-variant hover:text-on-surface"
+                        }`}
+                      >
+                        ${preset}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      placeholder="Amount"
+                      value={addAmount}
+                      onChange={(e) => setAddAmount(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddBalance()}
+                      className="w-full rounded-lg bg-surface-container-highest px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/60 outline-none transition-all focus:ring-1 focus:ring-primary/40"
+                    />
+                    <button
+                      onClick={handleAddBalance}
+                      className="shrink-0 rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary transition-opacity hover:opacity-90"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <Link
             href="/cart"
             className="relative flex h-11 w-11 items-center justify-center rounded-lg bg-surface-container-highest text-on-surface-variant transition-colors hover:text-on-surface"
