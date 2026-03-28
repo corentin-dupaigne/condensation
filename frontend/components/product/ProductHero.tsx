@@ -92,7 +92,6 @@ export function ProductHero({ game }: { game: GameDetail }) {
 
   const finalPrice = (game.price_overview.final ?? 0) / 100;
   const initialPrice = (game.price_overview.initial ?? 0) / 100;
-  const hasDiscount = game.price_overview.discount_percent > 0;
   const ageText = String(game.required_age || "E");
   const genreText =
     game.genres.length > 0
