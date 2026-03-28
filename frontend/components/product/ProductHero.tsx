@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import videojs from "video.js";
-import type Player from "video.js/dist/types/player";
-import "video.js/dist/video-js.css";
+import { useState } from "react";
+import { createPlayer, videoFeatures } from "@videojs/react";
+import { VideoSkin, Video } from "@videojs/react/video";
+import "@videojs/react/video/skin.css";
 import type { GameDetail } from "@/lib/types";
 import { formatPrice } from "@/lib/format-price";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -55,40 +55,16 @@ function ProductAddToCartButton({ game }: { game: GameDetail }) {
   );
 }
 
+const HlsPlayer = createPlayer({ features: videoFeatures });
+
 function VideoPlayer({ src, poster }: { src: string; poster: string }) {
-  const videoRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<Player | null>(null);
-
-  useEffect(() => {
-    if (!videoRef.current) return;
-
-    const videoElement = document.createElement("video-js");
-    videoElement.classList.add("vjs-big-play-centered", "vjs-fill");
-    videoRef.current.appendChild(videoElement);
-
-    const player = videojs(videoElement, {
-      controls: true,
-      fluid: false,
-      fill: true,
-      responsive: true,
-      poster,
-      sources: [{ src, type: "application/x-mpegURL" }],
-      controlBar: {
-        pictureInPictureToggle: false,
-      },
-    });
-
-    playerRef.current = player;
-
-    return () => {
-      if (playerRef.current && !playerRef.current.isDisposed()) {
-        playerRef.current.dispose();
-        playerRef.current = null;
-      }
-    };
-  }, [src, poster]);
-
-  return <div ref={videoRef} className="h-full w-full" data-vjs-player />;
+  return (
+    <HlsPlayer.Provider>
+      <VideoSkin poster={poster}>
+        <Video src={src} playsInline />
+      </VideoSkin>
+    </HlsPlayer.Provider>
+  );
 }
 
 export function ProductHero({ game }: { game: GameDetail }) {
@@ -116,7 +92,6 @@ export function ProductHero({ game }: { game: GameDetail }) {
 
   const finalPrice = (game.price_overview.final ?? 0) / 100;
   const initialPrice = (game.price_overview.initial ?? 0) / 100;
-  const hasDiscount = game.price_overview.discount_percent > 0;
   const ageText = String(game.required_age || "E");
   const genreText =
     game.genres.length > 0
@@ -154,11 +129,10 @@ export function ProductHero({ game }: { game: GameDetail }) {
               <button
                 key={item.id}
                 onClick={() => setActiveIndex(i)}
-                className={`m-2 relative min-w-28 aspect-video shrink-0 overflow-hidden rounded-lg transition-all ${
-                  i === activeIndex
-                    ? "ring-2 ring-secondary ring-offset-2 ring-offset-surface"
-                    : "opacity-60 hover:opacity-100"
-                }`}
+                className={`m-2 relative min-w-28 aspect-video shrink-0 overflow-hidden rounded-lg transition-all ${i === activeIndex
+                  ? "ring-2 ring-secondary ring-offset-2 ring-offset-surface"
+                  : "opacity-60 hover:opacity-100"
+                  }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -244,11 +218,10 @@ export function ProductHero({ game }: { game: GameDetail }) {
               {/* Standard Edition */}
               <button
                 onClick={() => setSelectedEdition("standard")}
-                className={`w-full text-right p-4 rounded-xl border transition-all group ${
-                  selectedEdition === "standard"
-                    ? "border-secondary/30 bg-secondary/5"
-                    : "border-outline-variant/20 bg-surface-container-high hover:border-secondary/20"
-                }`}
+                className={`w-full text-right p-4 rounded-xl border transition-all group ${selectedEdition === "standard"
+                  ? "border-secondary/30 bg-secondary/5"
+                  : "border-outline-variant/20 bg-surface-container-high hover:border-secondary/20"
+                  }`}
               >
                 <div className="flex justify-between items-center mb-1 h-fit">
                   <div className="flex flex-col gap-2">
@@ -256,30 +229,27 @@ export function ProductHero({ game }: { game: GameDetail }) {
                       Steam key
                     </span>
                     <span className="w-fit font-extrabold text-xs px-3 py-2 rounded-2xl border-amber-300 border-2 text-amber-300">
-                    -15%</span>
+                      -15%</span>
                   </div>
                   <div className="flex flex-col items-end h-full">
-                    {hasDiscount && (
-                      <span className="text-xs line-through text-outline">
-                        {formatPrice(initialPrice)}
-                      </span>
-                    )}
                     <span className="text-xl font-headline font-black text-secondary">
                       {formatPrice(finalPrice)}
                     </span>
+                    <span className="text-xs text-on-surface-variant mt-4">
+                      5 keys left in stock
+                    </span>
                   </div>
                 </div>
-                
+
               </button>
 
               {/* Digital Deluxe */}
               <button
                 onClick={() => setSelectedEdition("deluxe")}
-                className={`w-full text-left p-4 rounded-xl border transition-all group ${
-                  selectedEdition === "deluxe"
-                    ? "border-primary/30 bg-primary/5"
-                    : "border-outline-variant/20 bg-surface-container-high hover:border-primary/20"
-                }`}
+                className={`w-full text-left p-4 rounded-xl border transition-all group ${selectedEdition === "deluxe"
+                  ? "border-primary/30 bg-primary/5"
+                  : "border-outline-variant/20 bg-surface-container-high hover:border-primary/20"
+                  }`}
               >
                 <div className="flex justify-between items-center mb-1">
                   <div className="">
