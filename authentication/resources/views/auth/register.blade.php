@@ -1,4 +1,13 @@
 <x-condensation-guest-layout>
+  <a href="{{ config('app.frontend_url', '/') }}"
+     class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface">
+    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5" /><path d="m12 19-7-7 7-7" />
+    </svg>
+    {{ __('Return to Home') }}
+  </a>
+
   <div class="glass-panel rounded-2xl border border-outline-variant/10 p-10 shadow-2xl">
     <header class="mb-8 text-center">
       <h1 class="mb-2 font-headline text-5xl font-black uppercase tracking-tighter text-on-surface">Sign Up</h1>
@@ -36,10 +45,10 @@
         <div class="group relative">
           <input id="password" type="password" name="password"
                  required autocomplete="new-password" placeholder="{{ __('8+ characters') }}"
-                 class="w-full rounded-xl border-0 bg-surface-container-highest px-4 py-4 pr-12 text-sm text-on-surface placeholder:text-outline/50 outline-none transition-all focus:ring-1 focus:ring-primary/40" />
-          <button type="button" aria-label="{{ __('Show password') }}"
+                 class="w-full rounded-lg border-0 bg-surface-container-highest px-4 py-4 pr-12 font-headline text-sm text-on-surface placeholder:text-on-surface-variant/60 outline-none transition-all focus:ring-1 focus:ring-primary/40" />
+          <button type="button" tabindex="-1" aria-label="{{ __('Show password') }}"
                   onclick="togglePassword('password', this)"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-bright hover:text-on-surface">
+                  class="absolute right-3 top-1/2 -translate-y-1/2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-bright hover:text-on-surface">
             <svg class="eye-open hidden h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />
@@ -63,10 +72,10 @@
         <div class="group relative">
           <input id="password_confirmation" type="password" name="password_confirmation"
                  required autocomplete="new-password" placeholder="{{ __('Repeat your password') }}"
-                 class="w-full rounded-xl border-0 bg-surface-container-highest px-4 py-4 pr-12 text-sm text-on-surface placeholder:text-outline/50 outline-none transition-all focus:ring-1 focus:ring-primary/40" />
-          <button type="button" aria-label="{{ __('Show confirm password') }}"
+                 class="w-full rounded-lg border-0 bg-surface-container-highest px-4 py-4 pr-12 font-headline text-sm text-on-surface placeholder:text-on-surface-variant/60 outline-none transition-all focus:ring-1 focus:ring-primary/40" />
+          <button type="button" tabindex="-1" aria-label="{{ __('Show confirm password') }}"
                   onclick="togglePassword('password_confirmation', this)"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-bright hover:text-on-surface">
+                  class="absolute right-3 top-1/2 -translate-y-1/2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-bright hover:text-on-surface">
             <svg class="eye-open hidden h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />
@@ -86,13 +95,15 @@
 
       {{-- Terms Checkbox --}}
       <div class="flex items-start gap-3 pt-1">
+        <div class="relative mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center">
         <button id="terms-checkbox" type="button" role="checkbox" aria-checked="false"
-                class="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border border-outline bg-surface-container-highest transition-all hover:border-primary/60">
+                class="h-5 w-5 shrink-0 cursor-pointer rounded border border-outline bg-surface-container-highest transition-all hover:border-primary/60">
           <svg class="check-icon hidden h-full w-full p-0.5" viewBox="0 0 16 16" fill="none">
             <path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round" class="text-on-primary" />
           </svg>
         </button>
+        </div>
         <p class="text-sm text-on-surface-variant leading-snug">
           {{ __('I agree to the') }}
           <a href="#" class="font-semibold text-primary hover:underline">{{ __('Terms of Service') }}</a>
@@ -103,7 +114,7 @@
 
       {{-- Submit: raw <button> (not x-primary-button) — needs stable id for initTermsCheckbox() --}}
       <button id="register-submit" type="submit" disabled
-              class="mt-2 inline-flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gradient-to-r from-primary to-primary-container py-4 font-headline text-base font-black tracking-tight text-on-primary opacity-40 shadow-none transition-all">
+              class="mt-2 inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg bg-gradient-to-r from-primary to-primary-container py-4 font-headline text-base font-black tracking-tight text-on-primary opacity-40 shadow-none transition-all">
         {{ __('Create Account') }}
       </button>
     </form>
