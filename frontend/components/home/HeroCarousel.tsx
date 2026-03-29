@@ -29,7 +29,7 @@ const slides: HeroSlideData[] = [
     genres: ["Action", "RPG"],
     ctaLink: "/games/nioh-3",
     image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/c65877619b70c51d6be030c20b5c37bcfaf2e248/ss_c65877619b70c51d6be030c20b5c37bcfaf2e248.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8c9333bf3f28194cb8113af455ecaf1aa45a0050/ss_8c9333bf3f28194cb8113af455ecaf1aa45a0050.1920x1080.jpg?t=1772090941",
     accentFrom: "#6b1010",
     accentTo: "#1a0505",
   },
@@ -164,7 +164,7 @@ export function HeroCarousel() {
 
   return (
     <section
-      className="relative h-[70vh] min-h-[480px] max-h-[720px] w-full overflow-hidden bg-background"
+      className="relative h-[70vh] w-full overflow-hidden bg-background"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onKeyDown={onKeyDown}
@@ -228,7 +228,7 @@ export function HeroCarousel() {
           </div>
 
           {/* Title */}
-          <h1 className="font-headline text-4xl font-bold leading-[1.1] tracking-tight text-on-surface sm:text-5xl lg:text-6xl">
+          <h1 className="font-headline text-4xl font-bold leading-[1.1] tracking-tight text-on-surface sm:text-5xl lg:text-6xl uppercase">
             {slide.title}
           </h1>
 

@@ -20,8 +20,6 @@ type CartState = {
 };
 
 const STORAGE_KEY = "condensation.cart.v1";
-const EVENT_NAME = "condensation:cart";
-
 const EMPTY_STATE: CartState = { items: [], updatedAt: 0 };
 
 let cachedRaw: string | null | undefined = undefined;
@@ -82,26 +80,33 @@ function writeState(next: CartState) {
   const raw = JSON.stringify(next);
   window.localStorage.setItem(STORAGE_KEY, raw);
   cachedState = next;
-  // Invalidate cachedRaw so subscribers detect the change via ensureCache()
-  cachedRaw = undefined;
-  window.dispatchEvent(new Event(EVENT_NAME));
+  cachedRaw = raw;
+  notifyListeners();
+}
+
+let listeners: Set<() => void> = new Set();
+
+function notifyListeners() {
+  for (const listener of listeners) {
+    listener();
+  }
 }
 
 export function subscribeCart(listener: () => void) {
   if (typeof window === "undefined") return () => {};
-  const handler = () => {
+  listeners.add(listener);
+
+  // Handle cross-tab changes via storage event
+  const storageHandler = () => {
     const before = cachedRaw;
     ensureCache();
-    const changed = before !== cachedRaw;
-
-    if (changed) listener();
+    if (before !== cachedRaw) listener();
   };
 
-  window.addEventListener(EVENT_NAME, handler);
-  window.addEventListener("storage", handler);
+  window.addEventListener("storage", storageHandler);
   return () => {
-    window.removeEventListener(EVENT_NAME, handler);
-    window.removeEventListener("storage", handler);
+    listeners.delete(listener);
+    window.removeEventListener("storage", storageHandler);
   };
 }
 
