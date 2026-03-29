@@ -29,7 +29,7 @@ const slides: HeroSlideData[] = [
     genres: ["Action", "RPG"],
     ctaLink: "/games/nioh-3",
     image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/c65877619b70c51d6be030c20b5c37bcfaf2e248/ss_c65877619b70c51d6be030c20b5c37bcfaf2e248.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8c9333bf3f28194cb8113af455ecaf1aa45a0050/ss_8c9333bf3f28194cb8113af455ecaf1aa45a0050.1920x1080.jpg?t=1772090941",
     accentFrom: "#6b1010",
     accentTo: "#1a0505",
   },
@@ -58,7 +58,7 @@ const slides: HeroSlideData[] = [
     ctaLink: "/games/grand-theft-auto-v-enhanced",
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3240220/8340fd391012e12be7e4c02e65801a2648a6b60e/ss_8340fd391012e12be7e4c02e65801a2648a6b60e.1920x1080.jpg?t=1765479644",
-    accentFrom: "#053615",
+    accentFrom: "#051a36",
     accentTo: "#051a0a",
   },
   {
@@ -84,7 +84,7 @@ const slides: HeroSlideData[] = [
     ctaLink: "/games/resident-evil-requiem",
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/08af4e9398b8e45152bfbedce3bc24d22e2c0990/ss_08af4e9398b8e45152bfbedce3bc24d22e2c0990.1920x1080.jpg?t=1772587704",
-    accentFrom: "#2a0a2a",
+    accentFrom: "#2a0a25",
     accentTo: "#0a0510",
   },
 ];
@@ -164,7 +164,7 @@ export function HeroCarousel() {
 
   return (
     <section
-      className="relative h-[70vh] min-h-[480px] max-h-[720px] w-full overflow-hidden bg-background"
+      className="relative h-[70vh] w-full overflow-hidden bg-background"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onKeyDown={onKeyDown}
@@ -228,7 +228,7 @@ export function HeroCarousel() {
           </div>
 
           {/* Title */}
-          <h1 className="font-headline text-4xl font-bold leading-[1.1] tracking-tight text-on-surface sm:text-5xl lg:text-6xl">
+          <h1 className="font-headline text-4xl font-bold leading-[1.1] tracking-tight text-on-surface sm:text-5xl lg:text-6xl uppercase">
             {slide.title}
           </h1>
 
@@ -293,42 +293,35 @@ export function HeroCarousel() {
         </svg>
       </button>
 
-      {/* Bottom navigation bar */}
-      <div className="absolute bottom-0 left-0 right-0 z-20">
-        <div className="mx-auto flex max-w-7xl items-stretch gap-0 px-6">
-          {slides.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => goto(i)}
-              aria-label={`Go to slide ${i + 1}: ${s.title}`}
-              aria-current={i === current ? "true" : undefined}
-              className={`group relative flex-1 cursor-pointer border-t-2 px-3 py-3 text-left transition-colors duration-200 ${i === current
-                ? "border-primary bg-white/5"
-                : "border-transparent hover:border-on-surface-variant/30 hover:bg-white/[0.02]"
+      {/* Dot navigation */}
+      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+        {slides.map((s, i) => (
+          <button
+            key={s.id}
+            onClick={() => goto(i)}
+            aria-label={`Go to slide ${i + 1}: ${s.title}`}
+            aria-current={i === current ? "true" : undefined}
+            className="group relative flex h-5 cursor-pointer items-center justify-center"
+          >
+            <div
+              className={`h-2 rounded-full transition-all duration-300 ${i === current
+                ? "w-16 bg-primary"
+                : "w-8 bg-white/30 group-hover:bg-white/50"
                 }`}
             >
-              {/* Progress indicator on active tab */}
+              {/* Progress fill on active dot */}
               {i === current && !reducedMotion && !paused && (
                 <div
-                  ref={i === current ? progressRef : undefined}
-                  className="absolute left-0 top-[-2px] h-[2px] bg-primary"
+                  ref={progressRef}
+                  className="h-full rounded-full bg-primary brightness-150"
                   style={{
                     animation: `hero-progress ${INTERVAL}ms linear forwards`,
                   }}
                 />
               )}
-
-              <span
-                className={`block truncate text-xs font-medium transition-colors duration-200 sm:text-sm ${i === current
-                  ? "text-on-surface"
-                  : "text-on-surface-variant/60 group-hover:text-on-surface-variant"
-                  }`}
-              >
-                {s.title}
-              </span>
-            </button>
-          ))}
-        </div>
+            </div>
+          </button>
+        ))}
       </div>
 
       {/* Progress bar animation keyframes */}
