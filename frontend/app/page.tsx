@@ -12,7 +12,6 @@ import { BudgetDeals } from "@/components/home/BudgetDeals";
 import { TrustBar } from "@/components/home/TrustBar";
 
 import {
-  getHeroSlides,
   getRecommendedGames,
   getBestsellerGames,
   getNewReleases,
@@ -27,14 +26,12 @@ export default async function Home() {
 
   // Retrieve our live dynamic dashboard data streams concurrently!
   const [
-    heroSlides,
     recommendedGames,
     bestsellerGames,
     newReleases,
     preOrders,
     dealTiers,
   ] = await Promise.all([
-    getHeroSlides(),
     getRecommendedGames(),
     getBestsellerGames(),
     getNewReleases(),
@@ -46,7 +43,7 @@ export default async function Home() {
     <>
       <Header isLoggedIn={isLoggedIn} userName={userName} />
       <main>
-        <HeroCarousel slides={heroSlides} />
+        <HeroCarousel />
         <PromoBanner />
         <GameCardGrid title="Recommended For You" games={recommendedGames} />
         <BestsellersSection games={bestsellerGames} />

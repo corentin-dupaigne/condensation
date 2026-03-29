@@ -47,12 +47,12 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
 
   return (
     <header className="sticky top-0 z-50 border-b border-outline-variant/20 bg-surface-container/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-6">
+      <div className="mx-auto flex h-16 items-center gap-6 px-6">
         <Link href="/" className="shrink-0 font-headline text-xl font-bold tracking-tight text-primary">
           CONDENSATION
         </Link>
 
-        <nav className="hidden items-center gap-5 md:flex">
+        <nav className="ml-10 hidden items-center gap-5 md:flex">
           {navLinks.map((link) => (
             <a
               key={link.label}
@@ -70,11 +70,10 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
             placeholder="Search games, DLC, gift cards..."
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
-            className={`w-full rounded-lg bg-surface-container-highest px-4 py-2 pl-10 text-sm text-on-surface placeholder:text-on-surface-variant/60 outline-none transition-all ${
-              searchFocused
-                ? "ring-1 ring-primary/40 shadow-[0_0_12px_rgba(161,250,255,0.1)]"
-                : ""
-            }`}
+            className={`w-full rounded-lg bg-surface-container-highest px-4 py-2 pl-10 text-sm text-on-surface placeholder:text-on-surface-variant/60 outline-none transition-all ${searchFocused
+              ? "ring-1 ring-primary/40 shadow-[0_0_12px_rgba(161,250,255,0.1)]"
+              : ""
+              }`}
           />
           <svg
             className="absolute top-1/2 left-3 -translate-y-1/2 text-on-surface-variant"
@@ -141,11 +140,10 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
                       <button
                         key={preset}
                         onClick={() => setAddAmount(String(preset))}
-                        className={`flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
-                          addAmount === String(preset)
-                            ? "bg-primary/20 text-primary"
-                            : "bg-surface-container-highest text-on-surface-variant hover:text-on-surface"
-                        }`}
+                        className={`flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${addAmount === String(preset)
+                          ? "bg-primary/20 text-primary"
+                          : "bg-surface-container-highest text-on-surface-variant hover:text-on-surface"
+                          }`}
                       >
                         ${preset}
                       </button>

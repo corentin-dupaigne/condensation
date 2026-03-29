@@ -19,7 +19,8 @@ export async function getAuthState(): Promise<{
       cache: "no-store",
     });
 
-    if (res.ok) {
+    const contentType = res.headers.get("content-type");
+    if (res.ok && contentType?.includes("application/json")) {
       const user = await res.json();
       return { isLoggedIn: true, userName: user.name ?? null };
     }

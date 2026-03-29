@@ -1,8 +1,95 @@
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
-import type { HeroSlide } from "@/lib/types";
-import { formatPrice } from "@/lib/format-price";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
+import Link from "next/link";
+
+/* ── Static slide data (Steam IDs: 3681010, 1245620, 3240220, 2399830, 3764200) ── */
+
+interface HeroSlideData {
+  id: string;
+  title: string;
+  subtitle: string;
+  price: number;
+  originalPrice?: number;
+  discountPercent?: number;
+  genres: string[];
+  ctaLink: string;
+  image: string;
+  accentFrom: string;
+  accentTo: string;
+}
+
+const slides: HeroSlideData[] = [
+  {
+    id: "3681010",
+    title: "Nioh 3",
+    subtitle:
+      "Use both Samurai and Ninja combat styles in the third dark samurai action RPG.",
+    price: 69.99,
+    genres: ["Action", "RPG"],
+    ctaLink: "/games/nioh-3",
+    image:
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/c65877619b70c51d6be030c20b5c37bcfaf2e248/ss_c65877619b70c51d6be030c20b5c37bcfaf2e248.1920x1080.jpg?t=1772090941",
+    accentFrom: "#6b1010",
+    accentTo: "#1a0505",
+  },
+  {
+    id: "1245620",
+    title: "ELDEN RING",
+    subtitle:
+      "Rise, Tarnished, and be guided by grace to brandish the power of the Elden Ring.",
+    price: 59.99,
+    genres: ["Action", "RPG"],
+    ctaLink: "/games/elden-ring",
+    image:
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_943bf6fe62352757d9070c1d33e50b92fe8539f1.1920x1080.jpg?t=1767883716",
+    accentFrom: "#744106",
+    accentTo: "#1a1205",
+  },
+  {
+    id: "3240220",
+    title: "Grand Theft Auto V Enhanced",
+    subtitle:
+      "Experience the blockbuster — now upgraded with stunning visuals for a new generation.",
+    price: 14.99,
+    originalPrice: 29.99,
+    discountPercent: 50,
+    genres: ["Action", "Adventure", "Racing"],
+    ctaLink: "/games/grand-theft-auto-v-enhanced",
+    image:
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3240220/8340fd391012e12be7e4c02e65801a2648a6b60e/ss_8340fd391012e12be7e4c02e65801a2648a6b60e.1920x1080.jpg?t=1765479644",
+    accentFrom: "#053615",
+    accentTo: "#051a0a",
+  },
+  {
+    id: "2399830",
+    title: "ARK: Survival Ascended",
+    subtitle:
+      "Reimagined from the ground-up with Unreal Engine 5. Form a tribe, tame & breed hundreds of dinosaurs.",
+    price: 44.99,
+    genres: ["Action", "Adventure", "Survival"],
+    ctaLink: "/games/ark-survival-ascended",
+    image:
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2399830/ss_65c0de5ced28281764990a299eb3926629b2863e.1920x1080.jpg?t=1766710980",
+    accentFrom: "#1a3a0a",
+    accentTo: "#0a1a05",
+  },
+  {
+    id: "3764200",
+    title: "Resident Evil Requiem",
+    subtitle:
+      "Requiem for the dead. Nightmare for the living. Prepare to escape death.",
+    price: 69.99,
+    genres: ["Action", "Adventure"],
+    ctaLink: "/games/resident-evil-requiem",
+    image:
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/08af4e9398b8e45152bfbedce3bc24d22e2c0990/ss_08af4e9398b8e45152bfbedce3bc24d22e2c0990.1920x1080.jpg?t=1772587704",
+    accentFrom: "#2a0a2a",
+    accentTo: "#0a0510",
+  },
+];
+
+/* ── Reduced motion hook ── */
 
 const motionQuery = "(prefers-reduced-motion: reduce)";
 
@@ -18,103 +105,239 @@ function useReducedMotion() {
   );
 }
 
-export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
+/* ── Format helpers ── */
+
+function formatPrice(price: number): string {
+  if (price === 0) return "Free";
+  return `$${price.toFixed(2)}`;
+}
+
+/* ── Auto-advance interval (ms) ── */
+const INTERVAL = 6000;
+
+/* ── Component ── */
+
+export function HeroCarousel() {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const reducedMotion = useReducedMotion();
+  const progressRef = useRef<HTMLDivElement>(null);
+
+  const goto = useCallback((index: number) => {
+    setCurrent(index);
+  }, []);
 
   const next = useCallback(() => {
     setCurrent((c) => (c + 1) % slides.length);
-  }, [slides.length]);
+  }, []);
 
+  const prev = useCallback(() => {
+    setCurrent((c) => (c - 1 + slides.length) % slides.length);
+  }, []);
+
+  /* Auto-advance */
   useEffect(() => {
     if (reducedMotion || paused) return;
-    const timer = setInterval(next, 6000);
+    const timer = setInterval(next, INTERVAL);
     return () => clearInterval(timer);
   }, [next, paused, reducedMotion]);
+
+  /* Progress bar animation reset */
+  useEffect(() => {
+    const el = progressRef.current;
+    if (!el || reducedMotion) return;
+    el.style.animation = "none";
+    void el.offsetWidth;
+    el.style.animation = "";
+  }, [current, reducedMotion]);
+
+  /* Keyboard navigation */
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+    },
+    [prev, next],
+  );
 
   const slide = slides[current];
 
   return (
     <section
-      className="relative overflow-hidden h-[60vh]"
+      className="relative h-[70vh] min-h-[480px] max-h-[720px] w-full overflow-hidden bg-background"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onKeyDown={onKeyDown}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Featured games"
     >
-      <div
-        className={`relative flex h-full items-center ${reducedMotion ? "" : "transition-colors duration-700"}`}
-        style={{
-          background: `linear-gradient(135deg, ${slide.gradientFrom} 0%, ${slide.gradientTo} 50%, #0c0e11 100%)`,
-        }}
-      >
-        <div className="absolute inset-0 bg-linear-to-r from-background/80 via-background/40 to-transparent" />
+      {/* Background slides with crossfade */}
+      {slides.map((s, i) => (
+        <div
+          key={s.id}
+          className={`absolute inset-0 ${reducedMotion ? "" : "transition-opacity duration-700 ease-out"}`}
+          style={{ opacity: i === current ? 1 : 0 }}
+          aria-hidden={i !== current}
+        >
+          {/* Background image */}
+          <img
+            src={s.image}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            loading={i === 0 ? "eager" : "lazy"}
+            draggable={false}
+          />
+          {/* Multi-layer gradient overlay for depth */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `
+                linear-gradient(to right, ${s.accentFrom}ee 0%, ${s.accentFrom}88 35%, transparent 70%),
+                linear-gradient(to top, #0c0e11 0%, #0c0e11aa 15%, transparent 50%),
+                linear-gradient(135deg, ${s.accentFrom}66 0%, transparent 60%)
+              `,
+            }}
+          />
+        </div>
+      ))}
 
-        <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-16">
-          <div className="max-w-xl space-y-6">
-            <div className="flex items-center gap-3">
-              <span className="rounded bg-secondary/20 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-secondary">
-                Featured
+      {/* Content overlay */}
+      <div className="relative z-10 mx-auto flex h-full max-w-7xl items-end px-6 pb-16 lg:items-center lg:pb-0">
+        <div
+          className={`max-w-xl space-y-5 ${reducedMotion ? "" : "transition-all duration-500 ease-out"}`}
+          role="group"
+          aria-roledescription="slide"
+          aria-label={`${current + 1} of ${slides.length}: ${slide.title}`}
+        >
+          {/* Genre tags */}
+          <div className="flex flex-wrap items-center gap-2">
+            {slide.genres.map((genre) => (
+              <span
+                key={genre}
+                className="rounded-md bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm"
+              >
+                {genre}
               </span>
-              <div className="flex gap-1.5 text-on-surface-variant">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="m8 21 4-4 4 4" /></svg>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" /></svg>
-              </div>
-            </div>
+            ))}
+            {slide.discountPercent && (
+              <span className="rounded-md bg-cta px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider text-white">
+                -{slide.discountPercent}%
+              </span>
+            )}
+          </div>
 
-            <h1 className="font-headline text-5xl font-bold leading-tight tracking-tight text-on-surface lg:text-6xl">
-              {slide.title}
-            </h1>
+          {/* Title */}
+          <h1 className="font-headline text-4xl font-bold leading-[1.1] tracking-tight text-on-surface sm:text-5xl lg:text-6xl">
+            {slide.title}
+          </h1>
 
-            <p className="text-lg leading-relaxed text-on-surface-variant">
-              {slide.subtitle}
-            </p>
+          {/* Subtitle */}
+          <p className="text-base leading-relaxed text-white/90 sm:text-lg">
+            {slide.subtitle}
+          </p>
 
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-on-surface-variant">Starting at</span>
+          {/* Price + CTA row */}
+          <div className="flex items-center gap-5 pt-1">
+            <Link
+              href={slide.ctaLink}
+              className="group relative inline-flex items-center gap-2.5 rounded-xl bg-cta px-7 py-3.5 font-headline text-md font-bold text-on-cta transition-all duration-200 ease-out hover:brightness-110 active:scale-[0.97] cursor-pointer"
+            >
+              BUY NOW
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`${reducedMotion ? "" : "transition-transform duration-200 group-hover:translate-x-0.5"}`}
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+
+            <div className="flex items-baseline gap-2.5">
+              {slide.originalPrice && (
+                <span className="text-sm font-medium text-on-surface-variant line-through">
+                  {formatPrice(slide.originalPrice)}
+                </span>
+              )}
               <span className="font-headline text-2xl font-bold text-on-surface">
                 {formatPrice(slide.price)}
               </span>
             </div>
-
-            <a
-              href={slide.ctaLink}
-              className="inline-block rounded-xl bg-cta px-8 py-3.5 font-headline text-sm font-bold text-on-cta transition-opacity hover:opacity-90"
-            >
-              {slide.ctaText}
-            </a>
-          </div>
-
-          <div className="hidden w-100 lg:block">
-            {slide.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={slide.image}
-                alt={slide.title}
-                width={400}
-                height={225}
-                className="aspect-video w-full rounded-2xl object-cover opacity-80"
-              />
-            ) : (
-              <div className="aspect-3/4 rounded-2xl bg-linear-to-br from-surface-container-highest via-surface-bright to-surface-container opacity-60" />
-            )}
           </div>
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            className={`h-1.5 rounded-full transition-all ${
-              i === current
-                ? "w-8 bg-primary"
-                : "w-4 bg-on-surface-variant/30 hover:bg-on-surface-variant/50"
-            }`}
-          />
-        ))}
+      {/* Navigation arrows (desktop) */}
+      <button
+        onClick={prev}
+        aria-label="Previous slide"
+        className="absolute left-4 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full bg-black/30 p-3 text-on-surface-variant backdrop-blur-sm transition-colors duration-200 hover:bg-black/50 hover:text-on-surface lg:flex cursor-pointer"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+      <button
+        onClick={next}
+        aria-label="Next slide"
+        className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full bg-black/30 p-3 text-on-surface-variant backdrop-blur-sm transition-colors duration-200 hover:bg-black/50 hover:text-on-surface lg:flex cursor-pointer"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </button>
+
+      {/* Bottom navigation bar */}
+      <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="mx-auto flex max-w-7xl items-stretch gap-0 px-6">
+          {slides.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => goto(i)}
+              aria-label={`Go to slide ${i + 1}: ${s.title}`}
+              aria-current={i === current ? "true" : undefined}
+              className={`group relative flex-1 cursor-pointer border-t-2 px-3 py-3 text-left transition-colors duration-200 ${i === current
+                ? "border-primary bg-white/5"
+                : "border-transparent hover:border-on-surface-variant/30 hover:bg-white/[0.02]"
+                }`}
+            >
+              {/* Progress indicator on active tab */}
+              {i === current && !reducedMotion && !paused && (
+                <div
+                  ref={i === current ? progressRef : undefined}
+                  className="absolute left-0 top-[-2px] h-[2px] bg-primary"
+                  style={{
+                    animation: `hero-progress ${INTERVAL}ms linear forwards`,
+                  }}
+                />
+              )}
+
+              <span
+                className={`block truncate text-xs font-medium transition-colors duration-200 sm:text-sm ${i === current
+                  ? "text-on-surface"
+                  : "text-on-surface-variant/60 group-hover:text-on-surface-variant"
+                  }`}
+              >
+                {s.title}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
+
+      {/* Progress bar animation keyframes */}
+      <style>{`
+        @keyframes hero-progress {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+      `}</style>
     </section>
   );
 }
