@@ -1,16 +1,15 @@
 package fr.fullstack.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "game_companies")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class GameCompany {
 
     @EmbeddedId
@@ -26,7 +25,6 @@ public class GameCompany {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    public String getRole() {
-        return id != null ? id.getRole() : null;
-    }
+    @Column(name = "role", insertable = false, updatable = false)
+    private String role;
 }

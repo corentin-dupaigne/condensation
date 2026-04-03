@@ -6,15 +6,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "companies")
+@Table(name = "balance")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Company {
+public class Balance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 300, unique = true, nullable = false)
-    private String name;
+    @Column(name = "user_id", unique = true, nullable = false)
+    private Integer userId;
+
+    @Column(nullable = false)
+    private Integer balance = 0;
 }

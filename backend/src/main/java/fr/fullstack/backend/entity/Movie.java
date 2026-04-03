@@ -1,17 +1,16 @@
 package fr.fullstack.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "movies")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Movie {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,9 +37,7 @@ public class Movie {
     @Column(name = "hls_h264", columnDefinition = "TEXT")
     private String hlsH264;
 
-    @Column(columnDefinition = "boolean default false")
-    private Boolean highlight;
+    private Boolean highlight = false;
 
-    @Column(columnDefinition = "smallint default 0")
-    private Short position;
+    private Short position = 0;
 }
