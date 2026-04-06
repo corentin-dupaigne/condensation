@@ -11,7 +11,6 @@ import {
   fetchFeaturedData,
   rawToGame,
   centsToPrice,
-  slugify,
 } from "./steam-api";
 
 /* ── Hero Slides ── */
@@ -31,7 +30,7 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
     title: item.name,
     subtitle: `Save ${item.discount_percent}% on ${item.name}. Limited time offer — grab your key before the deal expires!`,
     ctaText: "Buy Now",
-    ctaLink: `/games/${slugify(item.name)}`,
+    ctaLink: `/games/${item.id}`,
     price: centsToPrice(item.final_price),
     gradientFrom: heroGradients[i % heroGradients.length].from,
     gradientTo: heroGradients[i % heroGradients.length].to,
@@ -134,29 +133,6 @@ export async function getCatalogGames(): Promise<Game[]> {
       return true;
     })
     .map(rawToGame);
-}
-
-/* ── Game by slug ── */
-
-export async function getGameBySlug(
-  slug: string
-): Promise<{ game: Game; steamAppId: number } | undefined> {
-  const rawData = await fetchFeaturedData();
-  const all = [
-    ...rawData.specials.items,
-    ...rawData.top_sellers.items,
-    ...rawData.new_releases.items,
-    ...rawData.coming_soon.items,
-  ];
-  const seen = new Set<number>();
-  const unique = all.filter((it) => {
-    if (seen.has(it.id)) return false;
-    seen.add(it.id);
-    return true;
-  });
-  const found = unique.find((it) => slugify(it.name) === slug);
-  if (!found) return undefined;
-  return { game: rawToGame(found, 0), steamAppId: found.id };
 }
 
 /* ── Related games ── */
