@@ -70,84 +70,9 @@ export interface SteamCategory {
   description: string;
 }
 
-export interface SteamGenre {
-  id: string;
-  description: string;
-}
-
-export interface SteamScreenshot {
-  id: number;
-  path_thumbnail: string;
-  path_full: string;
-}
-
-export interface SteamPlatforms {
-  windows: boolean;
-  mac: boolean;
-  linux: boolean;
-}
-
-export interface SteamPriceOverview {
-  currency: string;
-  initial: number;
-  final: number;
-  discount_percent: number;
-  initial_formatted?: string;
-  final_formatted?: string;
-}
-
 export interface SteamRequirements {
   minimum?: string;
   recommended?: string;
-}
-
-export interface SteamMovie {
-  id: number;
-  name: string;
-  thumbnail: string;
-  dash_av1?: string;
-  dash_h264?: string;
-  hls_h264?: string;
-  highlight: boolean;
-}
-
-export interface GameDetail extends Omit<Game, "genres" | "platforms"> {
-  detailed_description: string;
-  about_the_game: string;
-  supported_languages: string;
-  developers: string[];
-  publishers: string[];
-  categories: SteamCategory[];
-  genres: SteamGenre[];
-  platforms: SteamPlatforms;
-  price_overview: SteamPriceOverview;
-  screenshots: SteamScreenshot[];
-  movies?: SteamMovie[];
-  pc_requirements: SteamRequirements;
-  mac_requirements?: SteamRequirements;
-  linux_requirements?: SteamRequirements;
-  recommendations_total?: number;
-  metacritic_score?: number;
-  required_age?: string | number;
-}
-
-export interface DeluxePerk {
-  icon: string;
-  title: string;
-  description: string;
-}
-
-export interface DLCItem {
-  id: string;
-  title: string;
-  price: number;
-}
-
-export interface Achievement {
-  id: string;
-  title: string;
-  icon: string;
-  unlocked: boolean;
 }
 
 export type RelatedGame = Game & { genreBadge: string };
@@ -207,4 +132,3 @@ export interface BackendGameDetail {
   movies: BackendMovie[];
   updatedAt: string;
 }
-

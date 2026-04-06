@@ -1,9 +1,9 @@
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ appid: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { appid } = await params;
-  const res = await fetch(`http://localhost:8080/api/games/${appid}`);
+  const { id } = await params;
+  const res = await fetch(`http://localhost:8080/api/games/${id}`);
   if (!res.ok) {
     return Response.json({ error: "Not found" }, { status: 404 });
   }
