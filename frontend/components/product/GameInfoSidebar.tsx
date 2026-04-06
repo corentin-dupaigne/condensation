@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { GameDetail } from "@/lib/types";
+import type { BackendGameDetail } from "@/lib/types";
 
-export function GameInfoSidebar({ game }: { game: GameDetail }) {
+export function GameInfoSidebar({ game }: { game: BackendGameDetail }) {
   const [reqTab, setReqTab] = useState<"minimum" | "recommended">("minimum");
-  const reqs = game.pc_requirements[reqTab] || "No requirements provided.";
-  const languageRows = game.supported_languages
+  const reqs = game.pcRequirements[reqTab] || "No requirements provided.";
+  const languageRows = game.supportedLanguages
     .split(/,|<br>/)
     .map((entry) => entry.trim())
     .filter((entry) => entry && !entry.toLowerCase().includes("languages with full audio"))
