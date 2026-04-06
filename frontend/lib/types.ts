@@ -110,6 +110,7 @@ export interface BackendGameDetail {
   name: string;
   slug: string;
   headerImage: string;
+  platforms: { windows: boolean; mac: boolean; linux: boolean };
   priceFinal: number;
   reductionPercentage: number;
   recommendationsTotal: number;

@@ -1,5 +1,132 @@
 import type { BackendGameDetail, Game, Platform } from "./types";
 
+/* ── Raw Steam featured API types ── */
+
+export interface RawItem {
+  id: number;
+  name: string;
+  discounted: boolean;
+  discount_percent: number;
+  original_price: number | null;
+  final_price: number;
+  currency: string;
+  large_capsule_image: string;
+  small_capsule_image: string;
+  header_image: string;
+  windows_available: boolean;
+  mac_available: boolean;
+  linux_available: boolean;
+  controller_support?: string;
+  discount_expiration?: number;
+}
+
+export interface RawFeaturedData {
+  specials: { items: RawItem[] };
+  top_sellers: { items: RawItem[] };
+  new_releases: { items: RawItem[] };
+  coming_soon: { items: RawItem[] };
+}
+
+interface BackendGenre {
+  id: number;
+  description: string;
+}
+
+interface GameSummary {
+  id: number;
+  steamAppId: number;
+  name: string;
+  slug: string;
+  headerImage: string;
+  priceFinal: number;
+  reductionPercentage: number;
+  recommendationsTotal: number;
+  releaseDate: string;
+  genres: BackendGenre[];
+}
+
+interface BackendPage {
+  content: GameSummary[];
+  totalElements: number;
+  totalPages: number;
+}
+
+interface BackendLowDeals {
+  under_5: BackendPage;
+  under_10: BackendPage;
+  under_20: BackendPage;
+}
+
+interface BackendFeatureResponse {
+  topseller: BackendPage;
+  new_release: BackendPage;
+  low_deals: BackendLowDeals;
+  upcoming: BackendPage;
+}
+
+function gameSummaryToRawItem(game: GameSummary): RawItem {
+  const discounted = game.reductionPercentage > 0;
+  const finalCents = game.priceFinal;
+  const originalCents = discounted
+    ? Math.round(finalCents / (1 - game.reductionPercentage / 100))
+    : finalCents;
+
+  return {
+    id: game.steamAppId,
+    name: game.name,
+    discounted,
+    discount_percent: game.reductionPercentage,
+    original_price: discounted ? originalCents : null,
+    final_price: finalCents,
+    currency: "USD",
+    large_capsule_image: game.headerImage,
+    small_capsule_image: game.headerImage,
+    header_image: game.headerImage,
+    windows_available: true,
+    mac_available: false,
+    linux_available: false,
+  };
+}
+
+function backendPageToItems(page: BackendPage): RawItem[] {
+  return page.content.map(gameSummaryToRawItem);
+}
+
+function backendToRawFeaturedData(data: BackendFeatureResponse): RawFeaturedData {
+  const dealItems = [
+    ...data.low_deals.under_5.content,
+    ...data.low_deals.under_10.content,
+    ...data.low_deals.under_20.content,
+  ];
+  const seen = new Set<number>();
+  const uniqueDealItems = dealItems.filter((g) => {
+    if (seen.has(g.steamAppId)) return false;
+    seen.add(g.steamAppId);
+    return true;
+  });
+
+  return {
+    specials: { items: uniqueDealItems.map(gameSummaryToRawItem) },
+    top_sellers: { items: backendPageToItems(data.topseller) },
+    new_releases: { items: backendPageToItems(data.new_release) },
+    coming_soon: { items: backendPageToItems(data.upcoming) },
+  };
+}
+
+let cachedFeaturedData: RawFeaturedData | null = null;
+
+export async function fetchFeaturedData(): Promise<RawFeaturedData> {
+  if (cachedFeaturedData) return cachedFeaturedData;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/steam/featured`, {
+    next: { revalidate: 3600 },
+  });
+  if (!res.ok) throw new Error(`Failed to fetch featured data: ${res.status}`);
+  const data: BackendFeatureResponse = await res.json();
+  cachedFeaturedData = backendToRawFeaturedData(data);
+  return cachedFeaturedData;
+}
+
 /* ── Helpers ── */
 
 export function centsToPrice(cents: number | null): number {

@@ -149,8 +149,10 @@ export function addToCart(item: Omit<CartItem, "qty">, qty = 1) {
 }
 
 export function cartItemFromGame(game: Game | BackendGameDetail): Omit<CartItem, "qty"> {
-  const platforms = normalizePlatforms("platforms" in game ? game.platforms : []);
   const isBackend = "priceFinal" in game;
+  const platforms = isBackend
+    ? normalizePlatforms(game.platforms)
+    : (game.platforms as Platform[]);
   return {
     id: isBackend ? String(game.id) : game.slug,
     title: isBackend ? game.name : game.title,
@@ -164,8 +166,12 @@ export function cartItemFromGame(game: Game | BackendGameDetail): Omit<CartItem,
   };
 }
 
-function normalizePlatforms(platforms: Platform[]): Platform[] {
-  return platforms;
+function normalizePlatforms(p: { windows: boolean; mac: boolean; linux: boolean }): Platform[] {
+  const out: Platform[] = [];
+  if (p.windows) out.push("windows");
+  if (p.mac) out.push("mac");
+  if (p.linux) out.push("linux");
+  return out;
 }
 
 export function getCartCount(state: CartState): number {

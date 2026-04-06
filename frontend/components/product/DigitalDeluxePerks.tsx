@@ -1,5 +1,10 @@
 import React from "react";
-import type { DeluxePerk } from "@/lib/types";
+
+interface DeluxePerk {
+  title: string;
+  description: string;
+  icon: string;
+}
 
 const iconMap: Record<string, React.ReactNode> = {
   confirmation_number: (
