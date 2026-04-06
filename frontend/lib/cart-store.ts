@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { Game, GameDetail, Platform, SteamPlatforms } from "@/lib/types";
+import type { Game, BackendGameDetail, Platform } from "@/lib/types";
 
 export type CartItem = {
   id: string;
@@ -148,28 +148,24 @@ export function addToCart(item: Omit<CartItem, "qty">, qty = 1) {
   writeState({ items: nextItems, updatedAt: now() });
 }
 
-export function cartItemFromGame(game: Game | GameDetail): Omit<CartItem, "qty"> {
-  const platforms = normalizePlatforms(game.platforms);
+export function cartItemFromGame(game: Game | BackendGameDetail): Omit<CartItem, "qty"> {
+  const platforms = normalizePlatforms("platforms" in game ? game.platforms : []);
+  const isBackend = "priceFinal" in game;
   return {
-    id: game.slug,
-    title: game.title,
-    image: game.image ?? (("headerImage" in game ? game.headerImage : undefined) as
-      | string
-      | undefined) ?? null,
+    id: isBackend ? String(game.id) : game.slug,
+    title: isBackend ? game.name : game.title,
+    image: game.headerImage ?? null,
     platforms,
-    price: game.price,
-    originalPrice: game.originalPrice ?? null,
-    discountPercent: game.discountPercent ?? null,
+    price: isBackend ? game.priceFinal / 100 : game.price,
+    originalPrice: isBackend
+      ? game.priceInitial > 0 ? game.priceInitial / 100 : null
+      : game.originalPrice ?? null,
+    discountPercent: isBackend ? game.reductionPercentage : game.discountPercent ?? null,
   };
 }
 
-function normalizePlatforms(platforms: Platform[] | SteamPlatforms): Platform[] {
-  if (Array.isArray(platforms)) return platforms;
-  const list: Platform[] = [];
-  if (platforms.windows) list.push("windows");
-  if (platforms.mac) list.push("mac");
-  if (platforms.linux) list.push("linux");
-  return list;
+function normalizePlatforms(platforms: Platform[]): Platform[] {
+  return platforms;
 }
 
 export function getCartCount(state: CartState): number {
