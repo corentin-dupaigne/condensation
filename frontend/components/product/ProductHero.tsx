@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createPlayer, videoFeatures } from "@videojs/react";
 import { VideoSkin, Video } from "@videojs/react/video";
 import "@videojs/react/video/skin.css";
-import type { GameDetail } from "@/lib/types";
+import type { BackendGameDetail } from "@/lib/types";
 import { formatPrice } from "@/lib/format-price";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSteam } from "@fortawesome/free-brands-svg-icons";
@@ -14,7 +14,7 @@ type MediaItem =
   | { kind: "movie"; id: number; name: string; thumbnail: string; hls: string }
   | { kind: "screenshot"; id: number; thumbnail: string; full: string };
 
-function ProductAddToCartButton({ game }: { game: GameDetail }) {
+function ProductAddToCartButton({ game }: { game: BackendGameDetail }) {
   const [justAdded, setJustAdded] = useState(false);
 
   return (
@@ -47,7 +47,7 @@ function ProductAddToCartButton({ game }: { game: GameDetail }) {
 
       {justAdded && (
         <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 animate-fade-in whitespace-nowrap rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface shadow-lg border border-outline-variant/20">
-          {game.title} has been added to the cart
+          {game.name} has been added to the cart
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-surface-container-high" />
         </div>
       )}
@@ -67,20 +67,20 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
   );
 }
 
-export function ProductHero({ game }: { game: GameDetail }) {
+export function ProductHero({ game }: { game: BackendGameDetail }) {
   const media: MediaItem[] = [
     ...(game.movies ?? []).slice(0, 2).map((m) => ({
       kind: "movie" as const,
       id: m.id,
       name: m.name,
       thumbnail: m.thumbnail,
-      hls: m.hls_h264 ?? "",
+      hls: m.hlsH264 ?? "",
     })),
     ...game.screenshots.slice(0, 8).map((s) => ({
       kind: "screenshot" as const,
       id: s.id,
-      thumbnail: s.path_thumbnail,
-      full: s.path_full,
+      thumbnail: s.pathThumbnail,
+      full: s.pathFull,
     })),
   ];
 
@@ -90,9 +90,9 @@ export function ProductHero({ game }: { game: GameDetail }) {
   );
   const active = media[activeIndex];
 
-  const finalPrice = (game.price_overview.final ?? 0) / 100;
-  const initialPrice = (game.price_overview.initial ?? 0) / 100;
-  const ageText = String(game.required_age || "E");
+  const finalPrice = game.priceFinal / 100;
+  const initialPrice = game.priceInitial / 100;
+  const ageText = String(game.requiredAge || "E");
   const genreText =
     game.genres.length > 0
       ? game.genres.map((genre) => genre.description).join(" · ")
@@ -114,9 +114,9 @@ export function ProductHero({ game }: { game: GameDetail }) {
                   src={
                     active?.kind === "screenshot"
                       ? active.full
-                      : (game.image ?? "")
+                      : (game.headerImage ?? "")
                   }
-                  alt={game.title}
+                  alt={game.name}
                   className="h-full w-full object-cover"
                 />
               </>
@@ -140,7 +140,7 @@ export function ProductHero({ game }: { game: GameDetail }) {
                   alt={
                     item.kind === "movie"
                       ? item.name
-                      : `${game.title} screenshot ${i + 1}`
+                      : `${game.name} screenshot ${i + 1}`
                   }
                   className="h-full w-full object-cover"
                 />
@@ -168,7 +168,7 @@ export function ProductHero({ game }: { game: GameDetail }) {
           <div>
             <div className="flex justify-between items-start mb-2">
               <h1 className="font-headline text-4xl md:text-5xl font-extrabold uppercase leading-tight tracking-tighter text-on-surface">
-                {game.title}
+                {game.name}
               </h1>
               <span className="shrink-0 rounded bg-surface-container-highest px-3 py-1 text-xs font-black uppercase">
                 {ageText}
@@ -297,7 +297,7 @@ export function ProductHero({ game }: { game: GameDetail }) {
           <div className="flex gap-4 items-center justify-center pt-4">
             <div className="flex flex-col items-center">
               <span className="text-2xl font-headline font-black text-tertiary">
-                {game.metacritic_score ?? 0}
+                {game.metacriticScore ?? 0}
               </span>
               <span className="text-[8px] uppercase tracking-widest text-on-surface-variant">
                 Metascore
@@ -308,7 +308,7 @@ export function ProductHero({ game }: { game: GameDetail }) {
               <span className="text-2xl font-headline font-black text-primary">
                 {Math.min(
                   99,
-                  Math.round((game.recommendations_total ?? 0) / 250),
+                  Math.round((game.recommendationsTotal ?? 0) / 250),
                 )}
                 %
               </span>
