@@ -26,12 +26,13 @@ export function GameInfoSidebar({ game }: { game: BackendGameDetail }) {
           </p>
           <div className="flex flex-wrap gap-2">
             {game.genres.map((genre) => (
-              <span
+              <a
                 key={genre.id}
                 className="rounded-full bg-surface-container-highest px-3 py-1 text-xs font-medium text-on-surface-variant"
+                href={`/games?genre=${genre.id}`}
               >
                 {genre.description}
-              </span>
+              </a>
             ))}
           </div>
         </div>

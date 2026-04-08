@@ -196,54 +196,33 @@ export async function fetchSteamAppDetails(
   return res.json();
 }
 
-/* ── Steam store search ── */
+/* ── Backend games search ── */
+
+export interface SearchGamesParams {
+  search?: string;
+  page?: number;
+  size?: number;
+  genreId?: number;
+}
 
 export async function searchSteamGames(
-  term: string
-): Promise<{ total: number; games: Game[] }> {
+  params: SearchGamesParams
+): Promise<{ total: number; totalPages: number; games: Game[] }> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(
-    `${baseUrl}/api/steam/search?q=${encodeURIComponent(term)}`,
-    { cache: "no-store" }
-  );
+  const url = new URL(`${baseUrl}/api/steam/games`);
 
-  if (!res.ok) return { total: 0, games: [] };
+  if (params.search) url.searchParams.set("search", params.search);
+  if (params.page != null) url.searchParams.set("page", String(params.page));
+  if (params.size != null) url.searchParams.set("size", String(params.size));
+  if (params.genreId != null) url.searchParams.set("genreId", String(params.genreId));
 
-  const data: { total: number; items: Array<{ type: string; name: string; id: number; price?: { currency: string; initial: number; final: number }; tiny_image: string; metascore?: string; platforms: { windows: boolean; mac: boolean; linux: boolean } }> } = await res.json();
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) return { total: 0, totalPages: 0, games: [] };
+
+  const data: BackendPage = await res.json();
   return {
-    total: data.total ?? 0,
-    games: (data.items ?? [])
-      .filter((item) => item.type === "app")
-      .map((item) => {
-        const finalCents = item.price?.final ?? 0;
-        const initialCents = item.price?.initial ?? 0;
-        const price = centsToPrice(finalCents);
-        const originalPrice =
-          initialCents !== finalCents ? centsToPrice(initialCents) : undefined;
-        const discountPercent =
-          originalPrice != null && initialCents > 0
-            ? Math.round(((initialCents - finalCents) / initialCents) * 100)
-            : undefined;
-
-        const platforms: Platform[] = [];
-        if (item.platforms.windows) platforms.push("windows");
-        if (item.platforms.mac) platforms.push("mac");
-        if (item.platforms.linux) platforms.push("linux");
-
-        return {
-          id: String(item.id),
-          title: item.name,
-          slug: item.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, ""),
-          platforms,
-          genres: [],
-          price,
-          originalPrice,
-          discountPercent,
-          badges: (discountPercent ? ["discount"] : []) as Game["badges"],
-        };
-      }),
+    total: data.totalElements ?? 0,
+    totalPages: data.totalPages ?? 0,
+    games: (data.content ?? []).map((game) => rawToGame(gameSummaryToRawItem(game), 0)),
   };
 }

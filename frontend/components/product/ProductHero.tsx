@@ -229,7 +229,7 @@ export function ProductHero({ game }: { game: BackendGameDetail }) {
                       Steam key
                     </span>
                     <span className="w-fit font-extrabold text-xs px-3 py-2 rounded-2xl border-amber-300 border-2 text-amber-300">
-                      -15%</span>
+                      {game.reductionPercentage}%</span>
                   </div>
                   <div className="flex flex-col items-end h-full">
                     <span className="text-xl font-headline font-black text-secondary">

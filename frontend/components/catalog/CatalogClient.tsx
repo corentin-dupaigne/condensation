@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import type { Game, Platform, CatalogFilters, SortOption, ViewMode } from "@/lib/types";
 import { FilterSidebar } from "./FilterSidebar";
 import { ActiveFilterBar } from "./ActiveFilterBar";
@@ -14,6 +15,8 @@ interface CatalogClientProps {
   games: Game[];
   platforms: { value: Platform; label: string }[];
   genres: string[];
+  activeGenreId?: number;
+  activeGenreLabel?: string;
 }
 
 const DEFAULT_FILTERS: CatalogFilters = {
@@ -23,7 +26,8 @@ const DEFAULT_FILTERS: CatalogFilters = {
   priceMax: 100,
 };
 
-export function CatalogClient({ games, platforms, genres }: CatalogClientProps) {
+export function CatalogClient({ games, platforms, genres, activeGenreId, activeGenreLabel }: CatalogClientProps) {
+  const router = useRouter();
   const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortOption>("bestselling");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -121,6 +125,30 @@ export function CatalogClient({ games, platforms, genres }: CatalogClientProps) 
   return (
     <section className="bg-surface">
       <div className="mx-auto max-w-7xl px-6 py-8">
+        {/* Active genre pill from URL param */}
+        {activeGenreLabel && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+              Filtered by
+            </span>
+            <span className="flex items-center gap-1.5 rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary ring-1 ring-inset ring-secondary/30">
+              {activeGenreLabel}
+              <button
+                onClick={() => router.push("/games")}
+                aria-label="Remove genre filter"
+                className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-secondary/20 transition-colors"
+              >
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+            <span className="text-xs text-on-surface-variant">
+              {games.length} result{games.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
+
         <div className="mb-6">
           <ActiveFilterBar
             filters={filters}

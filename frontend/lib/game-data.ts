@@ -1,5 +1,4 @@
 import type {
-  HeroSlide,
   Game,
   BestsellerGame,
   DealTier,
@@ -13,6 +12,83 @@ import {
   centsToPrice,
 } from "./steam-api";
 
+/* ── Catalog by genre (server-side, calls backend directly) ── */
+
+interface BackendGenre {
+  id: number;
+  description: string;
+}
+
+interface GameSummary {
+  id: number;
+  steamAppId: number;
+  name: string;
+  slug: string;
+  headerImage: string;
+  priceFinal: number;
+  reductionPercentage: number;
+  recommendationsTotal: number;
+  releaseDate: string;
+  genres: BackendGenre[];
+}
+
+interface BackendPage {
+  content: GameSummary[];
+  totalElements: number;
+  totalPages: number;
+}
+
+function gameSummaryToGame(game: GameSummary, index: number): Game {
+  const discounted = game.reductionPercentage > 0;
+  const finalCents = game.priceFinal;
+  const originalCents = discounted
+    ? Math.round(finalCents / (1 - game.reductionPercentage / 100))
+    : finalCents;
+
+  const base = rawToGame(
+    {
+      id: game.steamAppId,
+      backendId: game.id,
+      name: game.name,
+      discounted,
+      discount_percent: game.reductionPercentage,
+      original_price: discounted ? originalCents : null,
+      final_price: finalCents,
+      large_capsule_image: game.headerImage,
+      header_image: game.headerImage,
+      windows_available: true,
+      mac_available: false,
+      linux_available: false,
+    },
+    index
+  );
+
+  return { ...base, genres: game.genres.map((g) => g.description) };
+}
+
+export async function getCatalogGamesByGenre(
+  genreId: number,
+  size = 100
+): Promise<{ games: Game[]; genreLabel: string | null }> {
+  const url = new URL("http://localhost:8080/api/games");
+  url.searchParams.set("genreId", String(genreId));
+  url.searchParams.set("size", String(size));
+
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) return { games: [], genreLabel: null };
+
+  const data: BackendPage = await res.json();
+  const games = data.content.map(gameSummaryToGame);
+
+  // Derive label from the first game that has the genre
+  const genreLabel =
+    data.content
+      .flatMap((g) => g.genres)
+      .find((g) => g.id === genreId)?.description ?? null;
+
+  return { games, genreLabel };
+}
+
 /* ── Hero Slides ── */
 
 const heroGradients = [
@@ -22,21 +98,6 @@ const heroGradients = [
   { from: "#0a1628", to: "#162844" },
   { from: "#1a0000", to: "#330011" },
 ];
-
-export async function getHeroSlides(): Promise<HeroSlide[]> {
-  const rawData = await fetchFeaturedData();
-  return rawData.specials.items.slice(0, 5).map((item, i) => ({
-    id: String(item.id),
-    title: item.name,
-    subtitle: `Save ${item.discount_percent}% on ${item.name}. Limited time offer — grab your key before the deal expires!`,
-    ctaText: "Buy Now",
-    ctaLink: `/games/${item.id}`,
-    price: centsToPrice(item.final_price),
-    gradientFrom: heroGradients[i % heroGradients.length].from,
-    gradientTo: heroGradients[i % heroGradients.length].to,
-    image: item.header_image,
-  }));
-}
 
 /* ── Recommended games ── */
 
@@ -50,10 +111,10 @@ export async function getRecommendedGames(): Promise<Game[]> {
 export async function getBestsellerGames(): Promise<BestsellerGame[]> {
   const rawData = await fetchFeaturedData();
   return rawData.top_sellers.items
-    .slice(0, 10)
+    .slice(0, 20)
     .map((item, i) => ({ ...rawToGame(item, i), rank: i + 1 }))
     .filter((game) => game.price < 150)
-    .slice(0, 5);
+    .slice(0, 10);
 }
 
 /* ── New Releases ── */
@@ -117,22 +178,17 @@ export async function getDealTiers(): Promise<DealTier[]> {
 
 /* ── Catalog ── */
 
-export async function getCatalogGames(): Promise<Game[]> {
-  const rawData = await fetchFeaturedData();
-  const all = [
-    ...rawData.specials.items,
-    ...rawData.top_sellers.items,
-    ...rawData.new_releases.items,
-    ...rawData.coming_soon.items,
-  ];
-  const seen = new Set<number>();
-  return all
-    .filter((it) => {
-      if (seen.has(it.id)) return false;
-      seen.add(it.id);
-      return true;
-    })
-    .map(rawToGame);
+export async function getCatalogGames(
+  size = 100
+): Promise<{ games: Game[]; genreLabel: null }> {
+  const url = new URL("http://localhost:8080/api/games");
+  url.searchParams.set("size", String(size));
+
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) return { games: [], genreLabel: null };
+
+  const data: BackendPage = await res.json();
+  return { games: data.content.map(gameSummaryToGame), genreLabel: null };
 }
 
 /* ── Related games ── */
@@ -144,20 +200,6 @@ export async function getRelatedGames(): Promise<RelatedGame[]> {
     genreBadge: ["RPG", "ACTION", "SHOOTER", "ADVENTURE"][i % 4],
   }));
 }
-
-/* ── Static UI constants ── */
-
-export const genres = [
-  "All Genres",
-  "Action",
-  "RPG",
-  "Strategy",
-  "Indie",
-  "Simulation",
-  "Racing",
-  "VR Only",
-  "Free to Play",
-];
 
 export const allPlatforms: { value: Platform; label: string }[] = [
   { value: "windows", label: "Windows" },

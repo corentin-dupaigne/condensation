@@ -9,14 +9,28 @@ import { searchSteamGames } from "@/lib/steam-api";
 import { popularSearches } from "@/lib/game-data";
 import { getAuthState } from "@/lib/auth";
 
-type Props = { searchParams: Promise<{ q?: string }> };
+type Props = {
+  searchParams: Promise<{
+    q?: string;
+    page?: string;
+    size?: string;
+    genreId?: string;
+  }>;
+};
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const { q, page, size, genreId } = await searchParams;
   const query = q?.trim() ?? "";
 
   const [searchResult, { isLoggedIn, userName }] = await Promise.all([
-    query ? searchSteamGames(query) : Promise.resolve({ total: 0, games: [] }),
+    query
+      ? searchSteamGames({
+          search: query,
+          page: page != null ? Number(page) : undefined,
+          size: size != null ? Number(size) : undefined,
+          genreId: genreId != null ? Number(genreId) : undefined,
+        })
+      : Promise.resolve({ total: 0, totalPages: 0, games: [] }),
     getAuthState(),
   ]);
   const { total, games } = searchResult;

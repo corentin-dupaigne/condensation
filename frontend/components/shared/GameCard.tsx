@@ -1,7 +1,6 @@
 import type { Game } from "@/lib/types";
 import { formatPrice } from "@/lib/format-price";
 import { Badge } from "./Badge";
-import { PlatformBadge } from "./PlatformBadge";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 
 export function GameCard({
@@ -13,7 +12,6 @@ export function GameCard({
 }) {
   const hasDiscount =
     game.discountPercent != null && game.discountPercent > 0;
-
   return (
     <a
       href={`/games/${game.id}`}
@@ -42,9 +40,14 @@ export function GameCard({
         {game.title}
       </h3>
 
-      <div className="flex items-center gap-1.5">
-        {game.platforms.map((p) => (
-          <PlatformBadge key={p} platform={p} />
+      <div className="flex items-center gap-1.5 overflow-hidden">
+        {game.genres.slice(0, 2).map((g) => (
+          <span
+            key={g}
+            className="truncate rounded bg-surface-container-highest px-1.5 py-0.5 text-xs text-on-surface-variant"
+          >
+            {g}
+          </span>
         ))}
       </div>
 

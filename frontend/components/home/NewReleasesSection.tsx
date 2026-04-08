@@ -20,7 +20,7 @@ export function NewReleasesSection({ games }: { games: Game[] }) {
           {games.map((game) => (
             <a
               key={game.id}
-              href="#"
+              href={`/games/${game.id}`}
               className="group flex gap-4 rounded-xl bg-surface-container-high p-4 transition-colors hover:bg-surface-bright"
             >
               <div className="h-24 w-20 shrink-0 overflow-hidden rounded-lg">
