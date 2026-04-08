@@ -70,7 +70,8 @@ export async function getCatalogGamesByGenre(
   genreId: number,
   size = 100
 ): Promise<{ games: Game[]; genreLabel: string | null }> {
-  const url = new URL("http://localhost:8080/api/games");
+  const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8080";
+  const url = new URL(`${backendUrl}/api/games`);
   url.searchParams.set("genreId", String(genreId));
   url.searchParams.set("size", String(size));
 
@@ -181,7 +182,8 @@ export async function getDealTiers(): Promise<DealTier[]> {
 export async function getCatalogGames(
   size = 100
 ): Promise<{ games: Game[]; genreLabel: null }> {
-  const url = new URL("http://localhost:8080/api/games");
+  const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8080";
+  const url = new URL(`${backendUrl}/api/games`);
   url.searchParams.set("size", String(size));
 
   const res = await fetch(url.toString(), { cache: "no-store" });

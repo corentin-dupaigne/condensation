@@ -166,12 +166,13 @@ export function cartItemFromGame(game: Game | BackendGameDetail): Omit<CartItem,
   };
 }
 
-function normalizePlatforms(p: { windows: boolean; mac: boolean; linux: boolean }): Platform[] {
+function normalizePlatforms(p?: { windows: boolean; mac: boolean; linux: boolean } | null): Platform[] {
+  if (!p) return ["windows"];
   const out: Platform[] = [];
   if (p.windows) out.push("windows");
   if (p.mac) out.push("mac");
   if (p.linux) out.push("linux");
-  return out;
+  return out.length > 0 ? out : ["windows"];
 }
 
 export function getCartCount(state: CartState): number {

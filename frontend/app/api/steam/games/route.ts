@@ -1,7 +1,8 @@
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
-  const upstream = new URL("http://localhost:8080/api/games");
+  const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8080";
+  const upstream = new URL(`${backendUrl}/api/games`);
 
   const genreId = searchParams.get("genreId");
   const page = searchParams.get("page");

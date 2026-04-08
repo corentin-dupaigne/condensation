@@ -7,7 +7,7 @@ import { ProductHero } from "@/components/product/ProductHero";
 import { GameDescription } from "@/components/product/GameDescription";
 import { RelatedGames } from "@/components/product/RelatedGames";
 import { GameInfoSidebar } from "@/components/product/GameInfoSidebar";
-import { fetchSteamAppDetails } from "@/lib/steam-api";
+import { fetchGameDetail } from "@/lib/steam-api";
 import { getRelatedGames } from "@/lib/game-data";
 import type { BackendGameDetail } from "@/lib/types";
 import { getAuthState } from "@/lib/auth";
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const appid = Number(id);
   if (isNaN(appid)) return { title: "Game Not Found — Condensation" };
-  const data = await fetchSteamAppDetails(appid);
+  const data = await fetchGameDetail(appid);
   if (!data) return { title: "Game Not Found — Condensation" };
   return {
     title: `${data.name} — Condensation`,

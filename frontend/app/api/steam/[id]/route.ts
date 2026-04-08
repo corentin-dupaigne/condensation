@@ -3,7 +3,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const res = await fetch(`http://localhost:8080/api/games/${id}`);
+  const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8080";
+  const res = await fetch(`${backendUrl}/api/games/${id}`);
   if (!res.ok) {
     return Response.json({ error: "Not found" }, { status: 404 });
   }
