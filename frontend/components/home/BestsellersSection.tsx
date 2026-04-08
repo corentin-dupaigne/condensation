@@ -1,5 +1,5 @@
 import type { BestsellerGame } from "@/lib/types";
-import { formatPrice } from "@/lib/format-price";
+import { formatCents } from "@/lib/format-price";
 import { Badge } from "@/components/shared/Badge";
 
 export function BestsellersSection({ games }: { games: BestsellerGame[] }) {
@@ -22,9 +22,9 @@ export function BestsellersSection({ games }: { games: BestsellerGame[] }) {
               </span>
 
               <div className="h-16 w-12 shrink-0 overflow-hidden rounded">
-                {game.image ? (
+                {game.headerImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
+                  <img src={game.headerImage} alt={game.name} className="h-full w-full object-cover" />
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-surface-container-highest via-surface-bright to-surface-container" />
                 )}
@@ -32,22 +32,19 @@ export function BestsellersSection({ games }: { games: BestsellerGame[] }) {
 
               <div className="flex-1">
                 <h3 className="font-headline text-base font-semibold text-on-surface">
-                  {game.title}
+                  {game.name}
                 </h3>
                 <p className="text-xs text-on-surface-variant">
-                  {game.genres.join(" · ")}
+                  {game.genres.map((g) => g.description).join(" · ")}
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
-                {game.discountPercent != null && game.discountPercent > 0 && (
-                  <Badge type="discount">-{game.discountPercent}% Off</Badge>
-                )}
-                {game.badges.includes("popular") && (
-                  <Badge type="popular">Popular</Badge>
+                {game.reductionPercentage > 0 && (
+                  <Badge type="discount">-{game.reductionPercentage}% Off</Badge>
                 )}
                 <span className="font-headline text-lg font-bold text-on-surface">
-                  {formatPrice(game.price)}
+                  {formatCents(game.priceFinal)}
                 </span>
               </div>
             </a>

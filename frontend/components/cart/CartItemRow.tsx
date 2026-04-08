@@ -1,6 +1,5 @@
 "use client";
 
-import { PlatformBadge } from "@/components/shared/PlatformBadge";
 import { formatPrice } from "@/lib/format-price";
 import type { CartItem } from "@/lib/cart-store";
 import { removeFromCart, setCartItemQty } from "@/lib/cart-store";
@@ -29,11 +28,6 @@ export function CartItemRow({ item }: { item: CartItem }) {
 
       <div className="flex flex-1 flex-col justify-between py-1">
         <div>
-          <div className="mb-3 flex flex-wrap gap-2">
-            {item.platforms.map((p) => (
-              <PlatformBadge key={p} platform={p} />
-            ))}
-          </div>
           <h3 className="font-headline text-2xl font-bold text-on-surface">
             {item.title}
           </h3>

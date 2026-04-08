@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCartCount } from "@/lib/cart-store";
 import { useBalance, addBalance } from "@/lib/balance-store";
+import type { Game } from "@/lib/types";
+import { formatCents } from "@/lib/format-price";
 
 const navLinks = [
   { label: "Store", href: "/" },
@@ -12,15 +15,70 @@ const navLinks = [
   { label: "Support", href: "#" },
 ];
 
+interface PreviewResult {
+  games: Game[];
+  total: number;
+}
+
 export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: boolean, userName?: string | null }) {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [preview, setPreview] = useState<PreviewResult | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [balanceOpen, setBalanceOpen] = useState(false);
   const [addAmount, setAddAmount] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const balanceRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cartCount = useCartCount();
   const balance = useBalance();
+
+  const showPreview = searchFocused && searchQuery.trim().length > 0;
+
+  const fetchPreview = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setPreview(null);
+      return;
+    }
+    setPreviewLoading(true);
+    try {
+      const url = `/api/steam/games?search=${encodeURIComponent(query.trim())}&size=5`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("fetch failed");
+      const data = await res.json();
+      setPreview({
+        games: (data.content ?? []) as Game[],
+        total: data.totalElements ?? 0,
+      });
+    } catch {
+      setPreview(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, []);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (!value.trim()) {
+        setPreview(null);
+        return;
+      }
+      debounceRef.current = setTimeout(() => fetchPreview(value), 300);
+    },
+    [fetchPreview],
+  );
+
+  function handleSearchSubmit() {
+    const q = searchQuery.trim();
+    if (!q) return;
+    setSearchFocused(false);
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -29,6 +87,9 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
       }
       if (balanceRef.current && !balanceRef.current.contains(e.target as Node)) {
         setBalanceOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchFocused(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -64,12 +125,17 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
           ))}
         </nav>
 
-        <div className="relative ml-auto flex-1 max-w-md">
+        <div className="relative ml-auto flex-1 max-w-md" ref={searchRef}>
           <input
             type="text"
             placeholder="Search games, DLC, gift cards..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
             onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearchSubmit();
+              if (e.key === "Escape") setSearchFocused(false);
+            }}
             className={`w-full rounded-lg bg-surface-container-highest px-4 py-2 pl-10 text-sm text-on-surface placeholder:text-on-surface-variant/60 outline-none transition-all ${searchFocused
               ? "ring-1 ring-primary/40 shadow-[0_0_12px_rgba(161,250,255,0.1)]"
               : ""
@@ -89,6 +155,76 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
           </svg>
+
+          {showPreview && (
+            <div className="absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-high shadow-2xl">
+              {previewLoading && !preview && (
+                <div className="px-4 py-6 text-center text-xs text-on-surface-variant">
+                  Searching…
+                </div>
+              )}
+
+              {preview && preview.games.length > 0 && (
+                <>
+                  {preview.games.map((game) => (
+                    <Link
+                      key={game.id}
+                      href={`/games/${game.id}`}
+                      className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-container-highest"
+                      onClick={() => setSearchFocused(false)}
+                    >
+                      {game.headerImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={game.headerImage}
+                          alt={game.name}
+                          className="h-10 w-16 shrink-0 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-16 shrink-0 rounded bg-surface-container-highest" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-on-surface">
+                          {game.name}
+                        </p>
+                        {game.genres.length > 0 && (
+                          <p className="truncate text-xs text-on-surface-variant">
+                            {game.genres.slice(0, 3).map((g) => g.description).join(", ")}
+                          </p>
+                        )}
+                      </div>
+                      <div className="shrink-0 text-right">
+                        {game.reductionPercentage > 0 && (
+                          <span className="mr-1.5 text-xs font-semibold text-primary">
+                            -{game.reductionPercentage}%
+                          </span>
+                        )}
+                        <span className="text-sm font-bold text-on-surface">
+                          {formatCents(game.priceFinal)}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                  <Link
+                    href={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
+                    className="flex items-center justify-center gap-1.5 border-t border-outline-variant/20 px-4 py-3 text-xs font-semibold text-primary transition-colors hover:bg-surface-container-highest"
+                    onClick={() => setSearchFocused(false)}
+                  >
+                    See all {preview.total} result{preview.total !== 1 ? "s" : ""}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  </Link>
+                </>
+              )}
+
+              {preview && preview.games.length === 0 && (
+                <div className="px-4 py-6 text-center text-xs text-on-surface-variant">
+                  No results for &ldquo;{searchQuery.trim()}&rdquo;
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

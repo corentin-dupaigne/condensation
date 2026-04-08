@@ -7,7 +7,6 @@ import { CatalogClient } from "@/components/catalog/CatalogClient";
 import {
   getCatalogGames,
   getCatalogGamesByGenre,
-  allPlatforms,
   allGenres,
 } from "@/lib/game-data";
 import { getAuthState } from "@/lib/auth";
@@ -39,7 +38,6 @@ export default async function CatalogPage({ searchParams }: Props) {
       <main>
         <CatalogClient
           games={gamesResult.games}
-          platforms={allPlatforms}
           genres={allGenres}
           activeGenreId={genreId ?? undefined}
           activeGenreLabel={gamesResult.genreLabel ?? undefined}

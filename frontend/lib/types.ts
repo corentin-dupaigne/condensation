@@ -8,33 +8,22 @@ export type BadgeType =
   | "popular"
   | "instant";
 
-export interface Game {
-  id: string;
-  title: string;
-  slug: string;
-  platforms: Platform[];
-  genres: string[];
-  price: number;
-  originalPrice?: number;
-  discountPercent?: number;
-  badges: BadgeType[];
-  releaseDate?: string;
-  releasedAgo?: string;
-  timeLeft?: string;
-  image?: string;
-  headerImage?: string;
+export interface GameGenre {
+  id: number;
+  description: string;
 }
 
-export interface HeroSlide {
-  id: string;
-  title: string;
-  subtitle: string;
-  ctaText: string;
-  ctaLink: string;
-  price: number;
-  gradientFrom: string;
-  gradientTo: string;
-  image?: string;
+export interface Game {
+  id: number;
+  steamAppId: number;
+  name: string;
+  slug: string;
+  headerImage: string;
+  priceFinal: number;
+  reductionPercentage: number;
+  recommendationsTotal: number;
+  releaseDate: string;
+  genres: GameGenre[];
 }
 
 export interface BestsellerGame extends Game {
@@ -57,7 +46,6 @@ export type SortOption =
 export type ViewMode = "grid" | "list";
 
 export interface CatalogFilters {
-  platforms: Platform[];
   genres: string[];
   priceMin: number;
   priceMax: number;
@@ -102,6 +90,12 @@ export interface BackendMovie {
   hlsH264?: string;
   highlight: boolean;
   position: number;
+}
+
+export interface BackendPage {
+  content: Game[];
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface BackendGameDetail {

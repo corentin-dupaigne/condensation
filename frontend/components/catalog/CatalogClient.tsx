@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import type { Game, Platform, CatalogFilters, SortOption, ViewMode } from "@/lib/types";
+import type { Game, CatalogFilters, SortOption, ViewMode } from "@/lib/types";
 import { FilterSidebar } from "./FilterSidebar";
 import { ActiveFilterBar } from "./ActiveFilterBar";
 import { SortDropdown } from "./SortDropdown";
@@ -13,20 +13,18 @@ import { EmptyState } from "./EmptyState";
 
 interface CatalogClientProps {
   games: Game[];
-  platforms: { value: Platform; label: string }[];
   genres: string[];
   activeGenreId?: number;
   activeGenreLabel?: string;
 }
 
 const DEFAULT_FILTERS: CatalogFilters = {
-  platforms: [],
   genres: [],
   priceMin: 0,
   priceMax: 100,
 };
 
-export function CatalogClient({ games, platforms, genres, activeGenreId, activeGenreLabel }: CatalogClientProps) {
+export function CatalogClient({ games, genres, activeGenreId, activeGenreLabel }: CatalogClientProps) {
   const router = useRouter();
   const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortOption>("bestselling");
@@ -37,11 +35,10 @@ export function CatalogClient({ games, platforms, genres, activeGenreId, activeG
 
   const filtered = useMemo(() => {
     const result = games.filter((game) => {
-      if (filters.platforms.length > 0 && !game.platforms.some((p) => filters.platforms.includes(p)))
+      if (filters.genres.length > 0 && !game.genres.some((g) => filters.genres.includes(g.description)))
         return false;
-      if (filters.genres.length > 0 && !game.genres.some((g) => filters.genres.includes(g)))
-        return false;
-      if (game.price < filters.priceMin || game.price > filters.priceMax)
+      const priceDollars = game.priceFinal / 100;
+      if (priceDollars < filters.priceMin || priceDollars > filters.priceMax)
         return false;
       return true;
     });
@@ -49,22 +46,16 @@ export function CatalogClient({ games, platforms, genres, activeGenreId, activeG
     const sorted = [...result];
     switch (sort) {
       case "price-asc":
-        sorted.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => a.priceFinal - b.priceFinal);
         break;
       case "price-desc":
-        sorted.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => b.priceFinal - a.priceFinal);
         break;
       case "newest":
-        sorted.sort((a, b) => {
-          const da = a.releaseDate ?? "";
-          const db = b.releaseDate ?? "";
-          return db.localeCompare(da);
-        });
+        sorted.sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
         break;
       case "discount":
-        sorted.sort(
-          (a, b) => (b.discountPercent ?? 0) - (a.discountPercent ?? 0),
-        );
+        sorted.sort((a, b) => b.reductionPercentage - a.reductionPercentage);
         break;
       default:
         break;
@@ -96,10 +87,8 @@ export function CatalogClient({ games, platforms, genres, activeGenreId, activeG
   );
 
   const handleRemoveFilter = useCallback(
-    (type: "platform" | "genre" | "price", value: string) => {
+    (type: "genre" | "price", value: string) => {
       setFilters((prev) => {
-        if (type === "platform")
-          return { ...prev, platforms: prev.platforms.filter((p) => p !== value) };
         if (type === "genre")
           return { ...prev, genres: prev.genres.filter((g) => g !== value) };
         return { ...prev, priceMin: DEFAULT_FILTERS.priceMin, priceMax: DEFAULT_FILTERS.priceMax };
@@ -163,7 +152,6 @@ export function CatalogClient({ games, platforms, genres, activeGenreId, activeG
             <FilterSidebar
               filters={filters}
               onFiltersChange={handleFiltersChange}
-              platforms={platforms}
               genres={genres}
             />
           </div>
@@ -209,7 +197,6 @@ export function CatalogClient({ games, platforms, genres, activeGenreId, activeG
                     handleFiltersChange(f);
                     setMobileFiltersOpen(false);
                   }}
-                  platforms={platforms}
                   genres={genres}
                 />
               </div>
