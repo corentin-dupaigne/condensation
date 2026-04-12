@@ -2,6 +2,7 @@ package fr.fullstack.backend.controller;
 
 import fr.fullstack.backend.dto.GameDetailDto;
 import fr.fullstack.backend.dto.GameSummaryDto;
+import fr.fullstack.backend.dto.GenreDto;
 import fr.fullstack.backend.dto.PageDto;
 import fr.fullstack.backend.entity.Game;
 import fr.fullstack.backend.mapper.CatalogMapper;
@@ -56,4 +57,13 @@ public class GameController {
         long count = gameService.getAvailableKeyCount(id);
         return ResponseEntity.ok(Map.of("key_counts", count));
     }
+
+    @GetMapping("/genres")
+    public ResponseEntity<List<GenreDto>> getGenres() {
+        List<GenreDto> genres = gameService.getAllGenres().stream()
+                .map(g -> new GenreDto(g.getId(), g.getDescription()))
+                .toList();
+        return ResponseEntity.ok(genres);
+    }
+
 }

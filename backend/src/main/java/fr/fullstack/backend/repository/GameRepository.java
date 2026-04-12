@@ -1,6 +1,7 @@
 package fr.fullstack.backend.repository;
 
 import fr.fullstack.backend.entity.Game;
+import fr.fullstack.backend.entity.Genre;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface GameRepository extends JpaRepository<Game, Long> {
@@ -32,4 +35,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "(g.priceInitial * (100 - g.reductionPercentage) / 100) < :maxPriceCents " +
             "ORDER BY (g.priceInitial * (100 - g.reductionPercentage) / 100) DESC")
     Page<Game> findLowDeals(@Param("maxPriceCents") Integer maxPriceCents, Pageable pageable);
+
+    @Query("SELECT DISTINCT genre FROM Game g JOIN g.genres genre")
+    List<Genre> findAllGenres();
+
 }

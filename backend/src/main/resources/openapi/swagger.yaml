@@ -245,6 +245,24 @@ paths:
                   message:
                     type: string
 
+  /games/genres:
+    get:
+      tags:
+        - Games
+      summary: Obtenir la liste de tous les genres
+      responses:
+        '200':
+          description: Liste des genres
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  genres:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Genre'
+
   /orders/{id}:
     get:
       tags:

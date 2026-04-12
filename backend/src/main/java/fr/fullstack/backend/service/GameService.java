@@ -1,6 +1,7 @@
 package fr.fullstack.backend.service;
 
 import fr.fullstack.backend.entity.Game;
+import fr.fullstack.backend.entity.Genre;
 import fr.fullstack.backend.repository.GameRepository;
 import fr.fullstack.backend.repository.SteamKeyRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 @Service
 public class GameService {
@@ -50,4 +53,9 @@ public class GameService {
         }
         return steamKeyRepository.countByGameId(gameId);
     }
+
+    public List<Genre> getAllGenres() {
+        return gameRepository.findAllGenres();
+    }
+
 }
