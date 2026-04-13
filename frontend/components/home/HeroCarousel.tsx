@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 /* ── Static slide data (Steam IDs: 3681010, 1245620, 3240220, 2399830, 3764200) ── */
@@ -179,11 +180,13 @@ export function HeroCarousel() {
           aria-hidden={i !== current}
         >
           {/* Background image */}
-          <img
+          <Image
             src={s.image}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            loading={i === 0 ? "eager" : "lazy"}
+            fill
+            className="object-cover"
+            priority={i === 0}
+            sizes="100vw"
             draggable={false}
           />
           {/* Multi-layer gradient overlay for depth */}

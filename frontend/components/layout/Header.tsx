@@ -312,24 +312,24 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
                     </p>
                   </div>
                   <div className="py-1">
-                    <a
+                    <Link
                       href="/profile"
                       className="block px-4 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-highest hover:text-on-surface"
                     >
                       My Profile
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/orders"
                       className="block px-4 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-highest hover:text-on-surface"
                     >
                       My Orders
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/settings"
                       className="block px-4 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-highest hover:text-on-surface"
                     >
                       Settings
-                    </a>
+                    </Link>
                   </div>
                   <div className="border-t border-outline-variant/20 py-1">
                     <a
