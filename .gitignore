@@ -9,3 +9,8 @@ vendor
 */.cursor
 .agent
 */agent
+# Added by code-review-graph
+.code-review-graph/
+.cursorrules
+.mcp.json
+AGENTS.md
