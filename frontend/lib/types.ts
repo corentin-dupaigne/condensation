@@ -132,4 +132,9 @@ export interface Order {
   userId: number;
   gamesId: number;
   key: string;
+  game?: {
+    name: string;
+    headerImage: string;
+    genres: string[];
+  };
 }

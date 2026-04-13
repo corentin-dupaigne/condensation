@@ -9,7 +9,7 @@ import { getAuthState } from "@/lib/auth";
 import { getUserId } from "@/lib/server-auth";
 import { CopyKeyButton } from "@/components/orders/CopyKeyButton";
 import { formatCents } from "@/lib/format-price";
-import type { Order, BackendGameDetail } from "@/lib/types";
+import type { Order } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Order Detail — Condensation",
@@ -48,20 +48,50 @@ export default async function OrderDetailPage({
 
   if (!order) notFound();
 
-  /* ── Fetch game detail via backend proxy ── */
-  let game: BackendGameDetail | null = null;
+  /* ── Fetch full game detail via backend proxy (price, dev/publisher, metacritic, etc.) ── */
+  let game: {
+    name: string;
+    headerImage: string;
+    slug: string;
+    priceFinal: number;
+    priceInitial: number;
+    reductionPercentage: number;
+    genres: { id: number; description: string }[];
+    releaseDate: string;
+    releaseDateRaw: string;
+    metacriticScore: number;
+    recommendationsTotal: number;
+    categories: { id: number; description: string }[];
+    companies: { company: { id: number; name: string }; role: string }[];
+  } | null = null;
   try {
     const res = await fetch(`${BACKEND_URL}/api/games/${order.gamesId}`, {
       cache: "no-store",
     });
     if (res.ok) {
       game = await res.json();
-      console.log(game);
     }
   } catch { /* game info unavailable — page still works */ }
 
-  const developer = game?.companies?.find((c) => c.role === "developer")?.company.name;
-  const publisher = game?.companies?.find((c) => c.role === "publisher")?.company.name;
+  /* ── Use order.game for basic info if full game detail is unavailable ── */
+  const displayGame = game ?? (order.game ? {
+    name: order.game.name,
+    headerImage: order.game.headerImage,
+    slug: "",
+    priceFinal: 0,
+    priceInitial: 0,
+    reductionPercentage: 0,
+    genres: order.game.genres.map((g, i) => ({ id: i, description: g })),
+    releaseDate: "",
+    releaseDateRaw: "",
+    metacriticScore: 0,
+    recommendationsTotal: 0,
+    categories: [],
+    companies: [],
+  } : null);
+
+  const developer = displayGame?.companies?.find((c) => c.role === "developer")?.company.name;
+  const publisher = displayGame?.companies?.find((c) => c.role === "publisher")?.company.name;
 
   return (
     <>
@@ -75,21 +105,21 @@ export default async function OrderDetailPage({
         </div>
 
         {/* ── Game Info Card ── */}
-        {game && (
+        {displayGame && (
           <div className="mb-8 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container">
             {/* Header image */}
             <div className="relative aspect-[460/215] w-full">
               <Image
-                src={game.headerImage}
-                alt={game.name}
+                src={displayGame.headerImage}
+                alt={displayGame.name}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 768px"
                 priority
               />
-              {game.reductionPercentage > 0 && (
+              {displayGame.reductionPercentage > 0 && (
                 <span className="absolute right-3 top-3 rounded-lg bg-tertiary px-2.5 py-1 text-xs font-bold text-on-tertiary">
-                  -{game.reductionPercentage}%
+                  -{displayGame.reductionPercentage}%
                 </span>
               )}
             </div>
@@ -99,10 +129,10 @@ export default async function OrderDetailPage({
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <Link
-                    href={`/games/${game.slug}`}
+                    href={`/games/${displayGame.slug}`}
                     className="font-headline text-2xl font-bold text-on-surface transition-colors hover:text-primary"
                   >
-                    {game.name}
+                    {displayGame.name}
                   </Link>
 
                   {/* Developer / Publisher */}
@@ -116,21 +146,21 @@ export default async function OrderDetailPage({
                 </div>
 
                 <div className="text-right">
-                  {game.reductionPercentage > 0 && (
+                  {displayGame.reductionPercentage > 0 && (
                     <span className="block text-xs font-medium text-on-surface-variant line-through">
-                      {formatCents(game.priceInitial)}
+                      {formatCents(displayGame.priceInitial)}
                     </span>
                   )}
                   <span className="font-headline text-2xl font-black text-secondary">
-                    {game.priceFinal === 0 ? "Free" : formatCents(game.priceFinal)}
+                    {displayGame.priceFinal === 0 ? "Free" : formatCents(displayGame.priceFinal)}
                   </span>
                 </div>
               </div>
 
               {/* Genres */}
-              {game.genres.length > 0 && (
+              {displayGame.genres.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {game.genres.map((g) => (
+                  {displayGame.genres.map((g) => (
                     <span
                       key={g.id}
                       className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
@@ -143,30 +173,30 @@ export default async function OrderDetailPage({
 
               {/* Meta row */}
               <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-outline-variant/15 pt-4 text-xs text-on-surface-variant">
-                {game.releaseDate && (
+                {displayGame.releaseDate && (
                   <div>
                     <span className="font-semibold uppercase tracking-wider text-on-surface-variant/70">Release</span>
-                    <p className="mt-0.5 font-medium text-on-surface">{game.releaseDateRaw || game.releaseDate}</p>
+                    <p className="mt-0.5 font-medium text-on-surface">{displayGame.releaseDateRaw || displayGame.releaseDate}</p>
                   </div>
                 )}
-                {game.metacriticScore > 0 && (
+                {displayGame.metacriticScore > 0 && (
                   <div>
                     <span className="font-semibold uppercase tracking-wider text-on-surface-variant/70">Metacritic</span>
-                    <p className="mt-0.5 font-medium text-on-surface">{game.metacriticScore}</p>
+                    <p className="mt-0.5 font-medium text-on-surface">{displayGame.metacriticScore}</p>
                   </div>
                 )}
-                {game.recommendationsTotal > 0 && (
+                {displayGame.recommendationsTotal > 0 && (
                   <div>
                     <span className="font-semibold uppercase tracking-wider text-on-surface-variant/70">Reviews</span>
-                    <p className="mt-0.5 font-medium text-on-surface">{game.recommendationsTotal.toLocaleString()}</p>
+                    <p className="mt-0.5 font-medium text-on-surface">{displayGame.recommendationsTotal.toLocaleString()}</p>
                   </div>
                 )}
               </div>
 
               {/* Categories */}
-              {game.categories && game.categories.length > 0 && (
+              {displayGame.categories && displayGame.categories.length > 0 && (
                 <div className="flex flex-wrap gap-2 border-t border-outline-variant/15 pt-4">
-                  {game.categories.slice(0, 8).map((c) => (
+                  {displayGame.categories.slice(0, 8).map((c) => (
                     <span
                       key={c.id}
                       className="rounded-md bg-surface-container-highest px-2.5 py-1 text-xs text-on-surface-variant"
@@ -209,9 +239,9 @@ export default async function OrderDetailPage({
           >
             ← Back to all orders
           </Link>
-          {game && (
+          {displayGame && (
             <Link
-              href={`/games/${game.slug}`}
+              href={`/games/${displayGame.slug}`}
               className="text-sm text-on-surface-variant hover:text-on-surface"
             >
               View game page

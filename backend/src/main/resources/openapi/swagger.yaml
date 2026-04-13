@@ -410,13 +410,27 @@ components:
       properties:
         id:
           type: integer
-        user_id:
+        userId:
           type: integer
-        games_id:
+        gamesId:
           type: integer
           format: int64
         key:
           type: string
+        game:
+          $ref: '#/components/schemas/GameInfo'
+
+    GameInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        headerImage:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string
 
     GameCompany:
       type: object

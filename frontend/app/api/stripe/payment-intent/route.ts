@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8080";
 const AUTH_URL = process.env.API_URL ?? process.env.AUTH_URL ?? "http://localhost:8000";
 
 async function getUserId(token: string): Promise<number | null> {

@@ -24,7 +24,7 @@ const DEFAULT_FILTERS: CatalogFilters = {
   priceMax: 100,
 };
 
-export function CatalogClient({ games, genres, activeGenreId, activeGenreLabel }: CatalogClientProps) {
+export function CatalogClient({ games, genres, activeGenreLabel }: CatalogClientProps) {
   const router = useRouter();
   const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortOption>("bestselling");

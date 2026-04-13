@@ -11,9 +11,14 @@ Get all orders for a user.
   "orders": [
     {
       "id": 1,
-      "user_id": 42,
-      "games_id": 123,
-      "key": "XXXX-YYYY-ZZZZ"
+      "userId": 42,
+      "gamesId": 123,
+      "key": "XXXX-YYYY-ZZZZ",
+      "game": {
+        "name": "Elden Ring",
+        "headerImage": "https://cdn.example.com/header.jpg",
+        "genres": ["Action RPG", "Open World"]
+      }
     }
   ]
 }

@@ -33,12 +33,12 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<Order> getUserOrders(Integer userId) {
-        return orderRepository.findByUserId(userId);
+        return orderRepository.findByUserIdWithGameAndGenres(userId);
     }
 
     @Transactional(readOnly = true)
     public Order getOrderDetails(Integer orderId, Integer userId) {
-        return orderRepository.findByIdAndUserId(orderId, userId)
+        return orderRepository.findByIdAndUserIdWithGameAndGenres(orderId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Commande introuvable ou n'appartient pas à cet utilisateur"));
     }
 

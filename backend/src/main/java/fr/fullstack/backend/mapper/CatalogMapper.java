@@ -3,6 +3,7 @@ package fr.fullstack.backend.mapper;
 import fr.fullstack.backend.dto.*;
 import fr.fullstack.backend.entity.Game;
 import fr.fullstack.backend.entity.GameCompany;
+import fr.fullstack.backend.entity.Genre;
 import fr.fullstack.backend.entity.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,6 +14,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public interface CatalogMapper {
@@ -35,7 +37,21 @@ public interface CatalogMapper {
 
     @Mapping(target = "gamesId", source = "game.id")
     @Mapping(target = "userId", source = "userId")
+    @Mapping(target = "game", source = "game", qualifiedByName = "gameToGameInfo")
     OrderDto toOrderDto(Order order);
+
+    default OrderDto.GameInfo toGameInfo(Game game) {
+        if (game == null) return null;
+        List<String> genreNames = game.getGenres() != null
+                ? game.getGenres().stream().map(Genre::getDescription).toList()
+                : List.of();
+        return new OrderDto.GameInfo(game.getName(), game.getHeaderImage(), genreNames);
+    }
+
+    @Named("gameToGameInfo")
+    default OrderDto.GameInfo gameToGameInfo(Game game) {
+        return toGameInfo(game);
+    }
 
     List<OrderDto> toOrderDtoList(List<Order> orders);
 
