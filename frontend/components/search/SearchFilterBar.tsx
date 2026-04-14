@@ -1,12 +1,47 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
 const dropdowns = [
   { label: "Platform", hasIcon: true },
   { label: "Price Range", hasIcon: false },
   { label: "Product Type", hasIcon: false },
 ];
 
-const activeGenres = ["RPG", "SCI-FI"];
+type Genre = { id: number; description: string };
 
 export function SearchFilterBar() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeGenreId = searchParams.get("genreId")
+    ? Number(searchParams.get("genreId"))
+    : null;
+
+  const [genres, setGenres] = useState<Genre[]>([]);
+
+  useEffect(() => {
+    fetch("/api/steam/games/genres")
+      .then((r) => r.json())
+      .then((data) => setGenres(data.genres ?? []));
+  }, []);
+
+  function toggleGenre(id: number) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (activeGenreId === id) {
+      params.delete("genreId");
+    } else {
+      params.set("genreId", String(id));
+    }
+    router.push(`/search?${params.toString()}`);
+  }
+
+  function clearAll() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("genreId");
+    router.push(`/search?${params.toString()}`);
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-6 pb-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -50,18 +85,31 @@ export function SearchFilterBar() {
           </button>
         ))}
 
-        {activeGenres.map((genre) => (
-          <span
-            key={genre}
-            className="rounded-full bg-primary/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary"
-          >
-            {genre}
-          </span>
-        ))}
+        {genres.map((genre) => {
+          const active = activeGenreId === genre.id;
+          return (
+            <button
+              key={genre.id}
+              onClick={() => toggleGenre(genre.id)}
+              className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+                active
+                  ? "bg-primary/15 text-primary"
+                  : "bg-surface-container text-on-surface-variant hover:bg-primary/10 hover:text-primary"
+              }`}
+            >
+              {genre.description}
+            </button>
+          );
+        })}
 
-        <button className="ml-auto text-xs font-semibold uppercase tracking-wider text-on-surface-variant transition-colors hover:text-on-surface">
-          Clear All
-        </button>
+        {activeGenreId !== null && (
+          <button
+            onClick={clearAll}
+            className="ml-auto text-xs font-semibold uppercase tracking-wider text-on-surface-variant transition-colors hover:text-on-surface"
+          >
+            Clear All
+          </button>
+        )}
       </div>
     </section>
   );

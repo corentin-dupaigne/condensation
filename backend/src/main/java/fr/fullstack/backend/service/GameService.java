@@ -1,51 +1,61 @@
 package fr.fullstack.backend.service;
 
-import fr.fullstack.backend.dto.GameDetail;
-import fr.fullstack.backend.dto.GameSummary;
 import fr.fullstack.backend.entity.Game;
-import fr.fullstack.backend.mapper.GameMapper;
+import fr.fullstack.backend.entity.Genre;
 import fr.fullstack.backend.repository.GameRepository;
+import fr.fullstack.backend.repository.SteamKeyRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.util.StringUtils;
+
+import java.util.List;
+
 @Service
-@RequiredArgsConstructor
 public class GameService {
 
     private final GameRepository gameRepository;
-    private final GameMapper gameMapper;
+    private final SteamKeyRepository steamKeyRepository;
 
-    @Transactional(readOnly = true)
-    public Page<GameSummary> getAllGames(String search, Integer genreId, Pageable pageable) {
-        Page<Game> games;
-
-        if (search != null && !search.isBlank()) {
-            games = gameRepository.searchByText(search, pageable);
-        } else if (genreId != null) {
-            games = gameRepository.findByGenreId(genreId, pageable);
-        } else {
-            games = gameRepository.findAll(pageable);
-        }
-
-        return games.map(gameMapper::toSummary);
+    public GameService(GameRepository gameRepository, SteamKeyRepository steamKeyRepository) {
+        this.gameRepository = gameRepository;
+        this.steamKeyRepository = steamKeyRepository;
     }
 
     @Transactional(readOnly = true)
-    public GameDetail getGameById(Long id) {
+    public Page<Game> getCatalog(String search, Integer genreId, Pageable pageable) {
+        String cleanSearch = StringUtils.hasText(search) ? search : "";
+
+        return gameRepository.findWithFilters(cleanSearch, genreId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Game getGameDetails(Long id) {
         return gameRepository.findById(id)
-                .map(gameMapper::toDetail)
-                .orElseThrow(() -> new EntityNotFoundException("Le jeu avec l'ID " + id + " est introuvable."));
+                .orElseThrow(() -> new EntityNotFoundException("Jeu non trouvé avec l'id: " + id));
     }
 
     @Transactional
     public void deleteGame(Long id) {
         if (!gameRepository.existsById(id)) {
-            throw new EntityNotFoundException("Le jeu avec l'ID " + id + " est introuvable.");
+            throw new EntityNotFoundException("Jeu non trouvé avec l'id: " + id);
         }
         gameRepository.deleteById(id);
     }
+
+    @Transactional(readOnly = true)
+    public long getAvailableKeyCount(Long gameId) {
+        if (!gameRepository.existsById(gameId)) {
+            throw new EntityNotFoundException("Jeu non trouvé avec l'id: " + gameId);
+        }
+        return steamKeyRepository.countByGameId(gameId);
+    }
+
+    public List<Genre> getAllGenres() {
+        return gameRepository.findAllGenres();
+    }
+
 }

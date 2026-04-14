@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function PopularSearches({ searches }: { searches: string[] }) {
   return (
     <section className="mx-auto max-w-7xl px-6 py-10">
@@ -23,12 +25,13 @@ export function PopularSearches({ searches }: { searches: string[] }) {
 
       <div className="flex flex-wrap gap-3">
         {searches.map((term) => (
-          <button
+          <Link
             key={term}
+            href={`/search?q=${encodeURIComponent(term)}`}
             className="rounded-full border border-outline-variant/40 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
           >
             {term}
-          </button>
+          </Link>
         ))}
       </div>
     </section>

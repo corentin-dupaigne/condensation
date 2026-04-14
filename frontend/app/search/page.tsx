@@ -2,25 +2,38 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SearchHero } from "@/components/search/SearchHero";
 import { SearchFilterBar } from "@/components/search/SearchFilterBar";
-import { SearchResultsGrid } from "@/components/search/SearchResultsGrid";
+import { SearchResultsClient } from "@/components/search/SearchResultsClient";
 import { PopularSearches } from "@/components/search/PopularSearches";
 
 import { searchSteamGames } from "@/lib/steam-api";
 import { popularSearches } from "@/lib/game-data";
 import { getAuthState } from "@/lib/auth";
 
-type Props = { searchParams: Promise<{ q?: string }> };
+type Props = {
+  searchParams: Promise<{
+    q?: string;
+    page?: string;
+    size?: string;
+    genreId?: string;
+  }>;
+};
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const { q, size, genreId } = await searchParams;
   const query = q?.trim() ?? "";
 
   const [searchResult, { isLoggedIn, userName }] = await Promise.all([
-    query ? searchSteamGames(query) : Promise.resolve({ total: 0, games: [] }),
+    query
+      ? searchSteamGames({
+          search: query,
+          size: size != null ? Number(size) : 100,
+          genreId: genreId != null ? Number(genreId) : undefined,
+        })
+      : Promise.resolve({ total: 0, totalPages: 0, games: [] }),
     getAuthState(),
   ]);
   const { total, games } = searchResult;
-
+  console.log("Games in SearchPage:", games);
   return (
     <>
       <Header isLoggedIn={isLoggedIn} userName={userName} />
@@ -29,7 +42,7 @@ export default async function SearchPage({ searchParams }: Props) {
         <SearchFilterBar />
 
         {games.length > 0 ? (
-          <SearchResultsGrid games={games} />
+          <SearchResultsClient games={games} total={total} />
         ) : query ? (
           <div className="mx-auto max-w-7xl px-6 py-16 text-center">
             <p className="font-headline text-lg font-semibold uppercase tracking-wide text-on-surface-variant">

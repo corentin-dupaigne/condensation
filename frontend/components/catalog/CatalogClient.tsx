@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import type { Game, Platform, CatalogFilters, SortOption, ViewMode } from "@/lib/types";
+import { useRouter } from "next/navigation";
+import type { Game, CatalogFilters, SortOption, ViewMode } from "@/lib/types";
 import { FilterSidebar } from "./FilterSidebar";
 import { ActiveFilterBar } from "./ActiveFilterBar";
 import { SortDropdown } from "./SortDropdown";
@@ -12,18 +13,19 @@ import { EmptyState } from "./EmptyState";
 
 interface CatalogClientProps {
   games: Game[];
-  platforms: { value: Platform; label: string }[];
   genres: string[];
+  activeGenreId?: number;
+  activeGenreLabel?: string;
 }
 
 const DEFAULT_FILTERS: CatalogFilters = {
-  platforms: [],
   genres: [],
   priceMin: 0,
   priceMax: 100,
 };
 
-export function CatalogClient({ games, platforms, genres }: CatalogClientProps) {
+export function CatalogClient({ games, genres, activeGenreLabel }: CatalogClientProps) {
+  const router = useRouter();
   const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortOption>("bestselling");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -33,11 +35,10 @@ export function CatalogClient({ games, platforms, genres }: CatalogClientProps) 
 
   const filtered = useMemo(() => {
     const result = games.filter((game) => {
-      if (filters.platforms.length > 0 && !game.platforms.some((p) => filters.platforms.includes(p)))
+      if (filters.genres.length > 0 && !game.genres.some((g) => filters.genres.includes(g.description)))
         return false;
-      if (filters.genres.length > 0 && !game.genres.some((g) => filters.genres.includes(g)))
-        return false;
-      if (game.price < filters.priceMin || game.price > filters.priceMax)
+      const priceDollars = game.priceFinal / 100;
+      if (priceDollars < filters.priceMin || priceDollars > filters.priceMax)
         return false;
       return true;
     });
@@ -45,22 +46,16 @@ export function CatalogClient({ games, platforms, genres }: CatalogClientProps) 
     const sorted = [...result];
     switch (sort) {
       case "price-asc":
-        sorted.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => a.priceFinal - b.priceFinal);
         break;
       case "price-desc":
-        sorted.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => b.priceFinal - a.priceFinal);
         break;
       case "newest":
-        sorted.sort((a, b) => {
-          const da = a.releaseDate ?? "";
-          const db = b.releaseDate ?? "";
-          return db.localeCompare(da);
-        });
+        sorted.sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
         break;
       case "discount":
-        sorted.sort(
-          (a, b) => (b.discountPercent ?? 0) - (a.discountPercent ?? 0),
-        );
+        sorted.sort((a, b) => b.reductionPercentage - a.reductionPercentage);
         break;
       default:
         break;
@@ -92,10 +87,8 @@ export function CatalogClient({ games, platforms, genres }: CatalogClientProps) 
   );
 
   const handleRemoveFilter = useCallback(
-    (type: "platform" | "genre" | "price", value: string) => {
+    (type: "genre" | "price", value: string) => {
       setFilters((prev) => {
-        if (type === "platform")
-          return { ...prev, platforms: prev.platforms.filter((p) => p !== value) };
         if (type === "genre")
           return { ...prev, genres: prev.genres.filter((g) => g !== value) };
         return { ...prev, priceMin: DEFAULT_FILTERS.priceMin, priceMax: DEFAULT_FILTERS.priceMax };
@@ -121,6 +114,30 @@ export function CatalogClient({ games, platforms, genres }: CatalogClientProps) 
   return (
     <section className="bg-surface">
       <div className="mx-auto max-w-7xl px-6 py-8">
+        {/* Active genre pill from URL param */}
+        {activeGenreLabel && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+              Filtered by
+            </span>
+            <span className="flex items-center gap-1.5 rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary ring-1 ring-inset ring-secondary/30">
+              {activeGenreLabel}
+              <button
+                onClick={() => router.push("/games")}
+                aria-label="Remove genre filter"
+                className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-secondary/20 transition-colors"
+              >
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+            <span className="text-xs text-on-surface-variant">
+              {games.length} result{games.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
+
         <div className="mb-6">
           <ActiveFilterBar
             filters={filters}
@@ -135,7 +152,6 @@ export function CatalogClient({ games, platforms, genres }: CatalogClientProps) 
             <FilterSidebar
               filters={filters}
               onFiltersChange={handleFiltersChange}
-              platforms={platforms}
               genres={genres}
             />
           </div>
@@ -181,7 +197,6 @@ export function CatalogClient({ games, platforms, genres }: CatalogClientProps) 
                     handleFiltersChange(f);
                     setMobileFiltersOpen(false);
                   }}
-                  platforms={platforms}
                   genres={genres}
                 />
               </div>

@@ -1,5 +1,5 @@
 import type { Game } from "@/lib/types";
-import { formatPrice } from "@/lib/format-price";
+import { formatCents } from "@/lib/format-price";
 
 export function PreOrdersSection({ games }: { games: Game[] }) {
   return (
@@ -20,13 +20,13 @@ export function PreOrdersSection({ games }: { games: Game[] }) {
           {games.map((game) => (
             <a
               key={game.id}
-              href="#"
+              href={`/games/${game.id}`}
               className="group flex gap-4 rounded-xl bg-surface-container-high p-4 transition-colors hover:bg-surface-bright"
             >
               <div className="h-24 w-20 shrink-0 overflow-hidden rounded-lg">
-                {game.image ? (
+                {game.headerImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
+                  <img src={game.headerImage} alt={game.name} className="h-full w-full object-cover" />
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-secondary-container/40 via-surface-bright to-surface-container" />
                 )}
@@ -34,32 +34,28 @@ export function PreOrdersSection({ games }: { games: Game[] }) {
               <div className="flex flex-col justify-between">
                 <div>
                   <h3 className="font-headline text-sm font-semibold text-on-surface">
-                    {game.title}
+                    {game.name}
                   </h3>
-                  {game.timeLeft && (
-                    <div className="mt-1 flex items-center gap-1.5">
-                      <svg
-                        className="text-secondary"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                      </svg>
-                      <span className="text-xs text-secondary">
-                        {game.timeLeft}
-                      </span>
-                    </div>
-                  )}
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <svg
+                      className="text-secondary"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span className="text-xs text-secondary">Coming Soon</span>
+                  </div>
                 </div>
                 <span className="font-headline text-base font-bold text-on-surface">
-                  {formatPrice(game.price)}
+                  {formatCents(game.priceFinal)}
                 </span>
               </div>
             </a>

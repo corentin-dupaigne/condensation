@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 /* ── Static slide data (Steam IDs: 3681010, 1245620, 3240220, 2399830, 3764200) ── */
@@ -21,67 +22,65 @@ interface HeroSlideData {
 
 const slides: HeroSlideData[] = [
   {
-    id: "3681010",
+    id: "368",
     title: "Nioh 3",
     subtitle:
       "Use both Samurai and Ninja combat styles in the third dark samurai action RPG.",
-    price: 69.99,
+    price: 22.39,
     genres: ["Action", "RPG"],
-    ctaLink: "/games/nioh-3",
+    ctaLink: "/games/368",
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8c9333bf3f28194cb8113af455ecaf1aa45a0050/ss_8c9333bf3f28194cb8113af455ecaf1aa45a0050.1920x1080.jpg?t=1772090941",
     accentFrom: "#6b1010",
     accentTo: "#1a0505",
   },
   {
-    id: "1245620",
+    id: "6",
     title: "ELDEN RING",
     subtitle:
       "Rise, Tarnished, and be guided by grace to brandish the power of the Elden Ring.",
-    price: 59.99,
+    price: 34.79,
     genres: ["Action", "RPG"],
-    ctaLink: "/games/elden-ring",
+    ctaLink: "/games/6",
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_943bf6fe62352757d9070c1d33e50b92fe8539f1.1920x1080.jpg?t=1767883716",
     accentFrom: "#744106",
     accentTo: "#1a1205",
   },
   {
-    id: "3240220",
+    id: "29",
     title: "Grand Theft Auto V Enhanced",
     subtitle:
       "Experience the blockbuster — now upgraded with stunning visuals for a new generation.",
-    price: 14.99,
-    originalPrice: 29.99,
-    discountPercent: 50,
+    price: 16.49,
     genres: ["Action", "Adventure", "Racing"],
-    ctaLink: "/games/grand-theft-auto-v-enhanced",
+    ctaLink: "/games/29",
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3240220/8340fd391012e12be7e4c02e65801a2648a6b60e/ss_8340fd391012e12be7e4c02e65801a2648a6b60e.1920x1080.jpg?t=1765479644",
     accentFrom: "#051a36",
     accentTo: "#051a0a",
   },
   {
-    id: "2399830",
+    id: "19",
     title: "ARK: Survival Ascended",
     subtitle:
       "Reimagined from the ground-up with Unreal Engine 5. Form a tribe, tame & breed hundreds of dinosaurs.",
-    price: 44.99,
+    price: 24.29,
     genres: ["Action", "Adventure", "Survival"],
-    ctaLink: "/games/ark-survival-ascended",
+    ctaLink: "/games/19",
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2399830/ss_65c0de5ced28281764990a299eb3926629b2863e.1920x1080.jpg?t=1766710980",
     accentFrom: "#1a3a0a",
     accentTo: "#0a1a05",
   },
   {
-    id: "3764200",
+    id: "45",
     title: "Resident Evil Requiem",
     subtitle:
       "Requiem for the dead. Nightmare for the living. Prepare to escape death.",
-    price: 69.99,
+    price: 59.49,
     genres: ["Action", "Adventure"],
-    ctaLink: "/games/resident-evil-requiem",
+    ctaLink: "/games/45",
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/08af4e9398b8e45152bfbedce3bc24d22e2c0990/ss_08af4e9398b8e45152bfbedce3bc24d22e2c0990.1920x1080.jpg?t=1772587704",
     accentFrom: "#2a0a25",
@@ -181,11 +180,13 @@ export function HeroCarousel() {
           aria-hidden={i !== current}
         >
           {/* Background image */}
-          <img
+          <Image
             src={s.image}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            loading={i === 0 ? "eager" : "lazy"}
+            fill
+            className="object-cover"
+            priority={i === 0}
+            sizes="100vw"
             draggable={false}
           />
           {/* Multi-layer gradient overlay for depth */}

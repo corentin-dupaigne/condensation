@@ -15,6 +15,17 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Write env vars from build args (injected by CI via secrets)
+ARG STRIPE_SECRET_KEY
+ARG STRIPE_WEBHOOK_SECRET
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+RUN if [ -n "$STRIPE_SECRET_KEY" ]; then \
+      echo "BACKEND_URL=http://localhost:8080" > /app/.env; \
+      echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" >> /app/.env; \
+      echo "STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY" >> /app/.env; \
+      echo "STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET" >> /app/.env; \
+    fi
+
 # Build the project (requires output: 'standalone' in next.config.ts)
 RUN bun run build
 

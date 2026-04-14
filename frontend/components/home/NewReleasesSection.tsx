@@ -1,5 +1,5 @@
 import type { Game } from "@/lib/types";
-import { formatPrice } from "@/lib/format-price";
+import { formatCents } from "@/lib/format-price";
 
 export function NewReleasesSection({ games }: { games: Game[] }) {
   return (
@@ -20,13 +20,13 @@ export function NewReleasesSection({ games }: { games: Game[] }) {
           {games.map((game) => (
             <a
               key={game.id}
-              href="#"
+              href={`/games/${game.id}`}
               className="group flex gap-4 rounded-xl bg-surface-container-high p-4 transition-colors hover:bg-surface-bright"
             >
               <div className="h-24 w-20 shrink-0 overflow-hidden rounded-lg">
-                {game.image ? (
+                {game.headerImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
+                  <img src={game.headerImage} alt={game.name} className="h-full w-full object-cover" />
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-surface-container-highest via-surface-bright to-surface-container" />
                 )}
@@ -34,14 +34,12 @@ export function NewReleasesSection({ games }: { games: Game[] }) {
               <div className="flex flex-col justify-between">
                 <div>
                   <h3 className="font-headline text-sm font-semibold text-on-surface">
-                    {game.title}
+                    {game.name}
                   </h3>
-                  {game.releasedAgo && (
-                    <p className="mt-1 text-xs text-tertiary">{game.releasedAgo}</p>
-                  )}
+                  <p className="mt-1 text-xs text-tertiary">Just Released</p>
                 </div>
                 <span className="font-headline text-base font-bold text-on-surface">
-                  {formatPrice(game.price)}
+                  {formatCents(game.priceFinal)}
                 </span>
               </div>
             </a>

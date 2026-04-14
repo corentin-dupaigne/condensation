@@ -1,15 +1,9 @@
-import type { CatalogFilters, Platform } from "@/lib/types";
-
-const platformLabels: Record<Platform, string> = {
-  windows: "Windows",
-  mac: "macOS",
-  linux: "Linux",
-};
+import type { CatalogFilters } from "@/lib/types";
 
 interface ActiveFilterBarProps {
   filters: CatalogFilters;
   defaults: CatalogFilters;
-  onRemoveFilter: (type: "platform" | "genre" | "price", value: string) => void;
+  onRemoveFilter: (type: "genre" | "price", value: string) => void;
   onClearAll: () => void;
 }
 
@@ -19,18 +13,15 @@ export function ActiveFilterBar({
   onRemoveFilter,
   onClearAll,
 }: ActiveFilterBarProps) {
-  const chips: { key: string; label: string; type: "platform" | "genre" | "price"; value: string }[] = [];
+  const chips: { key: string; label: string; type: "genre" | "price"; value: string }[] = [];
 
-  for (const p of filters.platforms) {
-    chips.push({ key: `p-${p}`, label: platformLabels[p], type: "platform", value: p });
-  }
   for (const g of filters.genres) {
     chips.push({ key: `g-${g}`, label: g, type: "genre", value: g });
   }
   if (filters.priceMin !== defaults.priceMin || filters.priceMax !== defaults.priceMax) {
     chips.push({
       key: "price",
-      label: `€${filters.priceMin}–€${filters.priceMax}`,
+      label: `$${filters.priceMin}–$${filters.priceMax}`,
       type: "price",
       value: "price",
     });

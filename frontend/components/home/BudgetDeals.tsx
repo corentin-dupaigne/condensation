@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { DealTier } from "@/lib/types";
-import { formatPrice } from "@/lib/format-price";
+import { formatCents, originalPriceCents } from "@/lib/format-price";
 
 export function BudgetDeals({ tiers }: { tiers: DealTier[] }) {
   const [activeTab, setActiveTab] = useState(0);
@@ -47,23 +47,23 @@ export function BudgetDeals({ tiers }: { tiers: DealTier[] }) {
               className="group rounded-lg bg-surface-container-high p-3 transition-colors hover:bg-surface-bright"
             >
               <div className="mb-3 aspect-[4/3] overflow-hidden rounded">
-                {game.image ? (
+                {game.headerImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
+                  <img src={game.headerImage} alt={game.name} className="h-full w-full object-cover" />
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-surface-container-highest via-surface-bright to-surface-container" />
                 )}
               </div>
               <h3 className="truncate text-sm font-semibold text-on-surface">
-                {game.title}
+                {game.name}
               </h3>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="font-headline text-sm font-bold text-primary">
-                  {formatPrice(game.price)}
+                  {formatCents(game.priceFinal)}
                 </span>
-                {game.originalPrice != null && (
+                {game.reductionPercentage > 0 && (
                   <span className="text-xs text-on-surface-variant line-through">
-                    {formatPrice(game.originalPrice)}
+                    {formatCents(originalPriceCents(game.priceFinal, game.reductionPercentage))}
                   </span>
                 )}
               </div>

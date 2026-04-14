@@ -7,6 +7,7 @@ const EVENT_NAME = "condensation:balance";
 
 let cachedRaw: string | null | undefined = undefined;
 let cachedBalance = 0;
+let balanceLoaded = false;
 
 function readRaw(): string | null {
   if (typeof window === "undefined") return null;
@@ -38,21 +39,26 @@ function writeBalance(amount: number) {
   window.localStorage.setItem(STORAGE_KEY, raw);
   cachedRaw = raw;
   cachedBalance = clamped;
+  balanceLoaded = true;
   window.dispatchEvent(new Event(EVENT_NAME));
 }
 
 function subscribe(listener: () => void) {
   if (typeof window === "undefined") return () => {};
-  const handler = () => {
+  const onWrite = () => {
+    ensureCache();
+    listener();
+  };
+  const onStorage = () => {
     const before = cachedRaw;
     ensureCache();
     if (before !== cachedRaw) listener();
   };
-  window.addEventListener(EVENT_NAME, handler);
-  window.addEventListener("storage", handler);
+  window.addEventListener(EVENT_NAME, onWrite);
+  window.addEventListener("storage", onStorage);
   return () => {
-    window.removeEventListener(EVENT_NAME, handler);
-    window.removeEventListener("storage", handler);
+    window.removeEventListener(EVENT_NAME, onWrite);
+    window.removeEventListener("storage", onStorage);
   };
 }
 
@@ -60,10 +66,30 @@ export function getBalance(): number {
   return readBalance();
 }
 
-export function addBalance(amount: number) {
-  writeBalance(readBalance() + amount);
+/** Set balance from backend cents value (e.g. 1500 → $15.00 in store) */
+export function setBalance(cents: number) {
+  writeBalance(cents / 100);
 }
 
 export function useBalance(): number {
   return useSyncExternalStore(subscribe, getBalance, () => 0);
+}
+
+function readLoaded(): boolean {
+  return balanceLoaded;
+}
+
+export function useBalanceLoaded(): boolean {
+  return useSyncExternalStore(subscribe, readLoaded, () => false);
+}
+
+export async function fetchBalance(): Promise<void> {
+  try {
+    const res = await fetch("/api/balance");
+    if (!res.ok) return;
+    const data = await res.json();
+    if (typeof data.balance === "number") setBalance(data.balance);
+  } catch {
+    // Silently fail — skeleton persists
+  }
 }

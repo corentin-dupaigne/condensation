@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { TopUpModal } from "@/components/wallet/TopUpModal";
+import { setBalance, useBalance } from "@/lib/balance-store";
 
 const sections = [
   "Account",
+  "Wallet",
   "Linked Accounts",
   "Notifications",
   "Privacy",
@@ -41,6 +44,7 @@ export function SettingsClient({ userName }: { userName: string | null }) {
         {/* Content */}
         <div className="min-w-0 flex-1">
           {activeSection === "Account" && <AccountSection userName={userName} />}
+          {activeSection === "Wallet" && <WalletSection />}
           {activeSection === "Linked Accounts" && <LinkedAccountsSection />}
           {activeSection === "Notifications" && <NotificationsSection />}
           {activeSection === "Privacy" && <PrivacySection />}
@@ -287,6 +291,47 @@ function PrivacySection() {
           </div>
         </div>
       </SettingsCard>
+    </div>
+  );
+}
+
+/* ── Wallet ── */
+
+function WalletSection() {
+  const balance = useBalance();
+  const [topUpOpen, setTopUpOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/balance")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.balance !== undefined) setBalance(data.balance);
+      })
+      .catch(() => {});
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <SettingsCard title="Wallet">
+        <div className="flex items-center justify-between rounded-lg bg-surface-container-highest p-4">
+          <div>
+            <p className="text-sm font-medium text-on-surface">Current Balance</p>
+            <p className="mt-0.5 font-headline text-2xl font-bold text-primary tabular-nums">
+              ${balance.toFixed(2)}
+            </p>
+          </div>
+          <button
+            onClick={() => setTopUpOpen(true)}
+            className="shrink-0 rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary transition-opacity hover:opacity-90"
+          >
+            Top Up
+          </button>
+        </div>
+        <p className="mt-3 text-xs text-on-surface-variant">
+          Balance is used to purchase games. Add funds via card payment.
+        </p>
+      </SettingsCard>
+      <TopUpModal open={topUpOpen} onClose={() => setTopUpOpen(false)} />
     </div>
   );
 }
