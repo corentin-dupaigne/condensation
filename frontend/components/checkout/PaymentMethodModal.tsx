@@ -36,22 +36,27 @@ export function PaymentMethodModal({
   const [state, setState] = useState<ModalState>("idle");
   const [balance, setBalance] = useState<number>(0);
   const [balanceLoading, setBalanceLoading] = useState(false);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const balanceShortfall = balance * 100 < totalCents;
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setState("idle");
+      return;
+    }
+    let mounted = true;
     setBalanceLoading(true);
     setState("idle");
     fetchBalance()
-      .then(() => setBalance(readBalance()))
-      .finally(() => setBalanceLoading(false));
+      .then(() => { if (mounted) setBalance(readBalance()); })
+      .finally(() => { if (mounted) setBalanceLoading(false); });
+    return () => { mounted = false; };
   }, [open]);
 
   useEffect(() => {
-    if (open && closeButtonRef.current) {
-      closeButtonRef.current.focus();
+    if (open && dialogRef.current) {
+      dialogRef.current.focus();
     }
   }, [open]);
 
@@ -83,10 +88,12 @@ export function PaymentMethodModal({
       />
       <div className="relative h-full flex items-start justify-center py-8 px-4">
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
           aria-describedby={descId}
+          tabIndex={-1}
           className="relative w-full max-w-md rounded-2xl border border-outline-variant/20 bg-surface-container-high p-6 shadow-2xl"
         >
           <div className="mb-6 flex items-center justify-between">
@@ -97,7 +104,6 @@ export function PaymentMethodModal({
               Choose Payment Method
             </h2>
             <button
-              ref={closeButtonRef}
               type="button"
               onClick={onClose}
               aria-label="Close payment method modal"
@@ -110,9 +116,8 @@ export function PaymentMethodModal({
           </div>
 
           <p id={descId} className="mb-6 text-sm text-on-surface-variant">
-            <span className="sr-only">Total: </span>
             Total:{" "}
-            <span aria-label={`${total} dollars`} className="font-headline font-bold text-on-surface">
+            <span className="font-headline font-bold text-on-surface">
               {formatPrice(total)}
             </span>
           </p>
