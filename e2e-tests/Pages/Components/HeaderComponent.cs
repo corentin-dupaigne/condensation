@@ -24,7 +24,10 @@ public class HeaderComponent
     public ILocator NavLink(string text) =>
         _page.Locator($"header nav a:has-text('{text}')");
 
-    public async Task ClickLogoAsync() => await Logo.ClickAsync();
+    // Force = true bypasses the Next.js dev overlay portal that intercepts pointer events
+    private static readonly LocatorClickOptions ForceClick = new() { Force = true };
+
+    public async Task ClickLogoAsync() => await Logo.ClickAsync(ForceClick);
 
     public async Task SearchAsync(string query)
     {
@@ -34,13 +37,13 @@ public class HeaderComponent
 
     public async Task FillSearchAsync(string query) => await SearchInput.FillAsync(query);
 
-    public async Task ClickSignInAsync() => await SignInLink.ClickAsync();
+    public async Task ClickSignInAsync() => await SignInLink.ClickAsync(ForceClick);
 
-    public async Task ClickSignUpAsync() => await SignUpLink.ClickAsync();
+    public async Task ClickSignUpAsync() => await SignUpLink.ClickAsync(ForceClick);
 
-    public async Task ClickSignOutAsync() => await SignOutLink.ClickAsync();
+    public async Task ClickSignOutAsync() => await SignOutLink.ClickAsync(ForceClick);
 
-    public async Task ClickCartAsync() => await CartButton.ClickAsync();
+    public async Task ClickCartAsync() => await CartButton.ClickAsync(ForceClick);
 
     public async Task<bool> IsLoggedInAsync() => await UserGreeting.IsVisibleAsync();
 
@@ -50,5 +53,5 @@ public class HeaderComponent
 
     public async Task<bool> IsVisibleAsync() => await Logo.IsVisibleAsync();
 
-    public async Task ClickNavLinkAsync(string text) => await NavLink(text).ClickAsync();
+    public async Task ClickNavLinkAsync(string text) => await NavLink(text).ClickAsync(ForceClick);
 }

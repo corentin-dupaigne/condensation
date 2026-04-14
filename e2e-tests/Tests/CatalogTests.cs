@@ -51,4 +51,88 @@ public class CatalogTests : BaseTest
         await Page.WaitForLoadStateAsync();
         Assert.That(Page.Url, Is.Not.EqualTo(initialUrl));
     }
+
+    // ── Filter sidebar ────────────────────────────────────────────────────────
+
+    [Test]
+    public async Task CatalogPage_ShouldDisplayFilterSidebar()
+    {
+        var isVisible = await _catalogPage.IsFilterSidebarVisibleAsync();
+        Assert.That(isVisible, Is.True);
+    }
+
+    [Test]
+    public async Task CatalogPage_GenreFilter_ShouldHaveCheckboxes()
+    {
+        // FilterGroup renders hidden <input type="checkbox" class="sr-only"> per genre option
+        var checkboxes = Page.Locator("aside input[type='checkbox']");
+        var count = await checkboxes.CountAsync();
+        Assert.That(count, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public async Task CatalogPage_GenreFilter_ClickLabel_ShouldToggleSelection()
+    {
+        // Click the first visible genre label; the custom checkbox should become checked
+        var firstLabel = Page.Locator("aside label").First;
+        var firstCheckbox = firstLabel.Locator("input[type='checkbox']");
+
+        var checkedBefore = await firstCheckbox.IsCheckedAsync();
+        await firstLabel.ClickAsync();
+        var checkedAfter = await firstCheckbox.IsCheckedAsync();
+
+        Assert.That(checkedAfter, Is.Not.EqualTo(checkedBefore));
+    }
+
+    // ── Sort dropdown ─────────────────────────────────────────────────────────
+
+    [Test]
+    public async Task CatalogPage_SortDropdown_ShouldBeVisible()
+    {
+        // SortDropdown renders a button showing the current sort label (default: "Bestselling")
+        var sortButton = Page.Locator("button:has-text('Bestselling')");
+        await Expect(sortButton).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task CatalogPage_SortDropdown_Click_ShouldOpenOptions()
+    {
+        var sortButton = Page.Locator("button:has-text('Bestselling')");
+        await sortButton.ClickAsync();
+
+        // Options appear in a popup — "Price: Low to High" is one of them
+        var option = Page.Locator("button:has-text('Price: Low to High')");
+        await Expect(option).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task CatalogPage_SortDropdown_SelectOption_ShouldUpdateLabel()
+    {
+        var sortButton = Page.Locator("button:has-text('Bestselling')");
+        await sortButton.ClickAsync();
+
+        await Page.Locator("button:has-text('Newest Arrivals')").ClickAsync();
+        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
+
+        // The trigger button now shows the selected label
+        var updatedButton = Page.Locator("button:has-text('Newest Arrivals')").First;
+        await Expect(updatedButton).ToBeVisibleAsync();
+    }
+
+    // ── Game cards ────────────────────────────────────────────────────────────
+
+    [Test]
+    public async Task CatalogPage_GameCards_ShouldHaveLinksToProductPages()
+    {
+        var firstCardLink = Page.Locator("a[href*='/games/']").First;
+        var href = await firstCardLink.GetAttributeAsync("href");
+        Assert.That(href, Does.Match(@"/games/\d+"));
+    }
+
+    [Test]
+    public async Task CatalogPage_ShouldDisplayAtLeastFourGameCards()
+    {
+        var count = await _catalogPage.GetGameCardCountAsync();
+        Assert.That(count, Is.GreaterThanOrEqualTo(4));
+    }
 }

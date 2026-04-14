@@ -79,4 +79,62 @@ public class LoginTests : BaseTest
         var forgotLink = Page.Locator("a:has-text('Forgot password')");
         await Expect(forgotLink).ToBeVisibleAsync();
     }
+
+    // ── Navigation from login ─────────────────────────────────────────────────
+
+    [Test]
+    public async Task LoginPage_ForgotPasswordLink_ShouldNavigateToReset()
+    {
+        await _loginPage.ClickForgotPasswordAsync();
+        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.NetworkIdle);
+        Assert.That(Page.Url, Does.Contain("forgot").Or.Contain("reset").Or.Contain("password"));
+    }
+
+    // ── Form validation ───────────────────────────────────────────────────────
+
+    [Test]
+    public async Task LoginPage_EmptyForm_Submit_ShouldNotNavigateAway()
+    {
+        var initialUrl = Page.Url;
+        await _loginPage.ClickSignInAsync();
+        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
+        // HTML5 validation prevents submission; URL stays the same
+        Assert.That(Page.Url, Is.EqualTo(initialUrl));
+    }
+
+    [Test]
+    public async Task LoginPage_InvalidEmailFormat_ShouldNotSubmit()
+    {
+        await _loginPage.FillEmailAsync("notanemail");
+        await _loginPage.FillPasswordAsync("Password123!");
+        var initialUrl = Page.Url;
+        await _loginPage.ClickSignInAsync();
+        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
+        Assert.That(Page.Url, Is.EqualTo(initialUrl));
+    }
+
+    // ── Password toggle ───────────────────────────────────────────────────────
+
+    [Test]
+    public async Task LoginPage_PasswordToggle_ShouldRestorePasswordType()
+    {
+        await _loginPage.FillPasswordAsync("secret");
+        await _loginPage.TogglePasswordVisibilityAsync(); // show
+        await _loginPage.TogglePasswordVisibilityAsync(); // hide again
+        var type = await _loginPage.GetPasswordInputTypeAsync();
+        Assert.That(type, Is.EqualTo("password"));
+    }
+
+    // ── OAuth buttons ─────────────────────────────────────────────────────────
+
+    [Test]
+    public async Task LoginPage_OAuthButtons_ShouldAllBeVisible()
+    {
+        var oauthButtons = Page.Locator("button[aria-label^='Sign in with']");
+        var count = await oauthButtons.CountAsync();
+        for (var i = 0; i < count; i++)
+        {
+            await Expect(oauthButtons.Nth(i)).ToBeVisibleAsync();
+        }
+    }
 }

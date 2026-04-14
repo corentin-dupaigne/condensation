@@ -33,7 +33,8 @@ public class SearchPage : BasePage
     public async Task SearchAsync(string query)
     {
         await SearchInput.FillAsync(query);
-        await SearchButton.ClickAsync();
+        // Force = true bypasses the Next.js dev overlay portal that intercepts pointer events
+        await SearchButton.ClickAsync(new LocatorClickOptions { Force = true });
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }
 

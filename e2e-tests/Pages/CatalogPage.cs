@@ -15,8 +15,8 @@ public class CatalogPage : BasePage
     private ILocator GridViewButton => Page.Locator("button[aria-label*='grid' i], button[aria-label*='Grid']");
     private ILocator ListViewButton => Page.Locator("button[aria-label*='list' i], button[aria-label*='List']");
 
-    // Game cards
-    private ILocator GameCards => Page.Locator("[class*='game'], [class*='card']");
+    // Game cards — GameCard renders as <a href="/games/{id}"> with Tailwind classes (no stable class name)
+    private ILocator GameCards => Page.Locator("a[href*='/games/']");
     private ILocator AddToCartButtons => Page.Locator("button:has-text('Add to Cart'), button:has-text('cart')");
 
     // Pagination
@@ -28,7 +28,8 @@ public class CatalogPage : BasePage
 
     public async Task<int> GetGameCardCountAsync() => await GameCards.CountAsync();
 
-    public async Task ClickGameCardAsync(int index) => await GameCards.Nth(index).ClickAsync();
+    public async Task ClickGameCardAsync(int index) =>
+        await GameCards.Nth(index).ClickAsync(new LocatorClickOptions { Force = true });
 
     public async Task ClickAddToCartAsync(int index) => await AddToCartButtons.Nth(index).ClickAsync();
 
