@@ -1,25 +1,17 @@
 package fr.fullstack.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
-
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Table(name = "games")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter @Setter @NoArgsConstructor
 public class Game {
 
     @Id
@@ -29,10 +21,10 @@ public class Game {
     @Column(name = "steam_app_id", unique = true, nullable = false)
     private Integer steamAppId;
 
-    @Column(nullable = false, length = 500)
+    @Column(length = 500, nullable = false)
     private String name;
 
-    @Column(unique = true, nullable = false, length = 500)
+    @Column(length = 500, unique = true, nullable = false)
     private String slug;
 
     @Column(name = "detailed_description", columnDefinition = "TEXT")
@@ -48,7 +40,7 @@ public class Game {
     private String headerImage;
 
     @Column(name = "required_age")
-    private Short requiredAge;
+    private Short requiredAge = 0;
 
     @Column(name = "release_date")
     private LocalDate releaseDate;
@@ -60,28 +52,22 @@ public class Game {
     private Short metacriticScore;
 
     @Column(name = "recommendations_total")
-    private Integer recommendationsTotal;
+    private Integer recommendationsTotal = 0;
 
     @Column(name = "platform_windows")
-    private Boolean platformWindows;
+    private Boolean platformWindows = false;
 
     @Column(name = "platform_mac")
-    private Boolean platformMac;
+    private Boolean platformMac = false;
 
     @Column(name = "platform_linux")
-    private Boolean platformLinux;
+    private Boolean platformLinux = false;
 
     @Column(length = 10)
     private String currency;
 
     @Column(name = "price_initial")
     private Integer priceInitial;
-
-    @Column(name = "price_final")
-    private Integer priceFinal;
-
-    @Column(name = "discount_percent")
-    private Short discountPercent;
 
     @Column(name = "pc_requirements", columnDefinition = "jsonb")
     private String pcRequirements;
@@ -92,47 +78,40 @@ public class Game {
     @Column(name = "linux_requirements", columnDefinition = "jsonb")
     private String linuxRequirements;
 
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
+
     @Column(name = "reduction_percentage")
     private Integer reductionPercentage;
 
-    @Column(name = "steam_key", length = 17)
-    private String steamKey;
+    // --- Relations ManyToMany simples ---
 
-    @CreationTimestamp
-    @Column(name = "crawled_at", updatable = false)
-    private ZonedDateTime crawledAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private ZonedDateTime updatedAt;
-
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "game_genres",
             joinColumns = @JoinColumn(name = "game_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
-    @Builder.Default
-    private List<Genre> genres = new ArrayList<>();
+    private Set<Genre> genres;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "game_categories",
             joinColumns = @JoinColumn(name = "game_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    @Builder.Default
-    private List<Category> categories = new ArrayList<>();
+    private Set<Category> categories;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Screenshot> screenshots = new ArrayList<>();
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Movie> movies = new ArrayList<>();
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<GameCompany> gameCompanies;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<GameCompany> gameCompanies = new ArrayList<>();
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    private List<Screenshot> screenshots;
+
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    private List<Movie> movies;
+
 }

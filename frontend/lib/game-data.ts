@@ -1,112 +1,102 @@
 import type {
-  HeroSlide,
   Game,
+  BackendPage,
   BestsellerGame,
   DealTier,
-  Platform,
   RelatedGame,
 } from "./types";
 
-import {
-  fetchFeaturedData,
-  rawToGame,
-  centsToPrice,
-  slugify,
-} from "./steam-api";
+import { fetchFeaturedData } from "./steam-api";
 
-/* ── Hero Slides ── */
+/* ── Catalog (server-side, calls backend directly) ── */
 
-const heroGradients = [
-  { from: "#0f2027", to: "#203a43" },
-  { from: "#1a0033", to: "#330066" },
-  { from: "#1c1c00", to: "#3a3a00" },
-  { from: "#0a1628", to: "#162844" },
-  { from: "#1a0000", to: "#330011" },
-];
+export async function getCatalogGames(
+  size = 100
+): Promise<{ games: Game[]; genreLabel: null }> {
+  const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8080";
+  const url = new URL(`${backendUrl}/api/games`);
+  url.searchParams.set("size", String(size));
 
-export async function getHeroSlides(): Promise<HeroSlide[]> {
-  const rawData = await fetchFeaturedData();
-  return rawData.specials.items.slice(0, 5).map((item, i) => ({
-    id: String(item.id),
-    title: item.name,
-    subtitle: `Save ${item.discount_percent}% on ${item.name}. Limited time offer — grab your key before the deal expires!`,
-    ctaText: "Buy Now",
-    ctaLink: `/games/${slugify(item.name)}`,
-    price: centsToPrice(item.final_price),
-    gradientFrom: heroGradients[i % heroGradients.length].from,
-    gradientTo: heroGradients[i % heroGradients.length].to,
-    image: item.header_image,
-  }));
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) return { games: [], genreLabel: null };
+
+  const data: BackendPage = await res.json();
+  return { games: data.content, genreLabel: null };
+}
+
+export async function getCatalogGamesByGenre(
+  genreId: number,
+  size = 100
+): Promise<{ games: Game[]; genreLabel: string | null }> {
+  const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8080";
+  const url = new URL(`${backendUrl}/api/games`);
+  url.searchParams.set("genreId", String(genreId));
+  url.searchParams.set("size", String(size));
+
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) return { games: [], genreLabel: null };
+
+  const data: BackendPage = await res.json();
+
+  const genreLabel =
+    data.content
+      .flatMap((g) => g.genres)
+      .find((g) => g.id === genreId)?.description ?? null;
+
+  return { games: data.content, genreLabel };
 }
 
 /* ── Recommended games ── */
 
 export async function getRecommendedGames(): Promise<Game[]> {
-  const rawData = await fetchFeaturedData();
-  return rawData.specials.items.map(rawToGame);
+  const data = await fetchFeaturedData();
+  return data.specials;
 }
 
 /* ── Bestsellers ── */
 
 export async function getBestsellerGames(): Promise<BestsellerGame[]> {
-  const rawData = await fetchFeaturedData();
-  return rawData.top_sellers.items
+  const data = await fetchFeaturedData();
+  return data.topSellers
+    .slice(0, 20)
+    .filter((game) => game.priceFinal < 15000)
     .slice(0, 10)
-    .map((item, i) => ({ ...rawToGame(item, i), rank: i + 1 }))
-    .filter((game) => game.price < 150)
-    .slice(0, 5);
+    .map((game, i) => ({ ...game, rank: i + 1 }));
 }
 
 /* ── New Releases ── */
 
 export async function getNewReleases(): Promise<Game[]> {
-  const rawData = await fetchFeaturedData();
-  return rawData.new_releases.items.slice(0, 6).map((item, i) => ({
-    ...rawToGame(item, i),
-    badges: ["new" as const],
-    releasedAgo: "Just Released",
-  }));
+  const data = await fetchFeaturedData();
+  return data.newReleases.slice(0, 6);
 }
 
 /* ── Pre-orders ── */
 
 export async function getPreOrders(): Promise<Game[]> {
-  const rawData = await fetchFeaturedData();
-  return rawData.coming_soon.items.slice(0, 6).map((item, i) => ({
-    ...rawToGame(item, i),
-    badges: ["pre-order" as const],
-    timeLeft: item.discount_expiration
-      ? `${Math.max(1, Math.ceil((item.discount_expiration * 1000 - Date.now()) / 86400000))} Days Left`
-      : "Coming Soon",
-  }));
+  const data = await fetchFeaturedData();
+  return data.comingSoon.slice(0, 6);
 }
 
 /* ── Budget Deals ── */
 
-function buildDealTier(
-  label: string,
-  maxCents: number,
-  items: Awaited<ReturnType<typeof fetchFeaturedData>>["specials"]["items"]
-): DealTier {
+function buildDealTier(label: string, maxCents: number, items: Game[]): DealTier {
   return {
     label,
     maxPrice: maxCents / 100,
     games: items
-      .filter(
-        (it) => it.final_price > 0 && it.final_price <= maxCents && it.discounted
-      )
-      .slice(0, 6)
-      .map((it, i) => ({ ...rawToGame(it, i), badges: ["discount" as const] })),
+      .filter((g) => g.priceFinal > 0 && g.priceFinal <= maxCents && g.reductionPercentage > 0)
+      .slice(0, 6),
   };
 }
 
 export async function getDealTiers(): Promise<DealTier[]> {
-  const rawData = await fetchFeaturedData();
+  const data = await fetchFeaturedData();
   const allDiscounted = [
-    ...rawData.specials.items,
-    ...rawData.new_releases.items,
-    ...rawData.top_sellers.items,
-  ].filter((it) => it.discounted && it.final_price > 0);
+    ...data.specials,
+    ...data.newReleases,
+    ...data.topSellers,
+  ].filter((g) => g.reductionPercentage > 0 && g.priceFinal > 0);
 
   return [
     buildDealTier("Under $5", 500, allDiscounted),
@@ -116,78 +106,15 @@ export async function getDealTiers(): Promise<DealTier[]> {
   ];
 }
 
-/* ── Catalog ── */
-
-export async function getCatalogGames(): Promise<Game[]> {
-  const rawData = await fetchFeaturedData();
-  const all = [
-    ...rawData.specials.items,
-    ...rawData.top_sellers.items,
-    ...rawData.new_releases.items,
-    ...rawData.coming_soon.items,
-  ];
-  const seen = new Set<number>();
-  return all
-    .filter((it) => {
-      if (seen.has(it.id)) return false;
-      seen.add(it.id);
-      return true;
-    })
-    .map(rawToGame);
-}
-
-/* ── Game by slug ── */
-
-export async function getGameBySlug(
-  slug: string
-): Promise<{ game: Game; steamAppId: number } | undefined> {
-  const rawData = await fetchFeaturedData();
-  const all = [
-    ...rawData.specials.items,
-    ...rawData.top_sellers.items,
-    ...rawData.new_releases.items,
-    ...rawData.coming_soon.items,
-  ];
-  const seen = new Set<number>();
-  const unique = all.filter((it) => {
-    if (seen.has(it.id)) return false;
-    seen.add(it.id);
-    return true;
-  });
-  const found = unique.find((it) => slugify(it.name) === slug);
-  if (!found) return undefined;
-  return { game: rawToGame(found, 0), steamAppId: found.id };
-}
-
 /* ── Related games ── */
 
 export async function getRelatedGames(): Promise<RelatedGame[]> {
-  const rawData = await fetchFeaturedData();
-  return rawData.specials.items.slice(0, 4).map((item, i) => ({
-    ...rawToGame(item, i),
+  const data = await fetchFeaturedData();
+  return data.specials.slice(0, 4).map((game, i) => ({
+    ...game,
     genreBadge: ["RPG", "ACTION", "SHOOTER", "ADVENTURE"][i % 4],
   }));
 }
-
-/* ── Static UI constants ── */
-
-export const genres = [
-  "All Genres",
-  "Action",
-  "RPG",
-  "Strategy",
-  "Indie",
-  "Simulation",
-  "Racing",
-  "VR Only",
-  "Free to Play",
-];
-
-export const allPlatforms: { value: Platform; label: string }[] = [
-  { value: "windows", label: "Windows" },
-  { value: "mac", label: "macOS" },
-  { value: "linux", label: "Linux" },
-];
 
 export const allGenres: string[] = [
   "Action",

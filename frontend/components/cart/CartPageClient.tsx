@@ -50,7 +50,7 @@ export function CartPageClient({ recommendedGames }: { recommendedGames: Game[] 
         </div>
 
         <div className="lg:col-span-3">
-          <OrderSummaryCard subtotal={subtotal} />
+          <OrderSummaryCard subtotal={subtotal} items={cart.items} />
         </div>
       </div>
 

@@ -1,4 +1,8 @@
-import type { DLCItem } from "@/lib/types";
+interface DLCItem {
+  id: string;
+  title: string;
+  price: number;
+}
 
 export function DLCSection({ items }: { items: DLCItem[] }) {
   return (

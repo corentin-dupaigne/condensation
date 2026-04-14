@@ -24,7 +24,7 @@ export function AddToCartButton({
       <button
         type="button"
         className={className}
-        aria-label={`Add ${game.title} to cart`}
+        aria-label={`Add ${game.name} to cart`}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -60,7 +60,7 @@ export function AddToCartButton({
 
       {justAdded && (
         <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 animate-fade-in whitespace-nowrap rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface shadow-lg border border-outline-variant/20">
-          {game.title} has been added to the cart
+          {game.name} has been added to the cart
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-surface-container-high" />
         </div>
       )}

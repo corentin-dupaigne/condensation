@@ -1,5 +1,11 @@
 import React from "react";
-import type { Achievement } from "@/lib/types";
+
+interface Achievement {
+  id: string;
+  title: string;
+  icon: string;
+  unlocked: boolean;
+}
 
 const achievementIconMap: Record<string, React.ReactNode> = {
   directions_walk: (

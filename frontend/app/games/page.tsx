@@ -4,7 +4,11 @@ export const dynamic = "force-dynamic";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CatalogClient } from "@/components/catalog/CatalogClient";
-import { getCatalogGames, allPlatforms, allGenres } from "@/lib/game-data";
+import {
+  getCatalogGames,
+  getCatalogGamesByGenre,
+  allGenres,
+} from "@/lib/game-data";
 import { getAuthState } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -13,9 +17,18 @@ export const metadata: Metadata = {
     "Browse thousands of game keys at the best prices. Filter by platform, genre, and price.",
 };
 
-export default async function CatalogPage() {
-  const [games, { isLoggedIn, userName }] = await Promise.all([
-    getCatalogGames(),
+interface Props {
+  searchParams: Promise<{ genre?: string }>;
+}
+
+export default async function CatalogPage({ searchParams }: Props) {
+  const { genre } = await searchParams;
+  const genreId = genre ? parseInt(genre, 10) : null;
+
+  const [gamesResult, { isLoggedIn, userName }] = await Promise.all([
+    genreId !== null && !isNaN(genreId)
+      ? getCatalogGamesByGenre(genreId)
+      : getCatalogGames(),
     getAuthState(),
   ]);
 
@@ -24,9 +37,10 @@ export default async function CatalogPage() {
       <Header isLoggedIn={isLoggedIn} userName={userName} />
       <main>
         <CatalogClient
-          games={games}
-          platforms={allPlatforms}
+          games={gamesResult.games}
           genres={allGenres}
+          activeGenreId={genreId ?? undefined}
+          activeGenreLabel={gamesResult.genreLabel ?? undefined}
         />
       </main>
       <Footer />

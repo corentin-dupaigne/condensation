@@ -1,15 +1,15 @@
 package fr.fullstack.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "screenshots")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Screenshot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +22,11 @@ public class Screenshot {
     @Column(name = "steam_id")
     private Integer steamId;
 
-    @Column(name = "path_thumbnail", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "path_thumbnail", columnDefinition = "TEXT", nullable = false)
     private String pathThumbnail;
 
-    @Column(name = "path_full", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "path_full", columnDefinition = "TEXT", nullable = false)
     private String pathFull;
 
-    private Short position;
+    private Short position = 0;
 }
