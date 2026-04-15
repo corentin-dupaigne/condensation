@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { fetchBalance } from "@/lib/balance-store";
 import { formatPrice } from "@/lib/format-price";
+import { TopUpModal } from "@/components/wallet/TopUpModal";
 
 type ModalState = "idle" | "loading" | "error";
 
@@ -27,13 +28,13 @@ export function PaymentMethodModal({
   onClose,
   total,
   totalCents,
-  lineItems,
   onBalancePay,
   onStripePay,
 }: PaymentMethodModalProps) {
   const [state, setState] = useState<ModalState>("idle");
   const [balance, setBalance] = useState<number>(0);         // in dollars
   const [balanceLoading, setBalanceLoading] = useState(false);
+  const [topUpOpen, setTopUpOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const balanceShortfall = balance * 100 < totalCents;
@@ -85,6 +86,8 @@ export function PaymentMethodModal({
         onClick={onClose}
         aria-hidden="true"
       />
+
+      <TopUpModal open={topUpOpen} onClose={() => setTopUpOpen(false)} />
 
       {/* Scrollable container */}
       <div className="relative flex min-h-full items-start justify-center py-8 px-4">
@@ -156,20 +159,29 @@ export function PaymentMethodModal({
                 <span className="ml-auto text-sm text-on-surface-variant">
                   Balance:{" "}
                   <span className="font-headline font-bold text-secondary">
-                    {balanceLoading ? "…" : formatPrice(balance)}
+                    {balanceLoading ? "…" : (balance === 0 ? "$0.00" : formatPrice(balance))}
                   </span>
                 </span>
               </div>
 
               {balanceShortfall && (
-                <p id={shortfallMsgId} className="ml-7 flex items-center gap-1.5 text-xs text-error">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                  Insufficient balance
-                </p>
+                <div className="ml-7 flex items-center justify-between gap-3">
+                  <p id={shortfallMsgId} className="flex items-center gap-1.5 text-xs text-error">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    Insufficient balance
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setTopUpOpen(true)}
+                    className="pointer-events-auto rounded-md border border-secondary/40 px-3 py-1 text-xs font-bold text-secondary transition-colors hover:bg-secondary/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-secondary/40"
+                  >
+                    Top Up
+                  </button>
+                </div>
               )}
 
               <button

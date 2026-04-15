@@ -100,8 +100,13 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: lineItems,
+      metadata: {
+        userid: String(userid),
+        type: "game_purchase",
+        games: JSON.stringify(games.map((g) => ({ gameIds: g.gameIds, quantity: g.quantity }))),
+      },
       payment_intent_data: {
-        metadata: { userid: String(userid) },
+        metadata: { userid: String(userid), type: "game_purchase" },
       },
       success_url: successUrl,
       cancel_url: returnUrl,

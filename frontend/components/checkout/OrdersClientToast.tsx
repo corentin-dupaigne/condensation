@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { clearCart } from "@/lib/cart-store";
 import { PurchaseSuccessToast } from "./PurchaseSuccessToast";
 
 export function OrdersClientToast() {
@@ -9,7 +10,10 @@ export function OrdersClientToast() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(searchParams.get("purchase") === "success");
+    if (searchParams.get("purchase") === "success") {
+      setVisible(true);
+      clearCart();
+    }
   }, [searchParams]);
 
   if (!visible) return null;

@@ -70,7 +70,7 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
   );
 }
 
-export function ProductHero({ game }: { game: BackendGameDetail }) {
+export function ProductHero({ game, isLoggedIn = false }: { game: BackendGameDetail; isLoggedIn?: boolean }) {
   const router = useRouter();
   const [keyCounts, setKeyCounts] = useState<number | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -303,7 +303,13 @@ export function ProductHero({ game }: { game: BackendGameDetail }) {
           {/* CTA Buttons */}
           <div className="space-y-3 pt-4">
             <button
-              onClick={() => setShowPaymentModal(true)}
+              onClick={() => {
+                if (!isLoggedIn) {
+                  router.push("/api/auth/login");
+                  return;
+                }
+                setShowPaymentModal(true);
+              }}
               disabled={balanceLoading || stripeLoading}
               className="w-full py-4 bg-linear-to-br from-secondary to-secondary-container text-on-secondary font-headline font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(161,250,255,0.3)] disabled:opacity-60 disabled:cursor-not-allowed"
             >

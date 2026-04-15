@@ -22,10 +22,6 @@ export function OrderSummaryCard({
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
 
   async function handleBalancePay() {
-    if (!isLoggedIn) {
-      router.push("/api/auth/login");
-      return;
-    }
     setShowPaymentModal(false);
     setStatus("loading");
     try {
@@ -50,10 +46,6 @@ export function OrderSummaryCard({
   }
 
   async function handleStripePay() {
-    if (!isLoggedIn) {
-      router.push("/api/auth/login");
-      return;
-    }
     setShowPaymentModal(false);
     setStatus("loading");
     try {
@@ -108,7 +100,13 @@ export function OrderSummaryCard({
 
         <button
           type="button"
-          onClick={() => setShowPaymentModal(true)}
+          onClick={() => {
+            if (!isLoggedIn) {
+              router.push("/api/auth/login");
+              return;
+            }
+            setShowPaymentModal(true);
+          }}
           disabled={status === "loading"}
           className="w-full rounded-xl bg-gradient-to-br from-secondary to-secondary-dim py-5 font-headline text-lg font-black uppercase tracking-widest text-on-secondary shadow-[0_0_30px_rgba(161,250,255,0.18)] transition-all duration-150 hover:shadow-[0_0_45px_rgba(161,250,255,0.26)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
         >
