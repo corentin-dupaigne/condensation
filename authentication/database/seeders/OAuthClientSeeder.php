@@ -36,7 +36,7 @@ class OAuthClientSeeder extends Seeder
             'secret' => null, // Public client — no secret for PKCE
             'provider' => 'users',
             'redirect_uris' => json_encode([
-                'http://localhost:4000/api/auth/callback',
+                env('REDIRECT_URI', 'http://localhost:4000/api/auth/callback'),
             ]),
             'grant_types' => json_encode([
                 'authorization_code',

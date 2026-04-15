@@ -5,10 +5,18 @@ resources:
   - ../../base
   - secrets/postgres-secret.yaml
   - secrets/auth-secret.yaml
+  - secrets/postgres-game-secret.yaml
+  - secrets/backend-secret.yaml
   - configmaps/frontend-cm.yaml
   - configmaps/auth-cm.yaml
+  - configmaps/backend-cm.yaml
+  - configmaps/kafka-cm.yaml
 images:
   - name: ghcr.io/corentin-dupaigne/fullstack_project/auth
     newTag: dev
   - name: ghcr.io/corentin-dupaigne/fullstack_project/frontend
+    newTag: dev
+  - name: ghcr.io/corentin-dupaigne/fullstack_project/backend
+    newTag: dev
+  - name: ghcr.io/corentin-dupaigne/fullstack_project/postgres-game
     newTag: dev
