@@ -11,7 +11,7 @@ spec:
     protocol: TCP
     targetPort: 5432
   selector:
-    app: postgres-svc
+    app: postgres
   type: ClusterIP
 status:
   loadBalancer: {}

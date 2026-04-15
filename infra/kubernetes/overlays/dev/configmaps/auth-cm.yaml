@@ -11,7 +11,7 @@ data:
   LOG_CHANNEL: "stack"
   LOG_LEVEL: "debug"
   DB_CONNECTION: "pgsql"
-  DB_HOST: "postgres"
+  DB_HOST: "postgres-svc"
   DB_PORT: "5432"
   CLIENT_ID: "ead85488-0ee1-41f9-9703-eac26103f5f4"
   REDIRECT_URI: "http://dev.condensation.corentindupaigne.com/api/auth/callback"
