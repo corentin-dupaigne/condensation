@@ -8,14 +8,14 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return redirect('http://localhost:4000/');
+    return redirect(config('app.frontend_url'));
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/auth/logout', function (\Illuminate\Http\Request $request) {
     \Illuminate\Support\Facades\Auth::guard('web')->logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-    return redirect('http://localhost:4000/');
+    return redirect(config('app.frontend_url'));
 });
 
 Route::middleware('auth')->group(function () {

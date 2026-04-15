@@ -27,6 +27,13 @@ spec:
   - matches:
     - path:
         type: PathPrefix
+        value: /oauth
+    backendRefs:
+    - name: auth-svc
+      port: 80
+  - matches:
+    - path:
+        type: PathPrefix
         value: /
     backendRefs:
     - name: frontend-svc
