@@ -2,3 +2,5 @@ resources:
   - gateway-class.yaml
   - gateway.yaml
   - metallb-config.yaml
+  - cert-manager.yaml
+  - http-redirect-route.yaml

@@ -7,6 +7,7 @@ spec:
   parentRefs:
   - name: gateway
     namespace: default
+    sectionName: https-dev
   hostnames:
   - "dev.condensation.corentindupaigne.com"
   rules:
@@ -28,6 +29,13 @@ spec:
     - path:
         type: PathPrefix
         value: /oauth
+    backendRefs:
+    - name: auth-svc
+      port: 80
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /auth
     backendRefs:
     - name: auth-svc
       port: 80

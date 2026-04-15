@@ -37,7 +37,7 @@ export async function GET() {
     return new Response('OAuth configuration error inside environment variables', { status: 500 });
   }
 
-  const authUrl = new URL(`${process.env.AUTH_URL}/oauth/authorize`);
+  const authUrl = new URL(`${process.env.AUTH_URL}/auth/oauth-init`);
   authUrl.searchParams.append('client_id', process.env.CLIENT_ID);
   authUrl.searchParams.append('redirect_uri', process.env.REDIRECT_URI);
   authUrl.searchParams.append('response_type', 'code');
