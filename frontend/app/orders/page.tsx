@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { OrdersClientToast } from "@/components/checkout/OrdersClientToast";
 import { getAuthState } from "@/lib/auth";
 import { getUserId } from "@/lib/server-auth";
 import type { Order } from "@/lib/types";
@@ -41,6 +42,7 @@ export default async function OrdersPage() {
   return (
     <>
       <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <OrdersClientToast />
       <main className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-10">
           <h1 className="font-headline text-5xl font-black tracking-tight text-on-surface">

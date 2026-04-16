@@ -63,7 +63,7 @@ export default async function ProductDetailPage({ params }: Props) {
           <Breadcrumb items={breadcrumbItems} />
         </div>
 
-        <ProductHero game={game} />
+        <ProductHero game={game} isLoggedIn={isLoggedIn} />
 
         <div className="mx-auto flex max-w-7xl gap-20 mb-8">
           <div className="w-2/3">

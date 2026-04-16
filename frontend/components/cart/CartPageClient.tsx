@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { GameCard } from "@/components/shared/GameCard";
 import { CartItemRow } from "@/components/cart/CartItemRow";
 import { EmptyCartState } from "@/components/cart/EmptyCartState";
@@ -7,12 +8,15 @@ import { OrderSummaryCard } from "@/components/cart/OrderSummaryCard";
 import { clearCart, getCartSubtotal, useCartState } from "@/lib/cart-store";
 import type { Game } from "@/lib/types";
 
-export function CartPageClient({ recommendedGames }: { recommendedGames: Game[] }) {
+export function CartPageClient({ recommendedGames, isLoggedIn = false }: { recommendedGames: Game[]; isLoggedIn?: boolean }) {
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+
   const cart = useCartState();
 
   const itemCount = cart.items.reduce((sum, it) => sum + it.qty, 0);
   const subtotal = getCartSubtotal(cart);
 
+  if (!mounted) return null;
   if (cart.items.length === 0) return <EmptyCartState />;
 
   return (
@@ -27,7 +31,7 @@ export function CartPageClient({ recommendedGames }: { recommendedGames: Game[] 
         <div className="mt-3 h-1 w-24 bg-gradient-to-r from-secondary to-transparent" />
       </div>
 
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-10">
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
         <div className="space-y-10 lg:col-span-7">
           <div className="space-y-4">
             {cart.items.map((item) => (
@@ -49,8 +53,8 @@ export function CartPageClient({ recommendedGames }: { recommendedGames: Game[] 
           </div>
         </div>
 
-        <div className="lg:col-span-3">
-          <OrderSummaryCard subtotal={subtotal} items={cart.items} />
+        <div className="lg:col-span-5">
+          <OrderSummaryCard subtotal={subtotal} items={cart.items} isLoggedIn={isLoggedIn} />
         </div>
       </div>
 

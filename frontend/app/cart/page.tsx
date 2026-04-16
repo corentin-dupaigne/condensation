@@ -21,7 +21,7 @@ export default async function CartPage() {
     <>
       <Header isLoggedIn={isLoggedIn} userName={userName} />
       <main>
-        <CartPageClient recommendedGames={recommendedGames} />
+        <CartPageClient recommendedGames={recommendedGames} isLoggedIn={isLoggedIn} />
       </main>
       <Footer />
     </>

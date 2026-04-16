@@ -8,7 +8,10 @@ import type { BackendGameDetail } from "@/lib/types";
 import { formatPrice } from "@/lib/format-price";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSteam } from "@fortawesome/free-brands-svg-icons";
-import { addToCart, cartItemFromGame } from "@/lib/cart-store";
+import { addToCart, cartItemFromGame, clearCart } from "@/lib/cart-store";
+import { fetchBalance } from "@/lib/balance-store";
+import { PaymentMethodModal } from "@/components/checkout/PaymentMethodModal";
+import { useRouter } from "next/navigation";
 
 type MediaItem =
   | { kind: "movie"; id: number; name: string; thumbnail: string; hls: string }
@@ -67,8 +70,12 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
   );
 }
 
-export function ProductHero({ game }: { game: BackendGameDetail }) {
+export function ProductHero({ game, isLoggedIn = false }: { game: BackendGameDetail; isLoggedIn?: boolean }) {
+  const router = useRouter();
   const [keyCounts, setKeyCounts] = useState<number | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
 
   useEffect(() => {
     fetch(`/api/steam/${game.id}/key_counts`)
@@ -106,6 +113,50 @@ export function ProductHero({ game }: { game: BackendGameDetail }) {
     game.genres.length > 0
       ? game.genres.map((genre) => genre.description).join(" · ")
       : "N/A";
+
+  async function handleBuyNowBalance() {
+    setShowPaymentModal(false);
+    setBalanceLoading(true);
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          games: [{ gameIds: game.id, quantity: 1 }],
+        }),
+      });
+      if (!res.ok) {
+        setBalanceLoading(false);
+        return;
+      }
+      clearCart();
+      await fetchBalance();
+      router.push("/orders?purchase=success");
+    } catch {
+      setBalanceLoading(false);
+    }
+  }
+
+  async function handleBuyNowStripe() {
+    setShowPaymentModal(false);
+    setStripeLoading(true);
+    try {
+      const res = await fetch("/api/stripe/game-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          games: [{ gameIds: game.id, quantity: 1 }],
+          returnUrl: `${window.location.origin}/orders?purchase=success`,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error();
+      setStripeLoading(false);
+      window.location.href = data.url;
+    } catch {
+      setStripeLoading(false);
+    }
+  }
 
   return (
     <section className="mx-auto max-w-7xl mb-20">
@@ -251,8 +302,18 @@ export function ProductHero({ game }: { game: BackendGameDetail }) {
 
           {/* CTA Buttons */}
           <div className="space-y-3 pt-4">
-            <button className="w-full py-4 bg-linear-to-br from-secondary to-secondary-container text-on-secondary font-headline font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(161,250,255,0.3)]">
-              Buy Now
+            <button
+              onClick={() => {
+                if (!isLoggedIn) {
+                  router.push("/api/auth/login");
+                  return;
+                }
+                setShowPaymentModal(true);
+              }}
+              disabled={balanceLoading || stripeLoading}
+              className="w-full py-4 bg-linear-to-br from-secondary to-secondary-container text-on-secondary font-headline font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(161,250,255,0.3)] disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {balanceLoading || stripeLoading ? "Processing…" : "Buy Now"}
             </button>
             <div className="grid grid-cols-2 gap-3">
               <ProductAddToCartButton game={game} />
@@ -300,6 +361,21 @@ export function ProductHero({ game }: { game: BackendGameDetail }) {
           </div>
         </div>
       </div>
+
+      <PaymentMethodModal
+        id="product-hero-payment-modal"
+        open={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        total={finalPrice}
+        totalCents={game.priceFinal}
+        lineItems={[{
+          name: game.name,
+          priceCents: game.priceFinal,
+          quantity: 1,
+        }]}
+        onBalancePay={handleBuyNowBalance}
+        onStripePay={handleBuyNowStripe}
+      />
     </section>
   );
 }
