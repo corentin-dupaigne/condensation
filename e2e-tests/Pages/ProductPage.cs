@@ -19,8 +19,8 @@ public class ProductPage : BasePage
     private ILocator MainMedia => Page.Locator("[class*='media'], [class*='hero'] img, [class*='hero'] video").First;
     private ILocator Thumbnails => Page.Locator("[class*='thumbnail'], [class*='thumb']");
 
-    // Breadcrumb
-    private ILocator BreadcrumbLinks => Page.Locator("nav[aria-label*='breadcrumb'] a, [class*='breadcrumb'] a");
+    // Breadcrumb — the Breadcrumb component renders a plain <nav> with <a> links
+    private ILocator BreadcrumbLinks => Page.Locator("main nav a, nav:has(a:has-text('Home')) a");
 
     // Game details
     private ILocator DeveloperInfo => Page.Locator("text=Developer").Locator("..");
@@ -51,7 +51,7 @@ public class ProductPage : BasePage
     public async Task<int> GetBreadcrumbCountAsync() => await BreadcrumbLinks.CountAsync();
 
     public async Task ClickBreadcrumbAsync(string text) =>
-        await Page.Locator($"[class*='breadcrumb'] a:has-text('{text}')").ClickAsync();
+        await Page.Locator($"main nav a:has-text('{text}')").DispatchEventAsync("click");
 
     public async Task<int> GetRelatedGamesCountAsync() => await RelatedGames.CountAsync();
 

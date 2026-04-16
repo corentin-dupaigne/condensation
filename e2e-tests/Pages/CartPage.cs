@@ -7,10 +7,9 @@ public class CartPage : BasePage
     protected override string PagePath => "/cart";
 
     // Empty state
-    // Use href selector to avoid matching the footer "Browse Games" link (href="#")
     private ILocator EmptyCartMessage => Page.Locator("p:has-text('Your cart is empty')");
-    private ILocator BrowseGamesLink => Page.Locator("a[href='/games']:has-text('Browse')");
-    private ILocator BackToHomeLink => Page.Locator("a[href='/']:has-text('Back to home')");
+    private ILocator BrowseGamesLink => Page.Locator("main a[href='/games']:has-text('Browse games')");
+    private ILocator BackToHomeLink => Page.Locator("main a[href='/']:has-text('Back to home')");
 
     // Cart with items
     private ILocator CartHeading => Page.Locator("h1").First;
@@ -41,12 +40,11 @@ public class CartPage : BasePage
     public async Task<bool> IsBackToHomeLinkVisibleAsync() =>
         await BackToHomeLink.IsVisibleAsync();
 
-    // Force = true bypasses the Next.js dev overlay portal that intercepts pointer events
     public async Task ClickBrowseGamesAsync() =>
-        await BrowseGamesLink.ClickAsync(new LocatorClickOptions { Force = true });
+        await BrowseGamesLink.DispatchEventAsync("click");
 
     public async Task ClickBackToHomeAsync() =>
-        await BackToHomeLink.ClickAsync(new LocatorClickOptions { Force = true });
+        await BackToHomeLink.DispatchEventAsync("click");
 
     // ── Cart with items ──────────────────────────────────────────────────────────
 

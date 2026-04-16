@@ -61,9 +61,12 @@ public class HeroCarouselTests : BaseTest
     [Test]
     public async Task HeroCarousel_NextButton_ShouldAdvanceSlide()
     {
+        // Hover the carousel to pause auto-advance
+        await Carousel.HoverAsync();
+
         var labelBefore = await ActiveDot.GetAttributeAsync("aria-label");
 
-        await NextButton.ClickAsync(new LocatorClickOptions { Force = true });
+        await NextButton.ClickAsync();
         // Allow the 700 ms CSS transition to complete
         await Page.WaitForTimeoutAsync(900);
 
@@ -74,13 +77,16 @@ public class HeroCarouselTests : BaseTest
     [Test]
     public async Task HeroCarousel_PrevButton_ShouldGoToPreviousSlide()
     {
-        // Advance first so we're not already on slide 1 (wrap-around counts, but keep it simple)
-        await NextButton.ClickAsync(new LocatorClickOptions { Force = true });
+        // Hover the carousel to pause auto-advance
+        await Carousel.HoverAsync();
+
+        // Advance first so we're not already on slide 1
+        await NextButton.ClickAsync();
         await Page.WaitForTimeoutAsync(900);
 
         var labelAfterNext = await ActiveDot.GetAttributeAsync("aria-label");
 
-        await PrevButton.ClickAsync(new LocatorClickOptions { Force = true });
+        await PrevButton.ClickAsync();
         await Page.WaitForTimeoutAsync(900);
 
         var labelAfterPrev = await ActiveDot.GetAttributeAsync("aria-label");
@@ -100,6 +106,9 @@ public class HeroCarouselTests : BaseTest
     [Test]
     public async Task HeroCarousel_DotClick_ShouldActivateCorrespondingSlide()
     {
+        // Hover the carousel to pause auto-advance
+        await Carousel.HoverAsync();
+
         // Click the third dot (index 2)
         var thirdDot = DotButtons.Nth(2);
         var thirdDotLabel = await thirdDot.GetAttributeAsync("aria-label");
@@ -134,9 +143,12 @@ public class HeroCarouselTests : BaseTest
     [Test]
     public async Task HeroCarousel_BuyNowCTA_ShouldNavigateToProductPage()
     {
+        // Hover to pause auto-advance, then click the CTA
+        await Carousel.HoverAsync();
+
         var buyNow = Carousel.Locator("a:has-text('BUY NOW')");
-        await buyNow.ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await buyNow.DispatchEventAsync("click");
+        await Page.WaitForURLAsync("**/games/**");
 
         Assert.That(Page.Url, Does.Contain("/games/"));
     }

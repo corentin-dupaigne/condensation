@@ -29,7 +29,7 @@ public class CatalogPage : BasePage
     public async Task<int> GetGameCardCountAsync() => await GameCards.CountAsync();
 
     public async Task ClickGameCardAsync(int index) =>
-        await GameCards.Nth(index).ClickAsync(new LocatorClickOptions { Force = true });
+        await GameCards.Nth(index).DispatchEventAsync("click");
 
     public async Task ClickAddToCartAsync(int index) => await AddToCartButtons.Nth(index).ClickAsync();
 

@@ -32,9 +32,9 @@ public class NavigationTests : BaseTest
 
         var catalogPage = new CatalogPage(Page);
         await catalogPage.Header.ClickLogoAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForURLAsync(url => !url.Contains("/games"));
 
-        Assert.That(Page.Url, Does.EndWith("/").Or.EqualTo(TestSettings.BaseUrl));
+        Assert.That(Page.Url.TrimEnd('/'), Is.EqualTo(TestSettings.BaseUrl.TrimEnd('/')));
     }
 
     // ── Cart icon ─────────────────────────────────────────────────────────────
@@ -43,8 +43,7 @@ public class NavigationTests : BaseTest
     public async Task Header_CartLink_ShouldNavigateToCart()
     {
         var cartLink = Page.Locator("header a[aria-label='Cart']");
-        // Force = true bypasses the Next.js dev overlay portal that intercepts pointer events
-        await cartLink.ClickAsync(new LocatorClickOptions { Force = true });
+        await cartLink.DispatchEventAsync("click");
         await Page.WaitForURLAsync("**/cart");
         Assert.That(Page.Url, Does.Contain("/cart"));
     }
@@ -78,9 +77,9 @@ public class NavigationTests : BaseTest
 
         var catalogPage = new CatalogPage(Page);
         await catalogPage.Header.ClickNavLinkAsync("Store");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForURLAsync(url => !url.Contains("/games"));
 
-        Assert.That(Page.Url, Does.EndWith("/").Or.EqualTo(TestSettings.BaseUrl));
+        Assert.That(Page.Url.TrimEnd('/'), Is.EqualTo(TestSettings.BaseUrl.TrimEnd('/')));
     }
 
     [Test]

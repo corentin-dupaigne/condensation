@@ -65,8 +65,8 @@ public class ProductTests : BaseTest
     public async Task ProductPage_BreadcrumbHome_ShouldNavigateToHomePage()
     {
         await _productPage.ClickBreadcrumbAsync("Home");
-        await Page.WaitForURLAsync("**/");
-        Assert.That(Page.Url, Does.EndWith("/"));
+        await Page.WaitForURLAsync(url => !url.Contains("/games/"));
+        Assert.That(Page.Url.TrimEnd('/'), Is.EqualTo(TestSettings.BaseUrl.TrimEnd('/')));
     }
 
     // ── CTA buttons ───────────────────────────────────────────────────────────

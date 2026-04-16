@@ -1,140 +1,93 @@
 using NUnit.Framework;
+using Microsoft.Playwright;
 using Condensation.E2E.Tests.Pages;
+using Condensation.E2E.Tests.Config;
 
 namespace Condensation.E2E.Tests.Tests;
 
+/// <summary>
+/// Tests that verify the login/auth entry points from the frontend.
+/// The actual login form is served by the external auth service (port 8000),
+/// so these tests verify the Sign In link behavior and redirect from the
+/// Next.js frontend (port 4000).
+/// </summary>
 [TestFixture]
 public class LoginTests : BaseTest
 {
-    private LoginPage _loginPage = null!;
-
     [SetUp]
     public async Task SetUp()
     {
-        _loginPage = new LoginPage(Page);
-        await _loginPage.NavigateAsync();
+        await Page.GotoAsync(TestSettings.BaseUrl);
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }
 
     [Test]
-    public async Task LoginPage_ShouldLoadSuccessfully()
+    public async Task Auth_SignInLink_ShouldBeVisible()
     {
-        var titleText = await _loginPage.GetPageTitleTextAsync();
-        Assert.That(titleText.ToUpper(), Does.Contain("SIGN IN"));
+        var signInLink = Page.Locator("header a:has-text('Sign In')");
+        await Expect(signInLink).ToBeVisibleAsync();
     }
 
     [Test]
-    public async Task LoginPage_ShouldDisplayEmailAndPasswordFields()
+    public async Task Auth_SignInLink_ShouldPointToAuthLoginEndpoint()
     {
-        var isEmailVisible = await _loginPage.IsEmailInputVisibleAsync();
-        var isSignInVisible = await _loginPage.IsSignInButtonVisibleAsync();
-        Assert.Multiple(() =>
-        {
-            Assert.That(isEmailVisible, Is.True);
-            Assert.That(isSignInVisible, Is.True);
-        });
+        var signInLink = Page.Locator("header a:has-text('Sign In')");
+        var href = await signInLink.GetAttributeAsync("href");
+        Assert.That(href, Does.Contain("auth").Or.Contain("login"));
     }
 
     [Test]
-    public async Task LoginPage_ShouldTogglePasswordVisibility()
+    public async Task Auth_SignInLink_ShouldBeVisibleOnCatalogPage()
     {
-        await _loginPage.FillPasswordAsync("testpassword");
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/games");
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        var typeBefore = await _loginPage.GetPasswordInputTypeAsync();
-        Assert.That(typeBefore, Is.EqualTo("password"));
-
-        await _loginPage.TogglePasswordVisibilityAsync();
-
-        var typeAfter = await _loginPage.GetPasswordInputTypeAsync();
-        Assert.That(typeAfter, Is.EqualTo("text"));
+        var signInLink = Page.Locator("header a:has-text('Sign In')");
+        await Expect(signInLink).ToBeVisibleAsync();
     }
 
     [Test]
-    public async Task LoginPage_ShouldHaveFiveOAuthProviders()
+    public async Task Auth_SignInLink_ShouldBeVisibleOnCartPage()
     {
-        var count = await _loginPage.GetOAuthButtonCountAsync();
-        Assert.That(count, Is.EqualTo(5));
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart");
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var signInLink = Page.Locator("header a:has-text('Sign In')");
+        await Expect(signInLink).ToBeVisibleAsync();
     }
 
     [Test]
-    public async Task LoginPage_SignUpLink_ShouldNavigateToRegister()
+    public async Task Auth_SignInLink_ShouldBeVisibleOnSearchPage()
     {
-        await _loginPage.ClickSignUpLinkAsync();
-        await Page.WaitForURLAsync("**/register");
-        Assert.That(Page.Url, Does.Contain("/register"));
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/search");
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var signInLink = Page.Locator("header a:has-text('Sign In')");
+        await Expect(signInLink).ToBeVisibleAsync();
     }
 
     [Test]
-    public async Task LoginPage_ShouldAllowFillingLoginForm()
+    public async Task Auth_SignUpLink_ShouldBeVisible()
     {
-        await _loginPage.FillEmailAsync("test@example.com");
-        await _loginPage.FillPasswordAsync("Password123!");
-
-        var isSignInVisible = await _loginPage.IsSignInButtonVisibleAsync();
-        Assert.That(isSignInVisible, Is.True);
+        var signUpLink = Page.Locator("header a:has-text('Sign Up')");
+        await Expect(signUpLink).ToBeVisibleAsync();
     }
 
     [Test]
-    public async Task LoginPage_ForgotPasswordLink_ShouldBeVisible()
+    public async Task Auth_SignUpLink_ShouldPointToAuthRegisterEndpoint()
     {
-        var forgotLink = Page.Locator("a:has-text('Forgot password')");
-        await Expect(forgotLink).ToBeVisibleAsync();
-    }
-
-    // ── Navigation from login ─────────────────────────────────────────────────
-
-    [Test]
-    public async Task LoginPage_ForgotPasswordLink_ShouldNavigateToReset()
-    {
-        await _loginPage.ClickForgotPasswordAsync();
-        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.NetworkIdle);
-        Assert.That(Page.Url, Does.Contain("forgot").Or.Contain("reset").Or.Contain("password"));
-    }
-
-    // ── Form validation ───────────────────────────────────────────────────────
-
-    [Test]
-    public async Task LoginPage_EmptyForm_Submit_ShouldNotNavigateAway()
-    {
-        var initialUrl = Page.Url;
-        await _loginPage.ClickSignInAsync();
-        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
-        // HTML5 validation prevents submission; URL stays the same
-        Assert.That(Page.Url, Is.EqualTo(initialUrl));
+        var signUpLink = Page.Locator("header a:has-text('Sign Up')");
+        var href = await signUpLink.GetAttributeAsync("href");
+        Assert.That(href, Does.Contain("auth").Or.Contain("register"));
     }
 
     [Test]
-    public async Task LoginPage_InvalidEmailFormat_ShouldNotSubmit()
+    public async Task Auth_BothAuthLinks_ShouldBeVisibleWhenNotLoggedIn()
     {
-        await _loginPage.FillEmailAsync("notanemail");
-        await _loginPage.FillPasswordAsync("Password123!");
-        var initialUrl = Page.Url;
-        await _loginPage.ClickSignInAsync();
-        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
-        Assert.That(Page.Url, Is.EqualTo(initialUrl));
-    }
+        var signInLink = Page.Locator("header a:has-text('Sign In')");
+        var signUpLink = Page.Locator("header a:has-text('Sign Up')");
 
-    // ── Password toggle ───────────────────────────────────────────────────────
-
-    [Test]
-    public async Task LoginPage_PasswordToggle_ShouldRestorePasswordType()
-    {
-        await _loginPage.FillPasswordAsync("secret");
-        await _loginPage.TogglePasswordVisibilityAsync(); // show
-        await _loginPage.TogglePasswordVisibilityAsync(); // hide again
-        var type = await _loginPage.GetPasswordInputTypeAsync();
-        Assert.That(type, Is.EqualTo("password"));
-    }
-
-    // ── OAuth buttons ─────────────────────────────────────────────────────────
-
-    [Test]
-    public async Task LoginPage_OAuthButtons_ShouldAllBeVisible()
-    {
-        var oauthButtons = Page.Locator("button[aria-label^='Sign in with']");
-        var count = await oauthButtons.CountAsync();
-        for (var i = 0; i < count; i++)
-        {
-            await Expect(oauthButtons.Nth(i)).ToBeVisibleAsync();
-        }
+        await Expect(signInLink).ToBeVisibleAsync();
+        await Expect(signUpLink).ToBeVisibleAsync();
     }
 }

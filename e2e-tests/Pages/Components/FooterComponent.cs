@@ -17,7 +17,22 @@ public class FooterComponent
     public ILocator FooterLink(string text) =>
         FooterElement.Locator($"a:has-text('{text}')");
 
-    public async Task<bool> IsVisibleAsync() => await FooterElement.IsVisibleAsync();
+    public async Task<bool> IsVisibleAsync()
+    {
+        try
+        {
+            await FooterElement.WaitForAsync(new LocatorWaitForOptions
+            {
+                State = WaitForSelectorState.Visible,
+                Timeout = 5_000
+            });
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     public async Task<string> GetCopyrightTextAsync() => await CopyrightText.InnerTextAsync();
 

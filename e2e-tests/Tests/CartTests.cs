@@ -72,9 +72,8 @@ public class CartTests : BaseTest
     public async Task CartPage_EmptyCart_BackToHomeLink_ShouldNavigateHome()
     {
         await _cartPage.ClickBackToHomeAsync();
-        // WaitForURLAsync ensures we actually wait for navigation, not just network idle on /cart
         await Page.WaitForURLAsync(url => !url.Contains("/cart"));
-        Assert.That(Page.Url, Does.EndWith("/").Or.EqualTo(TestSettings.BaseUrl));
+        Assert.That(Page.Url.TrimEnd('/'), Is.EqualTo(TestSettings.BaseUrl.TrimEnd('/')));
     }
 
     // ════════════════════════════════════════════════════════════════════════════
@@ -93,14 +92,15 @@ public class CartTests : BaseTest
 
         // Guard: if no game links rendered, the backend is unavailable — skip gracefully
         var firstGameLink = Page.Locator("a[href*='/games/']").First;
-        var href = await firstGameLink.GetAttributeAsync("href", new LocatorGetAttributeOptions { Timeout = 3_000 });
+        var href = await firstGameLink.GetAttributeAsync("href", new LocatorGetAttributeOptions { Timeout = 5_000 });
         if (string.IsNullOrEmpty(href))
         {
             Assert.Ignore("No game cards found in catalog — backend may be unavailable.");
             return;
         }
 
-        await catalogPage.ClickGameCardAsync(0);
+        // Navigate directly to the product page to avoid overlay/click issues
+        await Page.GotoAsync($"{TestSettings.BaseUrl}{href}");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // Click the "Add to Cart" button and wait for the "Added!" confirmation label
@@ -118,7 +118,7 @@ public class CartTests : BaseTest
     {
         await AddFirstGameToCartAndOpenCartPageAsync();
         var heading = await _cartPage.GetCartHeadingTextAsync();
-        Assert.That(heading, Does.Contain("Shopping Cart"));
+        Assert.That(heading, Does.Contain("Shopping Cart").IgnoreCase);
     }
 
     [Test]

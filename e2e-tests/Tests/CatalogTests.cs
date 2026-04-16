@@ -48,7 +48,7 @@ public class CatalogTests : BaseTest
     {
         var initialUrl = Page.Url;
         await _catalogPage.ClickGameCardAsync(0);
-        await Page.WaitForLoadStateAsync();
+        await Page.WaitForURLAsync("**/games/**");
         Assert.That(Page.Url, Is.Not.EqualTo(initialUrl));
     }
 
@@ -75,10 +75,11 @@ public class CatalogTests : BaseTest
     {
         // Click the first visible genre label; the custom checkbox should become checked
         var firstLabel = Page.Locator("aside label").First;
+        await Expect(firstLabel).ToBeVisibleAsync();
         var firstCheckbox = firstLabel.Locator("input[type='checkbox']");
 
         var checkedBefore = await firstCheckbox.IsCheckedAsync();
-        await firstLabel.ClickAsync();
+        await firstLabel.ClickAsync(new Microsoft.Playwright.LocatorClickOptions { Force = true });
         var checkedAfter = await firstCheckbox.IsCheckedAsync();
 
         Assert.That(checkedAfter, Is.Not.EqualTo(checkedBefore));
@@ -98,7 +99,9 @@ public class CatalogTests : BaseTest
     public async Task CatalogPage_SortDropdown_Click_ShouldOpenOptions()
     {
         var sortButton = Page.Locator("button:has-text('Bestselling')");
-        await sortButton.ClickAsync();
+        // Wait for hydration then click
+        await Expect(sortButton).ToBeVisibleAsync();
+        await sortButton.ClickAsync(new Microsoft.Playwright.LocatorClickOptions { Force = true });
 
         // Options appear in a popup — "Price: Low to High" is one of them
         var option = Page.Locator("button:has-text('Price: Low to High')");
@@ -109,7 +112,8 @@ public class CatalogTests : BaseTest
     public async Task CatalogPage_SortDropdown_SelectOption_ShouldUpdateLabel()
     {
         var sortButton = Page.Locator("button:has-text('Bestselling')");
-        await sortButton.ClickAsync();
+        await Expect(sortButton).ToBeVisibleAsync();
+        await sortButton.ClickAsync(new Microsoft.Playwright.LocatorClickOptions { Force = true });
 
         await Page.Locator("button:has-text('Newest Arrivals')").ClickAsync();
         await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);

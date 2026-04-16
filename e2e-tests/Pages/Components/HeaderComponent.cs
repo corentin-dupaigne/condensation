@@ -13,8 +13,8 @@ public class HeaderComponent
     private ILocator SignUpLink => _page.Locator("header a", new() { HasTextString = "Sign Up" });
     private ILocator SignOutLink => _page.Locator("header a", new() { HasTextString = "Sign Out" });
     private ILocator UserGreeting => _page.Locator("header span:has-text('Hello,')");
-    private ILocator CartButton => _page.Locator("header button[aria-label='Cart']");
-    private ILocator CartBadge => _page.Locator("header button[aria-label='Cart'] span");
+    private ILocator CartButton => _page.Locator("header a[aria-label='Cart']");
+    private ILocator CartBadge => _page.Locator("header a[aria-label='Cart'] span");
 
     public HeaderComponent(IPage page)
     {
@@ -24,10 +24,18 @@ public class HeaderComponent
     public ILocator NavLink(string text) =>
         _page.Locator($"header nav a:has-text('{text}')");
 
-    // Force = true bypasses the Next.js dev overlay portal that intercepts pointer events
-    private static readonly LocatorClickOptions ForceClick = new() { Force = true };
+    /// <summary>
+    /// Use JavaScript click (DispatchEvent) to bypass the Next.js dev overlay
+    /// that intercepts pointer events. Unlike Force=true which still dispatches
+    /// at the element's coordinates (overlay can intercept), DispatchEvent sends
+    /// the event directly to the DOM element.
+    /// </summary>
+    private static async Task JsClickAsync(ILocator locator)
+    {
+        await locator.DispatchEventAsync("click");
+    }
 
-    public async Task ClickLogoAsync() => await Logo.ClickAsync(ForceClick);
+    public async Task ClickLogoAsync() => await JsClickAsync(Logo);
 
     public async Task SearchAsync(string query)
     {
@@ -37,13 +45,13 @@ public class HeaderComponent
 
     public async Task FillSearchAsync(string query) => await SearchInput.FillAsync(query);
 
-    public async Task ClickSignInAsync() => await SignInLink.ClickAsync(ForceClick);
+    public async Task ClickSignInAsync() => await JsClickAsync(SignInLink);
 
-    public async Task ClickSignUpAsync() => await SignUpLink.ClickAsync(ForceClick);
+    public async Task ClickSignUpAsync() => await JsClickAsync(SignUpLink);
 
-    public async Task ClickSignOutAsync() => await SignOutLink.ClickAsync(ForceClick);
+    public async Task ClickSignOutAsync() => await JsClickAsync(SignOutLink);
 
-    public async Task ClickCartAsync() => await CartButton.ClickAsync(ForceClick);
+    public async Task ClickCartAsync() => await JsClickAsync(CartButton);
 
     public async Task<bool> IsLoggedInAsync() => await UserGreeting.IsVisibleAsync();
 
@@ -53,5 +61,5 @@ public class HeaderComponent
 
     public async Task<bool> IsVisibleAsync() => await Logo.IsVisibleAsync();
 
-    public async Task ClickNavLinkAsync(string text) => await NavLink(text).ClickAsync(ForceClick);
+    public async Task ClickNavLinkAsync(string text) => await JsClickAsync(NavLink(text));
 }
