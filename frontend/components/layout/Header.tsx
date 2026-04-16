@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCartCount } from "@/lib/cart-store";
+import { useCartCount, clearCart } from "@/lib/cart-store";
 import { useBalance, useBalanceLoaded, fetchBalance } from "@/lib/balance-store";
 import { TopUpModal } from "@/components/wallet/TopUpModal";
 import type { Game } from "@/lib/types";
@@ -332,12 +332,12 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
                     </Link>
                   </div>
                   <div className="border-t border-outline-variant/20 py-1">
-                    <a
-                      href="/api/auth/logout"
-                      className="block px-4 py-2 text-sm text-error transition-colors hover:bg-error/10"
+                    <button
+                      onClick={() => { clearCart(); window.location.href = "/api/auth/logout"; }}
+                      className="block w-full px-4 py-2 text-left text-sm text-error transition-colors hover:bg-error/10"
                     >
                       Logout
-                    </a>
+                    </button>
                   </div>
                 </div>
               )}
