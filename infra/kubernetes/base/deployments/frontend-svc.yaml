@@ -24,5 +24,7 @@ spec:
         envFrom:
           - configMapRef:
               name: frontend-cm
+          - secretRef:
+              name: frontend-secret
         resources: {}
 status: {}
