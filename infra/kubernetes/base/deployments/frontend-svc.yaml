@@ -20,9 +20,9 @@ spec:
       containers:
       - image: ghcr.io/corentin-dupaigne/fullstack_project/frontend
         imagePullPolicy: Always
-        env:
-          - name: HOSTNAME
-            value: "0.0.0.0"
         name: condensation-frontend
+        envFrom:
+          - configMapRef:
+              name: frontend-cm
         resources: {}
 status: {}

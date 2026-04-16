@@ -3,13 +3,31 @@ import { cookies } from 'next/headers';
 
 export async function GET() {
   const cookieStore = await cookies();
-  
-  // Clean up the secure PKCE tokens stored on the client side
-  cookieStore.delete('access_token');
-  cookieStore.delete('refresh_token');
+  const accessToken = cookieStore.get('access_token')?.value;
 
-  // Immediately dump the user back seamlessly to the unauthenticated homepage
-  // via the backend to destroy the origin Laravel persistence session too!
+  // Revoke the token on the backend before clearing cookies.
+  // Use the internal API_URL (server-to-server) so the browser never touches it.
+  if (accessToken) {
+    const backendApi = process.env.API_URL || process.env.AUTH_URL || 'http://localhost:8000';
+    try {
+      await fetch(`${backendApi}/api/auth/token/revoke`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+        },
+      });
+    } catch {
+      // Continue with logout even if revocation fails (token will expire on its own)
+    }
+  }
+
+  // Redirect the browser to the backend to also destroy the Laravel web session,
+  // then delete the cookies on the redirect response (not via cookieStore, which
+  // may not be flushed when a NextResponse.redirect is returned).
   const backendAuth = process.env.AUTH_URL || 'http://localhost:8000';
-  return NextResponse.redirect(`${backendAuth}/auth/logout`);
+  const response = NextResponse.redirect(`${backendAuth}/auth/logout`);
+  response.cookies.delete('access_token');
+  response.cookies.delete('refresh_token');
+  return response;
 }

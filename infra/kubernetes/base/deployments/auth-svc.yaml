@@ -20,6 +20,18 @@ spec:
       containers:
       - image: ghcr.io/corentin-dupaigne/fullstack_project/auth
         name: condensation-auth
+        envFrom:
+          - configMapRef:
+              name: auth-cm
+          - secretRef:
+              name: auth-secret
         imagePullPolicy: Always
         resources: {}
+        volumeMounts:
+        - name: auth-storage
+          mountPath: /var/www/html/storage
+      volumes:
+      - name: auth-storage
+        persistentVolumeClaim:
+          claimName: auth-pvc
 status: {}

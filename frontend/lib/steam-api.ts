@@ -30,7 +30,9 @@ export async function fetchFeaturedData(): Promise<FeaturedData> {
   const res = await fetch(`${baseUrl}/api/steam/featured`, {
     next: { revalidate: 3600 },
   });
-  if (!res.ok) throw new Error(`Failed to fetch featured data: ${res.status}`);
+  const empty: FeaturedData = { specials: [], topSellers: [], newReleases: [], comingSoon: [] };
+
+  if (!res.ok) return empty;
   const data: BackendFeatureResponse = await res.json();
 
   const dealItems = [

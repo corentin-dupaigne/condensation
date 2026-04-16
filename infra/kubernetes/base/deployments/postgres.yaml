@@ -13,10 +13,21 @@ spec:
   template:
     metadata:
       labels:
-        app: postgres-svc
+        app: postgres
     spec:
       containers:
       - image: postgres
+        volumeMounts:
+        - name: postgres-vol
+          mountPath: /var/lib/postgresql
+        envFrom:
+          - secretRef:
+              name: postgres-secret
         name: postgres
         resources: {}
+      volumes:
+      - name: postgres-vol
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
 status: {}

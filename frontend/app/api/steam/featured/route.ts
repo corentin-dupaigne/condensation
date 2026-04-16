@@ -4,15 +4,19 @@ export async function GET(request: Request) {
   const size = searchParams.get("size") ?? "20";
 
   const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8080";
-  const res = await fetch(
-    `${backendUrl}/api/feature?page=${page}&size=${size}`,
-    { next: { revalidate: 3600 } }
-  );
+  try {
+    const res = await fetch(
+      `${backendUrl}/api/feature?page=${page}&size=${size}`,
+      { next: { revalidate: 3600 } }
+    );
 
-  if (!res.ok) {
-    return new Response("Failed to fetch featured data", { status: res.status });
+    if (!res.ok) {
+      return new Response("Failed to fetch featured data", { status: res.status });
+    }
+
+    const data = await res.json();
+    return Response.json(data);
+  } catch {
+    return Response.json({}, { status: 503 });
   }
-
-  const data = await res.json();
-  return Response.json(data);
 }
