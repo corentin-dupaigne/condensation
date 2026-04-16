@@ -34,6 +34,18 @@ spec:
     hostname: "condensation.corentindupaigne.com"
     allowedRoutes:
       namespaces:
+        from: All
+  - name: https-prod
+    protocol: HTTPS
+    port: 443
+    hostname: "condensation.corentindupaigne.com"
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: prod-condensation-tls
+    allowedRoutes:
+      namespaces:
         from: Selector
         selector:
           matchLabels:
