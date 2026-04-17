@@ -100,7 +100,7 @@ if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
 const initials = userName ? userName.charAt(0).toUpperCase() : "P";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-outline-variant/20 bg-surface-container/70 backdrop-blur-xl">
+    <header className="glass-panel sticky top-0 z-50">
       <div className="mx-auto flex h-16 items-center gap-6 px-6">
         <Link href="/" className="shrink-0 font-headline text-xl font-bold tracking-tight text-primary">
           CONDENSATION
@@ -150,7 +150,7 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
           </svg>
 
           {showPreview && (
-            <div className="absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-high shadow-2xl">
+            <div className="absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-xl bg-surface-container-high shadow-2xl ghost-border">
               {previewLoading && !preview && (
                 <div className="px-4 py-6 text-center text-xs text-on-surface-variant">
                   Searching…
@@ -200,7 +200,7 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
                   ))}
                   <Link
                     href={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
-                    className="flex items-center justify-center gap-1.5 border-t border-outline-variant/20 px-4 py-3 text-xs font-semibold text-primary transition-colors hover:bg-surface-container-highest"
+                    className="flex items-center justify-center gap-1.5 bg-surface-container-low px-4 py-3 text-xs font-semibold text-primary transition-colors hover:bg-surface-container-highest"
                     onClick={() => setSearchFocused(false)}
                   >
                     See all {preview.total} result{preview.total !== 1 ? "s" : ""}
@@ -225,13 +225,13 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
             <>
               <a
                 href="/api/auth/login"
-                className="rounded-lg px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface"
+                className="inline-flex h-11 items-center rounded-lg px-4 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface"
               >
                 Sign In
               </a>
               <a
                 href="/api/auth/register"
-                className="rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary transition-opacity hover:opacity-90"
+                className="cta-gradient inline-flex h-11 items-center rounded-xl px-4 text-sm font-bold text-on-primary-fixed transition-opacity hover:opacity-90"
               >
                 Sign Up
               </a>
@@ -288,7 +288,7 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
             {cartCount > 0 ? (
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold tabular-nums text-on-primary">
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary px-1 text-xs font-bold tabular-nums text-on-secondary-fixed">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             ) : null}
@@ -298,15 +298,15 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary transition-opacity hover:opacity-90"
+                className="cta-gradient flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-on-primary-fixed transition-opacity hover:opacity-90"
                 aria-label="User menu"
               >
                 {initials}
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-lg border border-outline-variant/20 bg-surface-container-high shadow-xl">
-                  <div className="border-b border-outline-variant/20 px-4 py-3">
+                <div className="absolute right-0 mt-2 w-48 rounded-xl bg-surface-container-high shadow-xl ghost-border">
+                  <div className="bg-surface-container-low/40 px-4 py-3 rounded-t-xl">
                     <p className="text-sm font-semibold text-on-surface">
                       Hi, {userName || "Player"}
                     </p>
@@ -316,13 +316,13 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
                       href="/profile"
                       className="block px-4 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-highest hover:text-on-surface"
                     >
-                      My Profile
+                      Profile
                     </Link>
                     <Link
                       href="/orders"
                       className="block px-4 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-highest hover:text-on-surface"
                     >
-                      My Orders
+                      Orders
                     </Link>
                     <Link
                       href="/settings"
@@ -331,7 +331,7 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
                       Settings
                     </Link>
                   </div>
-                  <div className="border-t border-outline-variant/20 py-1">
+                  <div className="bg-surface-container-low/40 py-1 rounded-b-xl">
                     <button
                       onClick={() => { clearCart(); window.location.href = "/api/auth/logout"; }}
                       className="block w-full px-4 py-2 text-left text-sm text-error transition-colors hover:bg-error/10"

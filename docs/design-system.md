@@ -1,189 +1,154 @@
-# Design System — Condensation
+# Design System Strategy: The Kinetic Fluidity
 
-> Gaming marketplace for digital game keys. Stack: Next.js + Tailwind CSS. Style: Dark OLED + Glassmorphism.
+> Gaming marketplace for digital game keys. Stack: Next.js + Tailwind CSS. Creative North Star: **The Digital Pulse**.
 
 ---
 
-## 1. Product Identity
+## 1. Overview & Creative North Star
+
+The Creative North Star for this design system is **"The Digital Pulse."**
+
+In a gaming marketplace, speed and energy are paramount, but they must be anchored by a sense of unwavering security. We move away from the "static grid" of traditional e-commerce. Instead, we treat the UI as a high-performance engine: fluid, reactive, and layered. We break the template look through **Intentional Asymmetry** — using oversized display type justified against compact data modules — and **Tonal Depth**, where the interface feels like a series of illuminated glass panels floating in a deep, pressurized void.
 
 | Attribute | Value |
 |---|---|
 | Product Type | Gaming Marketplace + E-commerce (hybrid) |
 | Target Audience | Gamers buying/reselling Steam keys; Steam-connected users |
-| Style Archetype | Dark OLED + Content-Dense + Immersive |
-| Landing Pattern | Feature-Rich Showcase + Social Proof |
-| CTA Strategy | Prominent purchase CTA per card; newsletter capture at bottom |
+| Style Archetype | Neon Void + Glassmorphism + Editorial Scale |
+| Landing Pattern | Asymmetric Hero + Tonal-Depth Panels + Live-Pulse Proof |
+| CTA Strategy | Gradient primary CTA; secondary ghost style; tertiary utility |
 
 ---
 
-## 2. Color Tokens
+## 2. Colors: The Neon Void
 
-All tokens are defined in [`frontend/app/globals.css`](../frontend/app/globals.css) as CSS custom properties and mapped to Tailwind via `@theme inline`.
+Our palette thrives on the contrast between the absolute stability of deep charcoals and the volatile energy of "electric" accents. All tokens are defined in [`frontend/app/globals.css`](../frontend/app/globals.css) and mapped to Tailwind via `@theme inline`.
 
-### Current Token Map
+### Accent Roles
 
-| CSS Variable | Value | Role |
+| Token | Value | Role |
 |---|---|---|
-| `--background` | `#0c0e11` | Page background |
-| `--foreground` | `#f9f9fd` | Default text |
-| `--primary` | `#a1faff` | Brand color / interactive highlight |
+| `--primary` | `#a1faff` (Cyan) | High-action triggers, "coolant" — fast and precise |
 | `--primary-container` | `#00f4fe` | Gradient end for CTAs |
-| `--primary-dim` | `#00e5ee` | Hover state for primary |
-| `--on-primary` | `#00393b` | Text on primary surfaces |
-| `--secondary` | `#d575ff` | Accent / badges |
-| `--secondary-container` | `#9800d0` | Badge backgrounds |
-| `--tertiary` | `#f3ffca` | Lime accent (rare use) |
-| `--tertiary-container` | `#cafd00` | Lime backgrounds |
-| `--error` | `#ff716c` | Error states |
-| `--surface` | `#0c0e11` | Base surface |
-| `--surface-container` | `#171a1d` | Card backgrounds (low) |
-| `--surface-container-high` | `#1d2024` | Card backgrounds (default) |
-| `--surface-container-highest` | `#23262a` | Elevated elements |
-| `--surface-bright` | `#292c31` | Hover surface |
-| `--on-surface` | `#f9f9fd` | Primary text |
-| `--on-surface-variant` | `#aaabaf` | Secondary text / icons |
-| `--outline` | `#747579` | Borders |
-| `--outline-variant` | `#46484b` | Subtle dividers |
+| `--secondary` | `#d575ff` (Neon Purple) | "Energy source" — discovery, rare items, premium tiering |
+| `--secondary-container` | `#9800d0` | Badge backgrounds (Legendary/Epic) |
+| `--tertiary` | `#f3ffca` (Lime) | Success states, "In Stock", price drops, live pulse |
+| `--tertiary-container` | `#cafd00` | Lime accents |
+| `--error` | `#ff716c` | Error states, destructive feedback |
 
-### Design System Recommendation
+### Surface Hierarchy & Nesting
 
-For a gaming marketplace, the recommended palette is **Purple/Violet primary + Rose accent**. The current cyan primary (`#a1faff`) reads as SaaS/tech — consider this migration path:
+Treat the UI as a physical stack. Depth comes from tier transitions, **not** borders.
 
-| Token | Current | Recommended |
-|---|---|---|
-| `--primary` | `#a1faff` (cyan) | `#A78BFA` (violet) |
-| `--primary-container` | `#00f4fe` | `#7C3AED` |
-| `--secondary` | `#d575ff` | `#d575ff` (keep) |
-| `--cta` | *(missing)* | `#F43F5E` (rose, for buy buttons) |
+| Tier | Token | Value | Usage |
+|---|---|---|---|
+| Base | `--surface` | `#0c0e11` | Page background (the void) |
+| Sectional | `--surface-container-low` | `#111417` | Sidebars, navigation rails, groupings |
+| Component | `--surface-container` | `#171a1d` | Secondary components |
+| Component (high) | `--surface-container-high` | `#1d2024` | Cards, input areas |
+| Component (highest) | `--surface-container-highest` | `#23262a` | Elevated inputs, tertiary buttons |
+| Active / Floating | `--surface-bright` | `#292c31` | Modals, hover states |
 
-> **Decision**: Keeping cyan is acceptable if it's an intentional brand choice. If changing, update `globals.css` token values only — all components use tokens, not hardcoded hex.
+### The "No-Line" Rule
+
+**Explicit Instruction:** Do not use 1px solid borders to define sections. Traditional borders clutter the gamer-centric aesthetic. Boundaries must be defined solely by background shifts — transition from `surface` to `surface-container-low` to separate a sidebar from a main feed.
+
+### The "Glass & Gradient" Rule
+
+- **CTA gradient**: linear gradient from `primary` → `primary-container` at **135deg**. Applied to primary buttons and key hero CTAs.
+- **Glassmorphism**: `surface-container` at 70% opacity + `backdrop-blur(12px)` + a 1px **inner highlight** (top + left edges only) using `on-surface-variant` at 15%. Use for navbar, floating overlays, "Quick Buy" panels.
+- Never use pure black (`#000000`) except for the deepest shadows.
 
 ---
 
-## 3. Typography
+## 3. Typography: Editorial Impact
 
-### Font Pairing
+A high-contrast pairing that balances technical precision with aggressive energy.
 
-| Role | Font | CSS Variable | Weight |
-|---|---|---|---|
-| Headlines / Prices | Space Grotesk | `--font-headline` | 300–700 |
-| Body text | Inter | `--font-body` | 400, 500 |
+| Role | Font | CSS Variable | Weight | Notes |
+|---|---|---|---|---|
+| Display / Headline | Space Grotesk | `--font-headline` | 300–700 | "Mechanical" voice |
+| Body / Label | Inter | `--font-body` | 400, 500 | "Functional" voice |
 
 ### Type Scale
 
-| Step | Size | Usage | Class |
+| Step | Size | Tailwind | Usage |
 |---|---|---|---|
-| Display | 48–60px | Hero h1 | `text-5xl` / `text-6xl` |
-| Headline | 24–32px | Section titles | `text-2xl` |
-| Title | 18–20px | Card titles | `text-base` / `text-lg` |
-| Body | 14–16px | Descriptions | `text-sm` |
-| Label | 12px | Tags, badges | `text-xs` |
-| Caption | ~~10px~~ → 12px | Genre tags | ~~`text-[10px]`~~ → `text-xs` |
+| Display LG | 3.5rem (56px) | `text-6xl` + `tracking-tight` (-0.02em) | Hero headlines — oversized, editorial |
+| Display SM | 2.25rem (36px) | `text-4xl` | Section displays paired with label-md sub-headers |
+| Headline | 1.5rem (24px) | `text-2xl` | Section titles |
+| Title | 1.125rem (18px) | `text-lg` | Card titles |
+| Body MD | 0.875rem (14px) | `text-sm` | Descriptions, compact body |
+| Body | 1rem (16px) | `text-base` | Default body |
+| Label MD | 0.75rem (12px) | `text-xs uppercase tracking-wider` | Sub-headers, tags |
 
-> **Rule**: Minimum readable text is 12px. The genre tags in `GameCard` use `text-[10px]` which violates this — change to `text-xs`.
+> **Rule**: Minimum readable size is 12px. Never use `text-[10px]`. Always pair a `display-sm` headline with a `label-md` uppercase sub-header to create an authoritative, structured-data look.
 
 ### Font Loading
 
-Use `next/font` for proper font loading (no FOIT, no CLS):
-
-```tsx
-// app/layout.tsx
-import { Space_Grotesk, Inter } from 'next/font/google'
-
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-headline' })
-const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
-```
-
-> **Current issue**: `globals.css` has an invalid `@font-face` with a Google Fonts URL as `src` — this doesn't work. Use `next/font` or `@import` at top of CSS instead.
+Load via `next/font` (no FOIT, no CLS). Do not rely on `@font-face` pointing at a Google Fonts CSS URL.
 
 ---
 
-## 4. Spacing System
+## 4. Elevation & Depth
 
-Based on 4px base unit (Tailwind's default):
+Elevation is a product of **light and transparency**, not drop shadows.
 
-| Token | Value | Usage |
-|---|---|---|
-| xs | 4px (`p-1`) | Icon padding, tight gaps |
-| sm | 8px (`p-2`) | Inline element gaps |
-| md | 12–16px (`p-3`/`p-4`) | Card padding |
-| lg | 24px (`p-6`) | Section horizontal gutter |
-| xl | 32px (`py-8`) | Section vertical rhythm |
-| 2xl | 40px (`py-10`) | Section vertical rhythm (alt) |
-
-Container: `max-w-7xl mx-auto px-6` — consistent across all sections. ✅
+- **Layering Principle**: Depth via stacking tiers. A `surface-container-highest` card on a `surface-container-low` background provides "lift" without visual noise.
+- **Ambient Glow**: Floating-state shadow uses a **40px blur, 10% opacity, `primary` (#a1faff)** color — mimicking the glow of a high-end PC setup, never pure black.
+- **Ghost Border Fallback**: If accessibility mandates a stroke, use `outline-variant` (#46484b) at **20% opacity**. Never 100% opaque lines.
+- **Glass Inner Highlight**: 1px inner highlight on **top + left edges** using `on-surface-variant` at 15%, "cutting" glass elements out of the dark background.
 
 ---
 
-## 5. Component Patterns
+## 5. Components
 
-### Navigation Header
-- Sticky, `z-50`, glassmorphic (`backdrop-blur-xl bg-surface-container/70`)
-- Logo → Nav links → Search → Auth CTAs → Cart
-- Search has focus ring on focus: `ring-1 ring-primary/40` ✅
-- `aria-label` on cart button ✅
+### Buttons
 
-### Game Card (`GameCard`)
-- Fixed width `w-[200px]`, `aspect-[3/4]` cover image
-- Hover: `hover:bg-surface-bright` surface elevation ✅
-- `aria-label` on add-to-cart button ✅
-- **Issue**: Cart button is `h-7 w-7` (28px) — must be ≥44px touch target
-- **Issue**: Title uses `truncate` — add `title={game.title}` for tooltip
+| Variant | Style | Usage |
+|---|---|---|
+| **Primary** | Gradient (`primary` → `primary-container` at 135°), `on-primary-fixed` text, `rounded-xl` (12px), `font-bold` | Buy Now, Sign Up, hero CTA |
+| **Secondary** | Ghost — no background, `outline` at 20%, text in `secondary` | Alternative actions |
+| **Tertiary** | `surface-container-highest` bg, `on-surface` text | Utility (Add to Wishlist, filter toggle) |
 
-### Bestsellers Row (`BestsellersSection`)
-- Full-width list with rank number + thumbnail + title + price
-- Hover elevation: `hover:bg-surface-bright` ✅
-- **Issue**: Uses `let counter = 1` mutable variable — use map `index + 1` instead
+### Cards & Lists
 
-### Hero Carousel (`HeroCarousel`)
-- Full-bleed `h-[60vh]` gradient section
-- Auto-advances every 6s
-- Dot navigation with `aria-label` ✅
-- **Issue**: No `prefers-reduced-motion` handling — interval should be disabled when motion is reduced
-- **Issue**: No pause-on-hover mechanism
+- **Absolute prohibition of divider lines.**
+- **Separation**: Use 2rem (`space-y-8`) of vertical whitespace, or alternate backgrounds (`surface-container-low` ↔ `surface-container-lowest`).
+- **Product Cards**: `surface-container-high` + `rounded-xl`. Hover → `surface-bright`.
 
-### Section Pattern (all home sections)
-- Consistent: `h2` section title + optional "View All" link
-- `max-w-7xl px-6 py-8/py-10` container ✅
+### Input Fields
+
+- **Base**: `surface-container-highest` background, **no border**.
+- **Active**: 1px Ghost Border using `primary` at 40% opacity + subtle cyan glow.
+- **Error**: Dark background preserved; a bottom 2px glow line in `error` appears.
+
+### Gaming-Specific
+
+- **Rarity Badges**: `secondary-container` background with `on-secondary-container` text — for "Legendary" or "Epic" tiers.
+- **Live Pulse**: 8px circle using `tertiary` with CSS ripple animation — indicates live sellers, active auctions, "In Stock".
+
+### Navigation (Glassmorphic)
+
+- Sticky, `z-50`.
+- `backdrop-blur-xl` + `surface-container/70` + 1px inner highlight (top/left, 15% opacity).
+- **No border-bottom**. Separation from page content is the tonal contrast alone.
 
 ---
 
-## 6. Effects & Style
+## 6. Do's and Don'ts
 
-### Glassmorphism (nav, overlays)
-```css
-.glass-panel {
-  background: rgba(29, 32, 36, 0.7);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(170, 171, 175, 0.15);
-  border-left: 1px solid rgba(170, 171, 175, 0.15);
-}
-```
-Use only for: navbar, modal overlays, floating panels. Not for cards. ✅
+### Do
+- Use extreme scale. Pair a 56px headline with 12px uppercase label text for a sophisticated "pro" look.
+- Use asymmetrical margins. Offset hero images to break container edges — creates kinetic energy.
+- Prioritize "Breathable Dark Space". Let `#0c0e11` dominate so neon accents pop.
+- Use `tertiary` (lime) exclusively for success and price-drop signals.
 
-### CTA Gradient
-```css
-bg-gradient-to-br from-primary to-primary-container
-```
-Used for: Sign Up button, Buy Now button, hero CTA. Consistent ✅
-
-### Border Radius Scale
-| Component | Class | Radius |
-|---|---|---|
-| Cards | `rounded-lg` | 8px |
-| Buttons | `rounded-lg` / `rounded-xl` | 8–12px |
-| Hero image | `rounded-2xl` | 16px |
-| Badge | `rounded` / `rounded-full` | 4px / full |
-
-### Custom Scrollbar
-Applied via `.custom-scrollbar` — thin, dark thumb, primary-dim hover. Use on all horizontal scroll containers. ✅
-
-### Animations
-| Name | Duration | Usage |
-|---|---|---|
-| Slide indicator | `transition-all` | Carousel dot width change |
-| Hero gradient | `transition-colors duration-700` | Background color shift — wrap in `prefers-reduced-motion` |
-| Surface hover | `transition-colors` (150ms) | Cards, nav items ✅ |
+### Don't
+- **Don't** use pure black (`#000000`) for anything other than the deepest shadows.
+- **Don't** use standard 1px solid borders. If you need a line, use a background-color shift.
+- **Don't** use more than two accent colors in a single component. Stick to Cyan for actions, Purple for status/flair.
+- **Don't** use flat color buttons for primary CTAs — always gradient.
 
 ---
 
@@ -192,67 +157,64 @@ Applied via `.custom-scrollbar` — thin, dark thumb, primary-dim hover. Use on 
 | Layer | Value | Usage |
 |---|---|---|
 | Base | 0 | Normal content |
-| Cards floating | 10 | Badges on game cards |
-| Sticky header | 50 | `z-50` ✅ |
-| Modals | 100 | (future) |
-| Toasts | 1000 | (future) |
+| Floating badges | 10 | Badges on cards |
+| Sticky header | 50 | Glassmorphic nav |
+| Modals | 100 | Overlays |
+| Toasts | 1000 | Transient feedback |
 
 ---
 
 ## 8. Accessibility Rules
 
-| Rule | Status | Notes |
-|---|---|---|
-| Alt text on images | ✅ | Present on all `<img>` tags |
-| `aria-label` on icon buttons | ✅ | Cart button, carousel dots |
-| Focus ring on search input | ✅ | `ring-1 ring-primary/40` on focus |
-| Semantic heading hierarchy | ✅ | `h1` in hero, `h2` for sections, `h3` for cards |
-| Minimum text size 12px | ❌ | Genre tags use `text-[10px]` |
-| Touch target ≥44px | ❌ | Cart button is 28×28px |
-| `prefers-reduced-motion` | ❌ | HeroCarousel interval not paused |
-| Skip-to-content link | ❌ | Not implemented yet |
-| Keyboard nav on carousel | ⚠️ | Dots are keyboard-focusable but no keyboard left/right |
+| Rule | Target |
+|---|---|
+| Color contrast | 4.5:1 body, 3:1 large text |
+| Minimum text size | 12px — never `text-[10px]` |
+| Touch target | ≥44px (h-11 w-11) on buttons/icons |
+| Icon-only buttons | Require `aria-label` |
+| Focus ring | `ring-1 ring-primary/40` — never remove outline |
+| `prefers-reduced-motion` | Honor in all interval-based animations (carousels, live-pulse) |
+| Semantic headings | `h1` hero → `h2` section → `h3` card |
+| Keyboard navigation | Carousel dots and nav items keyboard-reachable |
 
 ---
 
-## 9. Gap Analysis — Current vs Recommended
+## 9. Effects & Utilities
 
-### CRITICAL (Fix First)
+### Glassmorphism (`.glass-panel`)
+```css
+background: rgba(23, 26, 29, 0.7);
+backdrop-filter: blur(12px);
+/* Inner highlight — top + left only */
+box-shadow:
+  inset 1px 0 0 rgba(170, 171, 175, 0.15),
+  inset 0 1px 0 rgba(170, 171, 175, 0.15);
+```
+Use only for nav, modal overlays, Quick Buy panels. Never for data cards.
 
-| # | Issue | File | Line | Fix |
-|---|---|---|---|---|
-| 1 | Cart button 28px < 44px minimum | `GameCard.tsx` | 69 | Change `h-7 w-7` → `h-11 w-11` or add `p-3` wrapper |
-| 2 | Genre tags at `text-[10px]` | `GameCard.tsx` | 50 | Change to `text-xs` (12px) |
-| 3 | HeroCarousel: no `prefers-reduced-motion` | `HeroCarousel.tsx` | 14 | Check `matchMedia` and skip interval |
+### CTA Gradient (`.cta-gradient`)
+```css
+background: linear-gradient(135deg, var(--primary), var(--primary-container));
+```
 
-### HIGH
+### Ambient Glow (floating state)
+```css
+box-shadow: 0 0 40px rgba(161, 250, 255, 0.10);
+```
 
-| # | Issue | File | Line | Fix |
-|---|---|---|---|---|
-| 4 | `@font-face` src is invalid Google Fonts URL | `globals.css` | 3 | Replace with `next/font` or `@import` |
-| 5 | `<img>` without `width`/`height` → CLS risk | Multiple | — | Use Next.js `<Image>` or add explicit dimensions |
-| 6 | Title truncates without tooltip | `GameCard.tsx` | 43 | Add `title={game.title}` attribute |
+### Live Pulse (`.live-pulse`)
+8px `tertiary` circle with a CSS ripple `::after` at 2.5× scale, fading to 0. Respects `prefers-reduced-motion`.
 
-### MEDIUM
+### Border Radius Scale
+| Component | Class | Radius |
+|---|---|---|
+| Cards, Inputs | `rounded-xl` | 12px |
+| Primary Button | `rounded-xl` | 12px |
+| Hero image | `rounded-2xl` | 16px |
+| Badge | `rounded-full` / `rounded` | full / 4px |
 
-| # | Issue | File | Line | Fix |
-|---|---|---|---|---|
-| 7 | `let counter = 1` mutated in `.map()` | `BestsellersSection.tsx` | 6 | Use `(game, index) => index + 1` |
-| 8 | Horizontal card scroll has no scroll-snap | `GameCardGrid.tsx` | 31 | Add `scroll-snap-type-x mandatory` + `snap-start` on cards |
-| 9 | No skeleton loading states | All sections | — | Add shimmer placeholders for SSR delay |
-
-### Matches Well ✅
-
-- Dark OLED base theme — correct for gaming marketplace
-- Semantic CSS custom property token system (Material-style naming)
-- SVG icons used throughout — no emojis
-- `aria-label` on interactive icon elements
-- `glass-panel` glassmorphism used only on nav (correct purpose)
-- Consistent `max-w-7xl px-6` container across all sections
-- `font-display: swap` approach for font loading
-- Space Grotesk + Inter pairing — clean, modern, gaming-appropriate
-- Section heading pattern consistent across home sections
-- Gradient CTA buttons consistent across hero and card
+### Custom Scrollbar (`.custom-scrollbar`)
+Thin, dark thumb, `primary-dim` on hover. Applied to every horizontal scroll container.
 
 ---
 
@@ -264,23 +226,24 @@ Before shipping any UI feature:
 - [ ] All `<img>` have descriptive `alt` text
 - [ ] Icon-only buttons have `aria-label`
 - [ ] Text minimum 12px (`text-xs`) — no `text-[10px]`
-- [ ] Touch targets ≥44px (buttons, links)
-- [ ] Focus states visible (don't remove `outline`)
-- [ ] `prefers-reduced-motion` checked for animations
+- [ ] Touch targets ≥44px (h-11 w-11)
+- [ ] Focus states visible (`ring-1 ring-primary/40`)
+- [ ] `prefers-reduced-motion` respected in carousels/pulses
 
 ### Style
-- [ ] Colors use CSS tokens — no raw hex in components
-- [ ] Icons are SVG (Heroicons inline) — no emojis
-- [ ] Hover states use `transition-colors` (150–300ms)
-- [ ] Glassmorphism only on nav/overlays — not on data cards
+- [ ] Colors reference CSS tokens — no raw hex in components
+- [ ] Icons are SVG (Heroicons, Lucide) — no emojis
+- [ ] Primary CTA uses `cta-gradient` — never flat color
+- [ ] Glassmorphism only on nav/overlays — never on data cards
+- [ ] No solid 1px borders — separation via tonal shift
 
 ### Layout
 - [ ] Container uses `max-w-7xl mx-auto px-6`
-- [ ] Sections use `py-8` or `py-10` vertical rhythm
+- [ ] Sections use `py-8`–`py-10` vertical rhythm
 - [ ] Horizontal scroll containers include `.custom-scrollbar`
 - [ ] Mobile layout tested at 375px width
 
 ### Performance
 - [ ] Images use `loading="lazy"` for below-fold content
-- [ ] Images have explicit `width` and `height` (or use Next.js `<Image>`)
-- [ ] No raw `<img>` for static assets — prefer `<Image>` from `next/image`
+- [ ] Images have explicit `width`/`height` or use `next/image`
+- [ ] Fonts via `next/font` (no `@font-face` at Google Fonts URL)

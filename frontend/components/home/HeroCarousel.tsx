@@ -216,13 +216,13 @@ export function HeroCarousel() {
             {slide.genres.map((genre) => (
               <span
                 key={genre}
-                className="rounded-md bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm"
+                className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-sm"
               >
                 {genre}
               </span>
             ))}
             {slide.discountPercent && (
-              <span className="rounded-md bg-cta px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider text-white">
+              <span className="rounded-md bg-tertiary-container px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-on-tertiary">
                 -{slide.discountPercent}%
               </span>
             )}
@@ -242,7 +242,7 @@ export function HeroCarousel() {
           <div className="flex items-center gap-5 pt-1">
             <Link
               href={slide.ctaLink}
-              className="group relative inline-flex items-center gap-2.5 rounded-xl bg-cta px-7 py-3.5 font-headline text-md font-bold text-on-cta transition-all duration-200 ease-out hover:brightness-110 active:scale-[0.97] cursor-pointer"
+              className="group relative inline-flex items-center gap-2.5 rounded-xl cta-gradient px-7 py-3.5 font-headline text-md font-bold text-on-primary-fixed transition-all duration-200 ease-out hover:brightness-110 active:scale-[0.97] cursor-pointer"
             >
               BUY NOW
               <svg

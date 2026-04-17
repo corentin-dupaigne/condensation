@@ -108,7 +108,7 @@ export function OrderSummaryCard({
             setShowPaymentModal(true);
           }}
           disabled={status === "loading"}
-          className="w-full rounded-xl bg-gradient-to-br from-secondary to-secondary-dim py-5 font-headline text-lg font-black uppercase tracking-widest text-on-secondary shadow-[0_0_30px_rgba(161,250,255,0.18)] transition-all duration-150 hover:shadow-[0_0_45px_rgba(161,250,255,0.26)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full rounded-xl cta-gradient py-5 font-headline text-lg font-black uppercase tracking-widest text-on-primary-fixed shadow-[0_0_30px_rgba(161,250,255,0.18)] transition-all duration-150 hover:brightness-110 hover:shadow-[0_0_45px_rgba(161,250,255,0.26)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {status === "loading" ? "Processing…" : "Proceed to Checkout"}
         </button>

@@ -14,9 +14,10 @@ export function GameCard({
   return (
     <a
       href={`/games/${game.id}`}
-      className={`group flex shrink-0 flex-col gap-2 rounded-lg bg-surface-container-high p-3 transition-colors hover:bg-surface-bright ${className ?? "w-[200px]"}`}
+      title={game.name}
+      className={`group flex shrink-0 flex-col gap-2 rounded-xl bg-surface-container-high p-3 transition-colors hover:bg-surface-bright ${className ?? "w-[200px]"}`}
     >
-      <div className="relative aspect-3/2 w-full overflow-hidden rounded">
+      <div className="relative aspect-3/2 w-full overflow-hidden rounded-lg">
         {game.headerImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={game.headerImage} alt={game.name} width={200} height={267} className="h-full w-full object-cover" />
@@ -38,7 +39,7 @@ export function GameCard({
         {game.genres.slice(0, 2).map((g) => (
           <span
             key={g.id}
-            className="truncate rounded bg-surface-container-highest px-1.5 py-0.5 text-xs text-on-surface-variant"
+            className="truncate rounded bg-surface-container-highest px-1.5 py-0.5 text-xs uppercase tracking-wider text-on-surface-variant"
           >
             {g.description}
           </span>
@@ -58,7 +59,7 @@ export function GameCard({
         </div>
         <AddToCartButton
           game={game}
-          className="flex h-11 w-11 items-center justify-center rounded bg-surface-container-highest text-on-surface-variant transition-colors hover:bg-cta hover:text-on-cta"
+          className="flex h-11 w-11 items-center justify-center rounded bg-surface-container-highest text-on-surface-variant transition-colors hover:bg-primary/15 hover:text-primary"
         />
       </div>
     </a>
