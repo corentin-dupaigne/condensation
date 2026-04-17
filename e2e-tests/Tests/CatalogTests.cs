@@ -99,9 +99,8 @@ public class CatalogTests : BaseTest
     public async Task CatalogPage_SortDropdown_Click_ShouldOpenOptions()
     {
         var sortButton = Page.Locator("button:has-text('Bestselling')");
-        // Wait for hydration then click
         await Expect(sortButton).ToBeVisibleAsync();
-        await sortButton.ClickAsync(new Microsoft.Playwright.LocatorClickOptions { Force = true });
+        await sortButton.ClickAsync();
 
         // Options appear in a popup — "Price: Low to High" is one of them
         var option = Page.Locator("button:has-text('Price: Low to High')");
@@ -113,7 +112,7 @@ public class CatalogTests : BaseTest
     {
         var sortButton = Page.Locator("button:has-text('Bestselling')");
         await Expect(sortButton).ToBeVisibleAsync();
-        await sortButton.ClickAsync(new Microsoft.Playwright.LocatorClickOptions { Force = true });
+        await sortButton.ClickAsync();
 
         await Page.Locator("button:has-text('Newest Arrivals')").ClickAsync();
         await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
