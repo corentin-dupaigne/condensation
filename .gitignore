@@ -17,5 +17,7 @@ vendor
 .mcp.json
 AGENTS.md
 skills-lock.json
+.gitnexus
+
 # Kubernetes secrets (contain sensitive credentials)
 infra/kubernetes/**/secrets/

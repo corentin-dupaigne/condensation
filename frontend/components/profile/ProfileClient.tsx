@@ -205,7 +205,7 @@ function OverviewTab({
       </div>
 
       {/* Recommendations Placeholder */}
-      <div className="rounded-xl border border-outline-variant/20 bg-surface-container p-6 md:col-span-2">
+      {/* <div className="rounded-xl border border-outline-variant/20 bg-surface-container p-6 md:col-span-2">
         <h2 className="font-headline text-lg font-semibold text-on-surface">
           Recommended For You
         </h2>
@@ -220,7 +220,7 @@ function OverviewTab({
             />
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
