@@ -20,7 +20,7 @@ jobs:
     with:
       image-name: ghcr.io/${{ github.repository_owner }}/fullstack_project/frontend
       image-tag: ${{ inputs.image-tag || github.ref_name }}
-      also-tag-latest: true
+      also-tag-latest: false
       validate-tag: true
       dockerfile-context: ./frontend
     secrets:

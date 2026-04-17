@@ -20,7 +20,7 @@ jobs:
     with:
       image-name: ghcr.io/${{ github.repository_owner }}/fullstack_project/backend
       image-tag: ${{ inputs.image-tag || github.ref_name }}
-      also-tag-latest: true
+      also-tag-latest: false
       validate-tag: true
       dockerfile-context: ./backend
     secrets:
@@ -35,7 +35,7 @@ jobs:
     with:
       image-name: ghcr.io/${{ github.repository_owner }}/fullstack_project/postgres-game
       image-tag: ${{ inputs.image-tag || github.ref_name }}
-      also-tag-latest: true
+      also-tag-latest: false
       validate-tag: true
       dockerfile-context: .
       dockerfile-path: infra/docker/postgres-game/Dockerfile

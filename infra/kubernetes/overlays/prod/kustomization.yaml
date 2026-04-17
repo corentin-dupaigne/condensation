@@ -12,12 +12,15 @@ resources:
   - configmaps/frontend-cm.yaml
   - configmaps/backend-cm.yaml
   - configmaps/kafka-cm.yaml
+# Image tags are set at deploy time by CI via `kubectl set image`.
+# Do not apply this overlay manually without first running:
+#   kustomize edit set image ghcr.io/corentin-dupaigne/fullstack_project/<service>:<version>
 images:
   - name: ghcr.io/corentin-dupaigne/fullstack_project/auth
-    newTag: latest
+    newTag: set-by-ci
   - name: ghcr.io/corentin-dupaigne/fullstack_project/frontend
-    newTag: latest
+    newTag: set-by-ci
   - name: ghcr.io/corentin-dupaigne/fullstack_project/backend
-    newTag: latest
+    newTag: set-by-ci
   - name: ghcr.io/corentin-dupaigne/fullstack_project/postgres-game
-    newTag: latest
+    newTag: set-by-ci
