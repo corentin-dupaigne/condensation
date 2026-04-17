@@ -4,14 +4,6 @@
 @custom-variant media-muted (:where([data-muted]) &);
 @custom-variant media-fullscreen (:where([data-fullscreen]) &);
 
-@font-face {
-  font-family: "Space Grotesk";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 300 700;
-  src: url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
-}
-
 :root {
   --background: #0c0e11;
   --foreground: #f9f9fd;
@@ -23,24 +15,26 @@
   --surface-container-high: #1d2024;
   --surface-container-highest: #23262a;
   --surface-container-low: #111417;
-  --surface-container-lowest: #000000;
+  --surface-container-lowest: #08090b;
   --surface-variant: #23262a;
-  --surface-tint: #d575ff;
+  --surface-tint: #a1faff;
 
-  --primary: #d575ff;
-  --primary-container: #9800d0;
-  --primary-dim: #b90afc;
-  --on-primary: #fff5fc;
-  --on-primary-container: #390050;
-  --on-primary-fixed: #58007a;
-  --inverse-primary: #9800d0;
+  /* Primary = Cyan (coolant — high-action triggers, sparingly) */
+  --primary: #a1faff;
+  --primary-container: #00f4fe;
+  --primary-dim: #00e5ee;
+  --on-primary: #00393b;
+  --on-primary-container: #00575b;
+  --on-primary-fixed: #004346;
+  --inverse-primary: #00f4fe;
 
-  --secondary: #a1faff;
-  --secondary-container: #00f4fe;
-  --secondary-dim: #00e5ee;
-  --on-secondary: #00393b;
-  --on-secondary-container: #00575b;
-  --on-secondary-fixed: #004346;
+  /* Secondary = Neon Purple (energy source — discovery, rare, premium) */
+  --secondary: #d575ff;
+  --secondary-container: #9800d0;
+  --secondary-dim: #b90afc;
+  --on-secondary: #fff5fc;
+  --on-secondary-container: #390050;
+  --on-secondary-fixed: #58007a;
 
   --cta: #F43F5E;
   --on-cta: #ffffff;
@@ -85,17 +79,21 @@
   --color-primary-container: var(--primary-container);
   --color-primary-dim: var(--primary-dim);
   --color-on-primary: var(--on-primary);
+  --color-on-primary-fixed: var(--on-primary-fixed);
 
   --color-secondary: var(--secondary);
   --color-secondary-container: var(--secondary-container);
   --color-secondary-dim: var(--secondary-dim);
   --color-on-secondary: var(--on-secondary);
   --color-on-secondary-container: var(--on-secondary-container);
+  --color-on-secondary-fixed: var(--on-secondary-fixed);
 
   --color-tertiary: var(--tertiary);
   --color-tertiary-container: var(--tertiary-container);
   --color-tertiary-dim: var(--tertiary-dim);
   --color-on-tertiary: var(--on-tertiary);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-on-tertiary-fixed: var(--on-tertiary-fixed);
 
   --color-error: var(--error);
   --color-on-error: var(--on-error);
@@ -139,11 +137,50 @@ body {
   100% { transform: scale(2.5); opacity: 0; }
 }
 
+/* Glassmorphism — surface-container at 70% + 12px blur + inner highlight on top/left */
 .glass-panel {
-  background: rgba(29, 32, 36, 0.7);
+  background: rgba(23, 26, 29, 0.7);
   backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(170, 171, 175, 0.15);
-  border-left: 1px solid rgba(170, 171, 175, 0.15);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    inset 1px 0 0 rgba(170, 171, 175, 0.15),
+    inset 0 1px 0 rgba(170, 171, 175, 0.15);
+}
+
+/* Primary CTA gradient — 135deg primary → primary-container */
+.cta-gradient {
+  background-image: linear-gradient(135deg, var(--primary), var(--primary-container));
+}
+
+/* Ambient glow — floating state, 40px blur, 10% opacity, primary color */
+.ambient-glow {
+  box-shadow: 0 0 40px rgba(161, 250, 255, 0.10);
+}
+
+/* Ghost border — 1px outline-variant at 20% opacity (accessibility fallback) */
+.ghost-border {
+  box-shadow: inset 0 0 0 1px rgba(70, 72, 75, 0.2);
+}
+
+/* Live pulse — 8px tertiary circle with ripple */
+.live-pulse {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--tertiary);
+}
+.live-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--tertiary);
+  animation: ripple 1.6s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-pulse::after { animation: none; }
 }
 
 .custom-scrollbar {

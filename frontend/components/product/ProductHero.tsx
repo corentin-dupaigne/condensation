@@ -311,7 +311,7 @@ export function ProductHero({ game, isLoggedIn = false }: { game: BackendGameDet
                 setShowPaymentModal(true);
               }}
               disabled={balanceLoading || stripeLoading}
-              className="w-full py-4 bg-linear-to-br from-secondary to-secondary-container text-on-secondary font-headline font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(161,250,255,0.3)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full py-4 cta-gradient text-on-primary-fixed font-headline font-black uppercase tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-[0_0_30px_rgba(161,250,255,0.2)] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {balanceLoading || stripeLoading ? "Processing…" : "Buy Now"}
             </button>

@@ -94,7 +94,7 @@
       </div>
 
       {{-- Terms Checkbox --}}
-      <div class="flex items-start gap-3 pt-1">
+      <div class="flex items-center gap-3 pt-1">
         <div class="relative mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center">
         <button id="terms-checkbox" type="button" role="checkbox" aria-checked="false"
                 class="h-5 w-5 shrink-0 cursor-pointer rounded border border-outline bg-surface-container-highest transition-all hover:border-primary/60">
