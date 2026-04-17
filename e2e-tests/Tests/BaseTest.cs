@@ -21,5 +21,6 @@ public class BaseTest : PageTest
     public async Task BaseSetUp()
     {
         Page.SetDefaultTimeout(TestSettings.DefaultTimeout);
+        Page.SetDefaultNavigationTimeout(TestSettings.DefaultTimeout);
     }
 }

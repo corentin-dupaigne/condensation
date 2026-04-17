@@ -41,10 +41,10 @@ public class CartPage : BasePage
         await BackToHomeLink.IsVisibleAsync();
 
     public async Task ClickBrowseGamesAsync() =>
-        await BrowseGamesLink.DispatchEventAsync("click");
+        await BrowseGamesLink.ClickAsync(new LocatorClickOptions { Force = true });
 
     public async Task ClickBackToHomeAsync() =>
-        await BackToHomeLink.DispatchEventAsync("click");
+        await BackToHomeLink.ClickAsync(new LocatorClickOptions { Force = true });
 
     // ── Cart with items ──────────────────────────────────────────────────────────
 

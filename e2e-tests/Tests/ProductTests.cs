@@ -14,8 +14,8 @@ public class ProductTests : BaseTest
     public async Task SetUp()
     {
         // Discover the first game URL from catalog links (works without clicking game cards)
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         // Find the first link pointing to a product page (/games/<id>)
         var firstGameLink = Page.Locator("a[href*='/games/']").First;
@@ -27,8 +27,8 @@ public class ProductTests : BaseTest
             return;
         }
 
-        await Page.GotoAsync($"{TestSettings.BaseUrl}{href}");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}{href}", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         _productPage = new ProductPage(Page);
     }
@@ -148,10 +148,46 @@ public class ProductTests : BaseTest
         if (count < 2)
             Assert.Inconclusive("Not enough thumbnails to test switching.");
 
+        // Find the first thumbnail that is a screenshot (has an <img> but no play-icon overlay)
+        // Movies come first in the media array, so we need to find a screenshot thumbnail
+        var screenshotIndex = -1;
+        for (int i = 0; i < count; i++)
+        {
+            var overlay = thumbnails.Nth(i).Locator("div.absolute");
+            if (await overlay.CountAsync() == 0)
+            {
+                screenshotIndex = i;
+                break;
+            }
+        }
+
+        if (screenshotIndex < 0)
+            Assert.Inconclusive("No screenshot thumbnails found to test switching.");
+
+        // Click the screenshot thumbnail to ensure the main area shows an <img>
+        await thumbnails.Nth(screenshotIndex).ClickAsync();
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+
         var mainImg = Page.Locator("section.mx-auto div.aspect-video img").First;
         var srcBefore = await mainImg.GetAttributeAsync("src");
 
-        await thumbnails.Nth(1).ClickAsync();
+        // Find a different screenshot thumbnail
+        var secondIndex = -1;
+        for (int i = 0; i < count; i++)
+        {
+            if (i == screenshotIndex) continue;
+            var overlay = thumbnails.Nth(i).Locator("div.absolute");
+            if (await overlay.CountAsync() == 0)
+            {
+                secondIndex = i;
+                break;
+            }
+        }
+
+        if (secondIndex < 0)
+            Assert.Inconclusive("Only one screenshot thumbnail — cannot test switching.");
+
+        await thumbnails.Nth(secondIndex).ClickAsync();
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var srcAfter = await mainImg.GetAttributeAsync("src");

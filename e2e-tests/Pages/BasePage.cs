@@ -23,8 +23,8 @@ public abstract class BasePage
 
     public async Task NavigateAsync()
     {
-        await Page.GotoAsync($"{BaseUrl}{PagePath}");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{BaseUrl}{PagePath}", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
     public async Task<string> GetTitleAsync() => await Page.TitleAsync();

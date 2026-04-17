@@ -97,8 +97,9 @@ public class HomeTests : BaseTest
     public async Task HomePage_ClickFirstGameCard_ShouldNavigateToProductPage()
     {
         var initialUrl = Page.Url;
-        var firstCard = Page.Locator("a[href*='/games/']").First;
-        await firstCard.DispatchEventAsync("click");
+        var firstCard = Page.Locator("main a[href*='/games/']").First;
+        var href = await firstCard.GetAttributeAsync("href");
+        await firstCard.ClickAsync();
         await Page.WaitForURLAsync("**/games/**");
 
         Assert.Multiple(() =>

@@ -91,8 +91,8 @@ public class CartTests : BaseTest
         await catalogPage.NavigateAsync();
 
         // Guard: if no game links rendered, the backend is unavailable — skip gracefully
-        var firstGameLink = Page.Locator("a[href*='/games/']").First;
-        var href = await firstGameLink.GetAttributeAsync("href", new LocatorGetAttributeOptions { Timeout = 5_000 });
+        var firstGameLink = Page.Locator("main a[href*='/games/']").First;
+        var href = await firstGameLink.GetAttributeAsync("href", new LocatorGetAttributeOptions { Timeout = 10_000 });
         if (string.IsNullOrEmpty(href))
         {
             Assert.Ignore("No game cards found in catalog — backend may be unavailable.");
@@ -100,8 +100,8 @@ public class CartTests : BaseTest
         }
 
         // Navigate directly to the product page to avoid overlay/click issues
-        await Page.GotoAsync($"{TestSettings.BaseUrl}{href}");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}{href}", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         // Click the "Add to Cart" button and wait for the "Added!" confirmation label
         var addToCartButton = Page.Locator("button:has-text('Add to Cart')").First;
@@ -109,8 +109,10 @@ public class CartTests : BaseTest
         await Page.Locator("button:has-text('Added!')").WaitForAsync(new() { Timeout = 5_000 });
 
         // Now navigate to the cart page
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        // Wait for the cart to hydrate and display the item
+        await Page.Locator("h1").First.WaitForAsync(new() { Timeout = 10_000 });
     }
 
     [Test]

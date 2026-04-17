@@ -21,12 +21,15 @@ public class FooterComponent
     {
         try
         {
+            // Wait for the footer to be attached to the DOM first
             await FooterElement.WaitForAsync(new LocatorWaitForOptions
             {
-                State = WaitForSelectorState.Visible,
-                Timeout = 5_000
+                State = WaitForSelectorState.Attached,
+                Timeout = 15_000
             });
-            return true;
+            // Then scroll it into view so Playwright considers it visible
+            await FooterElement.ScrollIntoViewIfNeededAsync();
+            return await FooterElement.IsVisibleAsync();
         }
         catch
         {

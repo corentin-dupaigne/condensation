@@ -147,7 +147,7 @@ public class HeroCarouselTests : BaseTest
         await Carousel.HoverAsync();
 
         var buyNow = Carousel.Locator("a:has-text('BUY NOW')");
-        await buyNow.DispatchEventAsync("click");
+        await buyNow.ClickAsync(new LocatorClickOptions { Force = true });
         await Page.WaitForURLAsync("**/games/**");
 
         Assert.That(Page.Url, Does.Contain("/games/"));

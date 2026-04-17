@@ -17,8 +17,8 @@ public class LoginTests : BaseTest
     [SetUp]
     public async Task SetUp()
     {
-        await Page.GotoAsync(TestSettings.BaseUrl);
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync(TestSettings.BaseUrl, new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
     [Test]
@@ -39,8 +39,8 @@ public class LoginTests : BaseTest
     [Test]
     public async Task Auth_SignInLink_ShouldBeVisibleOnCatalogPage()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var signInLink = Page.Locator("header a:has-text('Sign In')");
         await Expect(signInLink).ToBeVisibleAsync();
@@ -49,8 +49,8 @@ public class LoginTests : BaseTest
     [Test]
     public async Task Auth_SignInLink_ShouldBeVisibleOnCartPage()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var signInLink = Page.Locator("header a:has-text('Sign In')");
         await Expect(signInLink).ToBeVisibleAsync();
@@ -59,8 +59,8 @@ public class LoginTests : BaseTest
     [Test]
     public async Task Auth_SignInLink_ShouldBeVisibleOnSearchPage()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/search");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/search", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var signInLink = Page.Locator("header a:has-text('Sign In')");
         await Expect(signInLink).ToBeVisibleAsync();

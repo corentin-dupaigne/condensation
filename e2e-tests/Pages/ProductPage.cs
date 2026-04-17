@@ -13,11 +13,11 @@ public class ProductPage : BasePage
     private ILocator BuyNowButton => Page.Locator("button:has-text('Buy Now')");
     private ILocator AddToCartButton => Page.Locator("button:has-text('Add to Cart')");
     private ILocator WishlistButton => Page.Locator("button:has-text('Wishlist')");
-    private ILocator PriceDisplay => Page.Locator("[class*='price']").First;
+    private ILocator PriceDisplay => Page.Locator("span.text-secondary, span.text-on-surface").First;
 
-    // Media
-    private ILocator MainMedia => Page.Locator("[class*='media'], [class*='hero'] img, [class*='hero'] video").First;
-    private ILocator Thumbnails => Page.Locator("[class*='thumbnail'], [class*='thumb']");
+    // Media — the main media is inside section.mx-auto div.aspect-video
+    private ILocator MainMedia => Page.Locator("section.mx-auto div.aspect-video").First;
+    private ILocator Thumbnails => Page.Locator("div.custom-scrollbar button");
 
     // Breadcrumb — the Breadcrumb component renders a plain <nav> with <a> links
     private ILocator BreadcrumbLinks => Page.Locator("main nav a, nav:has(a:has-text('Home')) a");
@@ -26,8 +26,8 @@ public class ProductPage : BasePage
     private ILocator DeveloperInfo => Page.Locator("text=Developer").Locator("..");
     private ILocator PublisherInfo => Page.Locator("text=Publisher").Locator("..");
 
-    // Related games
-    private ILocator RelatedGames => Page.Locator("[class*='related'] [class*='card'], [class*='related'] a");
+    // Related games — GameCard links inside the related section
+    private ILocator RelatedGames => Page.Locator("main section a[href*='/games/']");
 
     public ProductPage(IPage page, string slug = "") : base(page)
     {
@@ -51,7 +51,7 @@ public class ProductPage : BasePage
     public async Task<int> GetBreadcrumbCountAsync() => await BreadcrumbLinks.CountAsync();
 
     public async Task ClickBreadcrumbAsync(string text) =>
-        await Page.Locator($"main nav a:has-text('{text}')").DispatchEventAsync("click");
+        await Page.Locator($"main nav a:has-text('{text}')").ClickAsync(new LocatorClickOptions { Force = true });
 
     public async Task<int> GetRelatedGamesCountAsync() => await RelatedGames.CountAsync();
 

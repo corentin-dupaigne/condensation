@@ -25,14 +25,12 @@ public class HeaderComponent
         _page.Locator($"header nav a:has-text('{text}')");
 
     /// <summary>
-    /// Use JavaScript click (DispatchEvent) to bypass the Next.js dev overlay
-    /// that intercepts pointer events. Unlike Force=true which still dispatches
-    /// at the element's coordinates (overlay can intercept), DispatchEvent sends
-    /// the event directly to the DOM element.
+    /// Force-click to bypass overlays. Using Force=true dispatches a real pointer
+    /// event that Next.js Link components can intercept for client-side routing.
     /// </summary>
     private static async Task JsClickAsync(ILocator locator)
     {
-        await locator.DispatchEventAsync("click");
+        await locator.ClickAsync(new LocatorClickOptions { Force = true });
     }
 
     public async Task ClickLogoAsync() => await JsClickAsync(Logo);

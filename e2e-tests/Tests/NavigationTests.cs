@@ -17,8 +17,8 @@ public class NavigationTests : BaseTest
     public async Task SetUp()
     {
         // Start every test from the home page
-        await Page.GotoAsync(TestSettings.BaseUrl);
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync(TestSettings.BaseUrl, new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
     // ── Logo ──────────────────────────────────────────────────────────────────
@@ -27,8 +27,8 @@ public class NavigationTests : BaseTest
     public async Task Header_Logo_ShouldNavigateToHome()
     {
         // Navigate away first
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var catalogPage = new CatalogPage(Page);
         await catalogPage.Header.ClickLogoAsync();
@@ -43,7 +43,7 @@ public class NavigationTests : BaseTest
     public async Task Header_CartLink_ShouldNavigateToCart()
     {
         var cartLink = Page.Locator("header a[aria-label='Cart']");
-        await cartLink.DispatchEventAsync("click");
+        await cartLink.ClickAsync(new LocatorClickOptions { Force = true });
         await Page.WaitForURLAsync("**/cart");
         Assert.That(Page.Url, Does.Contain("/cart"));
     }
@@ -72,8 +72,8 @@ public class NavigationTests : BaseTest
     public async Task Header_StoreNavLink_ShouldNavigateToHome()
     {
         // Start from catalog so "Store" actually causes a navigation
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var catalogPage = new CatalogPage(Page);
         await catalogPage.Header.ClickNavLinkAsync("Store");

@@ -8,16 +8,16 @@ public class SearchPage : BasePage
     protected override string PagePath => "/search";
 
     // Search hero
-    private ILocator SearchInput => Page.Locator("input[type='text'], input[placeholder*='search' i]").Last;
-    private ILocator SearchButton => Page.Locator("button:has-text('Search')");
-    private ILocator ResultCount => Page.Locator("[class*='result'] p, p:has-text('result')").First;
+    private ILocator SearchInput => Page.Locator("input[type='search'], input[placeholder*='search' i]").Last;
+    private ILocator SearchButton => Page.Locator("button[type='submit']:has-text('Search')");
+    private ILocator ResultCount => Page.Locator("span:has-text('Retrieved'), p:has-text('result')").First;
 
-    // Results
-    private ILocator ResultCards => Page.Locator("[class*='game'], [class*='card']");
+    // Results — GameCard renders as <a href="/games/{id}">
+    private ILocator ResultCards => Page.Locator("main a[href*='/games/']");
     private ILocator NoResultsMessage => Page.Locator("text=No results found");
 
-    // Popular searches
-    private ILocator PopularSearchPills => Page.Locator("[class*='popular'] a, [class*='popular'] button");
+    // Popular searches — <Link> pills inside the Popular Searches section
+    private ILocator PopularSearchPills => Page.Locator("section:has(h2:has-text('Popular Searches')) a[href*='/search']");
 
     // Filters
     private ILocator ClearAllButton => Page.Locator("button:has-text('Clear All')");
@@ -26,15 +26,15 @@ public class SearchPage : BasePage
 
     public async Task NavigateWithQueryAsync(string query)
     {
-        await Page.GotoAsync($"{BaseUrl}/search?q={Uri.EscapeDataString(query)}");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{BaseUrl}/search?q={Uri.EscapeDataString(query)}", new PageGotoOptions { Timeout = 30_000 });
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
     public async Task SearchAsync(string query)
     {
         await SearchInput.FillAsync(query);
         await SearchInput.PressAsync("Enter");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.WaitForURLAsync(url => url.Contains("/search") && url.Contains(Uri.EscapeDataString(query)));
     }
 
     public async Task<int> GetResultCardCountAsync() => await ResultCards.CountAsync();

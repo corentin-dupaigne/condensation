@@ -58,7 +58,7 @@ public class SearchTests : BaseTest
             Assert.Inconclusive("No popular search pills rendered.");
 
         await _searchPage.ClickPopularSearchAsync(0);
-        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.NetworkIdle);
+        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
 
         Assert.That(Page.Url, Does.Contain("/search"));
     }
@@ -88,7 +88,7 @@ public class SearchTests : BaseTest
             Assert.Inconclusive("No result cards to click.");
 
         await _searchPage.ClickResultCardAsync(0);
-        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.NetworkIdle);
+        await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
 
         Assert.That(Page.Url, Does.Contain("/games/"));
     }
@@ -129,7 +129,7 @@ public class SearchTests : BaseTest
     public async Task SearchPage_ShouldHaveSearchInputVisible()
     {
         await _searchPage.NavigateAsync();
-        var searchInput = Page.Locator("input[type='text'], input[placeholder*='search' i]").Last;
+        var searchInput = Page.Locator("input[type='search'], input[placeholder*='search' i]").Last;
         await Expect(searchInput).ToBeVisibleAsync();
     }
 
