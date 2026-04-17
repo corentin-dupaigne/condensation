@@ -1,125 +1,142 @@
 package fr.fullstack.backend.unit.controller;
 
 import fr.fullstack.backend.controller.GameController;
-import fr.fullstack.backend.dto.GameDetail;
-import fr.fullstack.backend.dto.GameSummary;
+import fr.fullstack.backend.dto.GameDetailDto;
+import fr.fullstack.backend.dto.GameSummaryDto;
+import fr.fullstack.backend.dto.PageDto;
+import fr.fullstack.backend.entity.Game;
+import fr.fullstack.backend.entity.Genre;
+import fr.fullstack.backend.mapper.CatalogMapper;
 import fr.fullstack.backend.service.GameService;
-import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@WebMvcTest(GameController.class)
+@ExtendWith(MockitoExtension.class)
 class GameControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockitoBean
+    @Mock
     private GameService gameService;
 
-    @Test
-    void getAllGames_returnsOkWithGamesList() throws Exception {
-        GameSummary summary = new GameSummary(1L, 100, "Test Game", "test-game", "img.png", 999, 0, true, false, false);
-        when(gameService.getAllGames(any(), any(), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(summary)));
+    @Mock
+    private CatalogMapper mapper;
 
-        mockMvc.perform(get("/api/games"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is("Test Game")))
-                .andExpect(jsonPath("$.content[0].steamAppId", is(100)))
-                .andExpect(jsonPath("$.content[0].priceFinal", is(999)));
+    @InjectMocks
+    private GameController gameController;
+
+    private Game game;
+    private GameSummaryDto summaryDto;
+
+    @BeforeEach
+    void setUp() {
+        game = new Game();
+        game.setId(1L);
+        game.setName("Portal");
+        summaryDto = new GameSummaryDto(1L, 400, "Portal", "portal", null,
+                999, 0, 100, null, List.of());
     }
 
     @Test
-    void getAllGames_passesSearchParam() throws Exception {
-        when(gameService.getAllGames(eq("Portal"), any(), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of()));
+    void getCatalog_returnsOkWithPageDto() {
+        Page<Game> gamePage = new PageImpl<>(List.of(game));
+        when(gameService.getCatalog(any(), any(), any(Pageable.class))).thenReturn(gamePage);
+        when(mapper.toGameSummaryDto(game)).thenReturn(summaryDto);
+        when(mapper.toPageDto(eq(gamePage), any())).thenReturn(new PageDto<>(List.of(summaryDto), 1, 1));
 
-        mockMvc.perform(get("/api/games").param("search", "Portal"))
-                .andExpect(status().isOk());
+        ResponseEntity<PageDto<GameSummaryDto>> response = gameController.getCatalog(0, 20, null, null);
 
-        verify(gameService).getAllGames(eq("Portal"), any(), any(Pageable.class));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().content()).hasSize(1);
+        assertThat(response.getBody().totalElements()).isEqualTo(1);
     }
 
     @Test
-    void getAllGames_passesGenreIdParam() throws Exception {
-        when(gameService.getAllGames(any(), eq(5), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of()));
+    void getCatalog_forwardsSearchAndGenreParams() {
+        Page<Game> empty = new PageImpl<>(List.of());
+        when(gameService.getCatalog(eq("Portal"), eq(5), any(Pageable.class))).thenReturn(empty);
+        when(mapper.toPageDto(eq(empty), any())).thenReturn(new PageDto<>(List.of(), 0, 0));
 
-        mockMvc.perform(get("/api/games").param("genreId", "5"))
-                .andExpect(status().isOk());
+        gameController.getCatalog(0, 20, "Portal", 5);
 
-        verify(gameService).getAllGames(any(), eq(5), any(Pageable.class));
+        verify(gameService).getCatalog(eq("Portal"), eq(5), any(Pageable.class));
     }
 
     @Test
-    void getAllGames_emptyList_returnsOkWithEmptyContent() throws Exception {
-        when(gameService.getAllGames(any(), any(), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of()));
+    void getGameDetails_returnsOkWithDto() {
+        GameDetailDto detail = new GameDetailDto(1L, 400, "Portal", "portal", null,
+                999, 0, 100, null, List.of(), null, null, null, (short) 0,
+                null, (short) 90, "EUR", 999, null, null, null, null,
+                List.of(), List.of(), List.of(), List.of());
+        when(gameService.getGameDetails(1L)).thenReturn(game);
+        when(mapper.toGameDetailDto(game)).thenReturn(detail);
 
-        mockMvc.perform(get("/api/games"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)))
-                .andExpect(jsonPath("$.totalElements", is(0)));
+        ResponseEntity<GameDetailDto> response = gameController.getGameDetails(1L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().id()).isEqualTo(1L);
+        assertThat(response.getBody().name()).isEqualTo("Portal");
     }
 
     @Test
-    void getGameById_existingId_returnsOkWithGameDetail() throws Exception {
-        GameDetail detail = new GameDetail(1L, 12345, "Super Game", "super-game", "header.png", 1999, 0,
-                true, false, false, "Description", "About", "English", (short) 0, null, null,
-                (short) 85, 1000, "EUR", 2999, 33, null, null, null, null, null, null,
-                List.of(), List.of(), List.of(), List.of(), List.of());
+    void deleteGame_returnsNoContentAndDelegates() {
+        ResponseEntity<Void> response = gameController.deleteGame(1L);
 
-        when(gameService.getGameById(1L)).thenReturn(detail);
-
-        mockMvc.perform(get("/api/games/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.name", is("Super Game")))
-                .andExpect(jsonPath("$.steamAppId", is(12345)))
-                .andExpect(jsonPath("$.metacriticScore", is(85)));
-    }
-
-    @Test
-    void getGameById_nonExistingId_returns404() throws Exception {
-        when(gameService.getGameById(999L))
-                .thenThrow(new EntityNotFoundException("Le jeu avec l'ID 999 est introuvable."));
-
-        mockMvc.perform(get("/api/games/999"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void deleteGame_existingId_returns204() throws Exception {
-        doNothing().when(gameService).deleteGame(1L);
-
-        mockMvc.perform(delete("/api/games/1"))
-                .andExpect(status().isNoContent());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getBody()).isNull();
         verify(gameService).deleteGame(1L);
     }
 
     @Test
-    void deleteGame_nonExistingId_returns404() throws Exception {
-        doThrow(new EntityNotFoundException("Le jeu avec l'ID 999 est introuvable."))
-                .when(gameService).deleteGame(999L);
+    void getKeyCounts_returnsOkWithMap() {
+        when(gameService.getAvailableKeyCount(1L)).thenReturn(7L);
 
-        mockMvc.perform(delete("/api/games/999"))
-                .andExpect(status().isNotFound());
+        ResponseEntity<Map<String, Long>> response = gameController.getKeyCounts(1L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).containsEntry("key_counts", 7L);
+    }
+
+    @Test
+    void getGenres_returnsOkWithGenreList() {
+        Genre g = new Genre();
+        g.setId(1);
+        g.setDescription("Action");
+        when(gameService.getAllGenres()).thenReturn(List.of(g));
+
+        var response = gameController.getGenres();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).hasSize(1);
+        assertThat(response.getBody().get(0).description()).isEqualTo("Action");
+    }
+
+    @Test
+    void getGenres_emptyList_returnsOkWithEmptyList() {
+        when(gameService.getAllGenres()).thenReturn(List.of());
+
+        var response = gameController.getGenres();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEmpty();
     }
 }

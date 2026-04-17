@@ -1,12 +1,12 @@
 package fr.fullstack.backend.unit.service;
 
-import fr.fullstack.backend.dto.GameDetail;
-import fr.fullstack.backend.dto.GameSummary;
 import fr.fullstack.backend.entity.Game;
-import fr.fullstack.backend.mapper.GameMapper;
+import fr.fullstack.backend.entity.Genre;
 import fr.fullstack.backend.repository.GameRepository;
+import fr.fullstack.backend.repository.SteamKeyRepository;
 import fr.fullstack.backend.service.GameService;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,135 +33,108 @@ class GameServiceTest {
     private GameRepository gameRepository;
 
     @Mock
-    private GameMapper gameMapper;
+    private SteamKeyRepository steamKeyRepository;
 
     @InjectMocks
     private GameService gameService;
 
-    private final Pageable pageable = PageRequest.of(0, 10);
+    private Pageable pageable;
+    private Game game;
 
-    // --- getAllGames ---
+    @BeforeEach
+    void setUp() {
+        pageable = PageRequest.of(0, 10);
+        game = new Game();
+        game.setId(1L);
+        game.setSteamAppId(12345);
+        game.setName("Test Game");
+        game.setSlug("test-game");
+    }
 
     @Test
-    void getAllGames_withNoFilters_returnsAllGames() {
-        Game game = Game.builder().id(1L).name("Test Game").build();
-        GameSummary summary = new GameSummary(1L, 100, "Test Game", "test-game", null, 999, 0, true, false, false);
-        Page<Game> gamePage = new PageImpl<>(List.of(game));
+    void getCatalog_withNullSearch_passesEmptyStringToRepository() {
+        Page<Game> page = new PageImpl<>(List.of(game));
+        when(gameRepository.findWithFilters(eq(""), eq(null), any(Pageable.class))).thenReturn(page);
 
-        when(gameRepository.findAll(pageable)).thenReturn(gamePage);
-        when(gameMapper.toSummary(game)).thenReturn(summary);
-
-        Page<GameSummary> result = gameService.getAllGames(null, null, pageable);
+        Page<Game> result = gameService.getCatalog(null, null, pageable);
 
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).name()).isEqualTo("Test Game");
-        verify(gameRepository).findAll(pageable);
-        verify(gameRepository, never()).searchByText(any(), any());
-        verify(gameRepository, never()).findByGenreId(any(), any());
+        verify(gameRepository).findWithFilters("", null, pageable);
     }
 
     @Test
-    void getAllGames_withSearch_usesSearchByText() {
-        Game game = Game.builder().id(1L).name("Portal").build();
-        GameSummary summary = new GameSummary(1L, 400, "Portal", "portal", null, 999, 0, true, false, false);
-        Page<Game> gamePage = new PageImpl<>(List.of(game));
+    void getCatalog_withBlankSearch_passesEmptyStringToRepository() {
+        Page<Game> page = new PageImpl<>(List.of());
+        when(gameRepository.findWithFilters(eq(""), eq(null), any(Pageable.class))).thenReturn(page);
 
-        when(gameRepository.searchByText("Portal", pageable)).thenReturn(gamePage);
-        when(gameMapper.toSummary(game)).thenReturn(summary);
+        gameService.getCatalog("   ", null, pageable);
 
-        Page<GameSummary> result = gameService.getAllGames("Portal", null, pageable);
+        verify(gameRepository).findWithFilters("", null, pageable);
+    }
+
+    @Test
+    void getCatalog_withSearch_passesSearchToRepository() {
+        Page<Game> page = new PageImpl<>(List.of(game));
+        when(gameRepository.findWithFilters(eq("Portal"), eq(null), any(Pageable.class))).thenReturn(page);
+
+        Page<Game> result = gameService.getCatalog("Portal", null, pageable);
 
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).name()).isEqualTo("Portal");
-        verify(gameRepository).searchByText("Portal", pageable);
-        verify(gameRepository, never()).findAll(any(Pageable.class));
+        verify(gameRepository).findWithFilters("Portal", null, pageable);
     }
 
     @Test
-    void getAllGames_withBlankSearch_fallsBackToFindAll() {
-        Page<Game> gamePage = new PageImpl<>(List.of());
+    void getCatalog_withGenreId_passesGenreIdToRepository() {
+        Page<Game> page = new PageImpl<>(List.of(game));
+        when(gameRepository.findWithFilters(eq(""), eq(5), any(Pageable.class))).thenReturn(page);
 
-        when(gameRepository.findAll(pageable)).thenReturn(gamePage);
+        gameService.getCatalog(null, 5, pageable);
 
-        gameService.getAllGames("   ", null, pageable);
-
-        verify(gameRepository).findAll(pageable);
-        verify(gameRepository, never()).searchByText(any(), any());
+        verify(gameRepository).findWithFilters("", 5, pageable);
     }
 
     @Test
-    void getAllGames_withGenreId_usesGenreFilter() {
-        Game game = Game.builder().id(1L).name("RPG Game").build();
-        GameSummary summary = new GameSummary(1L, 200, "RPG Game", "rpg-game", null, 1999, 0, true, false, false);
-        Page<Game> gamePage = new PageImpl<>(List.of(game));
+    void getCatalog_withSearchAndGenre_passesBothToRepository() {
+        Page<Game> page = new PageImpl<>(List.of());
+        when(gameRepository.findWithFilters(eq("action"), eq(3), any(Pageable.class))).thenReturn(page);
 
-        when(gameRepository.findByGenreId(5, pageable)).thenReturn(gamePage);
-        when(gameMapper.toSummary(game)).thenReturn(summary);
+        gameService.getCatalog("action", 3, pageable);
 
-        Page<GameSummary> result = gameService.getAllGames(null, 5, pageable);
-
-        assertThat(result.getContent()).hasSize(1);
-        verify(gameRepository).findByGenreId(5, pageable);
-        verify(gameRepository, never()).findAll(any(Pageable.class));
+        verify(gameRepository).findWithFilters("action", 3, pageable);
     }
 
     @Test
-    void getAllGames_searchTakesPriorityOverGenreId() {
-        Page<Game> gamePage = new PageImpl<>(List.of());
+    void getCatalog_emptyResults_returnsEmptyPage() {
+        Page<Game> empty = new PageImpl<>(List.of());
+        when(gameRepository.findWithFilters(any(), any(), any(Pageable.class))).thenReturn(empty);
 
-        when(gameRepository.searchByText(eq("query"), any())).thenReturn(gamePage);
-
-        gameService.getAllGames("query", 5, pageable);
-
-        verify(gameRepository).searchByText("query", pageable);
-        verify(gameRepository, never()).findByGenreId(any(), any());
-    }
-
-    @Test
-    void getAllGames_emptyResult_returnsEmptyPage() {
-        Page<Game> emptyPage = new PageImpl<>(List.of());
-
-        when(gameRepository.findAll(pageable)).thenReturn(emptyPage);
-
-        Page<GameSummary> result = gameService.getAllGames(null, null, pageable);
+        Page<Game> result = gameService.getCatalog(null, null, pageable);
 
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isZero();
     }
 
-    // --- getGameById ---
-
     @Test
-    void getGameById_existingId_returnsGameDetail() {
-        Game game = Game.builder().id(1L).name("Test Game").steamAppId(12345).build();
-        GameDetail detail = new GameDetail(1L, 12345, "Test Game", "test-game", null, 999, 0,
-                true, false, false, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null,
-                List.of(), List.of(), List.of(), List.of(), List.of());
-
+    void getGameDetails_existingId_returnsGame() {
         when(gameRepository.findById(1L)).thenReturn(Optional.of(game));
-        when(gameMapper.toDetail(game)).thenReturn(detail);
 
-        GameDetail result = gameService.getGameById(1L);
+        Game result = gameService.getGameDetails(1L);
 
-        assertThat(result.id()).isEqualTo(1L);
-        assertThat(result.name()).isEqualTo("Test Game");
-        verify(gameRepository).findById(1L);
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getName()).isEqualTo("Test Game");
     }
 
     @Test
-    void getGameById_nonExistingId_throwsEntityNotFoundException() {
+    void getGameDetails_nonExistingId_throwsEntityNotFoundException() {
         when(gameRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> gameService.getGameById(999L))
+        assertThatThrownBy(() -> gameService.getGameDetails(999L))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Le jeu avec l'ID 999 est introuvable.");
+                .hasMessageContaining("999");
     }
 
-    // --- deleteGame ---
-
     @Test
-    void deleteGame_existingId_deletesSuccessfully() {
+    void deleteGame_existingId_deletesGame() {
         when(gameRepository.existsById(1L)).thenReturn(true);
 
         gameService.deleteGame(1L);
@@ -170,13 +143,58 @@ class GameServiceTest {
     }
 
     @Test
-    void deleteGame_nonExistingId_throwsEntityNotFoundException() {
+    void deleteGame_nonExistingId_throwsAndDoesNotDelete() {
         when(gameRepository.existsById(999L)).thenReturn(false);
 
         assertThatThrownBy(() -> gameService.deleteGame(999L))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Le jeu avec l'ID 999 est introuvable.");
-
+                .isInstanceOf(EntityNotFoundException.class);
         verify(gameRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void getAvailableKeyCount_existingGame_returnsCount() {
+        when(gameRepository.existsById(1L)).thenReturn(true);
+        when(steamKeyRepository.countByGameId(1L)).thenReturn(7L);
+
+        long count = gameService.getAvailableKeyCount(1L);
+
+        assertThat(count).isEqualTo(7L);
+    }
+
+    @Test
+    void getAvailableKeyCount_nonExistingGame_throwsEntityNotFound() {
+        when(gameRepository.existsById(999L)).thenReturn(false);
+
+        assertThatThrownBy(() -> gameService.getAvailableKeyCount(999L))
+                .isInstanceOf(EntityNotFoundException.class);
+        verify(steamKeyRepository, never()).countByGameId(any());
+    }
+
+    @Test
+    void getAvailableKeyCount_returnsZeroWhenNoKeys() {
+        when(gameRepository.existsById(1L)).thenReturn(true);
+        when(steamKeyRepository.countByGameId(1L)).thenReturn(0L);
+
+        assertThat(gameService.getAvailableKeyCount(1L)).isZero();
+    }
+
+    @Test
+    void getAllGenres_returnsRepositoryResult() {
+        Genre genre = new Genre();
+        genre.setId(1);
+        genre.setDescription("Action");
+        when(gameRepository.findAllGenres()).thenReturn(List.of(genre));
+
+        List<Genre> result = gameService.getAllGenres();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getDescription()).isEqualTo("Action");
+    }
+
+    @Test
+    void getAllGenres_emptyList_returnsEmptyList() {
+        when(gameRepository.findAllGenres()).thenReturn(List.of());
+
+        assertThat(gameService.getAllGenres()).isEmpty();
     }
 }
