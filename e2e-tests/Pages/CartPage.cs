@@ -31,8 +31,18 @@ public class CartPage : BasePage
 
     // ── Empty state ─────────────────────────────────────────────────────────────
 
-    public async Task<bool> IsEmptyCartVisibleAsync() =>
-        await EmptyCartMessage.IsVisibleAsync();
+    public async Task<bool> IsEmptyCartVisibleAsync()
+    {
+        try
+        {
+            await EmptyCartMessage.WaitForAsync(new() { Timeout = 5000 });
+            return true;
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
+    }
 
     public async Task<bool> IsBrowseGamesLinkVisibleAsync() =>
         await BrowseGamesLink.IsVisibleAsync();

@@ -101,7 +101,7 @@ public class AuthTests : BaseTest
         await LoginAsync();
         await Page.Locator("button[aria-label='User menu']").ClickAsync();
 
-        var ordersLink = Page.Locator("a:has-text('My Orders')");
+        var ordersLink = Page.Locator("header a[href='/orders']");
         await Expect(ordersLink).ToBeVisibleAsync();
     }
 
@@ -111,7 +111,7 @@ public class AuthTests : BaseTest
         await LoginAsync();
         await Page.Locator("button[aria-label='User menu']").ClickAsync();
 
-        var settingsLink = Page.Locator("a:has-text('Settings')");
+        var settingsLink = Page.Locator("header a[href='/settings']");
         await Expect(settingsLink).ToBeVisibleAsync();
     }
 

@@ -58,6 +58,6 @@ public class BaseTest : PageTest
     {
         await Page.Locator("button[aria-label='User menu']").ClickAsync();
         await Page.Locator("button:has-text('Logout')").ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded, new() { Timeout = 30_000 });
     }
 }

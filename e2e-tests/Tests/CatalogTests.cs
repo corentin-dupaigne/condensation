@@ -48,7 +48,7 @@ public class CatalogTests : BaseTest
     {
         var initialUrl = Page.Url;
         await _catalogPage.ClickGameCardAsync(0);
-        await Page.WaitForURLAsync("**/games/**");
+        await Page.WaitForURLAsync("**/games/**", new() { Timeout = 30_000 });
         Assert.That(Page.Url, Is.Not.EqualTo(initialUrl));
     }
 

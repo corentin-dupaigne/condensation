@@ -205,7 +205,7 @@ public class SettingsTests : AuthenticatedBaseTest
     public async Task Settings_Privacy_ShouldDisplayProfileVisibilityToggle()
     {
         await Page.Locator("button:has-text('Privacy')").ClickAsync();
-        var publicProfile = Page.Locator("text=Public profile");
+        var publicProfile = Page.GetByText("Public profile", new() { Exact = true });
         await Expect(publicProfile).ToBeVisibleAsync();
     }
 
@@ -213,7 +213,7 @@ public class SettingsTests : AuthenticatedBaseTest
     public async Task Settings_Privacy_ShouldDisplayExportDataButton()
     {
         await Page.Locator("button:has-text('Privacy')").ClickAsync();
-        var exportBtn = Page.Locator("button:has-text('Export Your Data')");
+        var exportBtn = Page.Locator("button:text-is('Export')");
         await Expect(exportBtn).ToBeVisibleAsync();
     }
 

@@ -21,15 +21,15 @@ public class FooterComponent
     {
         try
         {
-            // Wait for the footer to be attached to the DOM first
+            // Wait for the footer to be attached and visible (non-empty bbox, not display:none).
+            // Avoid ScrollIntoViewIfNeeded: on long pages with animations/lazy images it can
+            // time out even though the footer itself is rendered and visible.
             await FooterElement.WaitForAsync(new LocatorWaitForOptions
             {
-                State = WaitForSelectorState.Attached,
+                State = WaitForSelectorState.Visible,
                 Timeout = 15_000
             });
-            // Then scroll it into view so Playwright considers it visible
-            await FooterElement.ScrollIntoViewIfNeededAsync();
-            return await FooterElement.IsVisibleAsync();
+            return true;
         }
         catch
         {
