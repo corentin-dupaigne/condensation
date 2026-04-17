@@ -7,4 +7,10 @@ public static class TestSettings
 
     public static int DefaultTimeout =>
         int.TryParse(Environment.GetEnvironmentVariable("E2E_TIMEOUT"), out var t) ? t : 30000;
+
+    public static string TestUserEmail =>
+        Environment.GetEnvironmentVariable("E2E_TEST_EMAIL") ?? "test@example.com";
+
+    public static string TestUserPassword =>
+        Environment.GetEnvironmentVariable("E2E_TEST_PASSWORD") ?? "password";
 }
