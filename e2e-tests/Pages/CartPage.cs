@@ -44,11 +44,31 @@ public class CartPage : BasePage
         }
     }
 
-    public async Task<bool> IsBrowseGamesLinkVisibleAsync() =>
-        await BrowseGamesLink.IsVisibleAsync();
+    public async Task<bool> IsBrowseGamesLinkVisibleAsync()
+    {
+        try
+        {
+            await BrowseGamesLink.WaitForAsync(new() { Timeout = 5000 });
+            return true;
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
+    }
 
-    public async Task<bool> IsBackToHomeLinkVisibleAsync() =>
-        await BackToHomeLink.IsVisibleAsync();
+    public async Task<bool> IsBackToHomeLinkVisibleAsync()
+    {
+        try
+        {
+            await BackToHomeLink.WaitForAsync(new() { Timeout = 5000 });
+            return true;
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
+    }
 
     public async Task ClickBrowseGamesAsync() =>
         await BrowseGamesLink.ClickAsync(new LocatorClickOptions { Force = true });

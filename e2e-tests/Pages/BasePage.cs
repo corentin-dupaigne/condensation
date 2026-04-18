@@ -23,8 +23,19 @@ public abstract class BasePage
 
     public async Task NavigateAsync()
     {
-        await Page.GotoAsync($"{BaseUrl}{PagePath}", new PageGotoOptions { Timeout = 30_000 });
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.GotoAsync($"{BaseUrl}{PagePath}", new PageGotoOptions
+        {
+            Timeout = 30_000,
+            WaitUntil = WaitUntilState.DOMContentLoaded,
+        });
+        // Best-effort wait for Load so client-side hydration has time to attach handlers.
+        // Some pages (e.g. /cart) have long-lived network activity that prevents the load
+        // event from ever firing, so a timeout here is tolerable.
+        try
+        {
+            await Page.WaitForLoadStateAsync(LoadState.Load, new() { Timeout = 5_000 });
+        }
+        catch (TimeoutException) { }
     }
 
     public async Task<string> GetTitleAsync() => await Page.TitleAsync();
