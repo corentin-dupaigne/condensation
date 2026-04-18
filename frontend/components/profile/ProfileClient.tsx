@@ -253,7 +253,7 @@ function BadgesTab({ badges }: { badges: typeof mockBadges }) {
 
       {[
         { name: "Veteran", description: "Be a member for 1 year", icon: "🎖️" },
-        { name: "Big Spender", description: "Spend $500 or more on game keys", icon: "💎" },
+        { name: "Big Spender", description: "Spend €500 or more on game keys", icon: "💎" },
         { name: "Reseller", description: "Complete your first peer-to-peer sale", icon: "🤝" },
       ].map((badge) => (
         <div

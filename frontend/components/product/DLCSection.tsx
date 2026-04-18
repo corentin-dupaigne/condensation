@@ -38,7 +38,7 @@ export function DLCSection({ items }: { items: DLCItem[] }) {
             </div>
 
             <span className="text-sm font-bold text-on-surface">
-              ${item.price.toFixed(2)}
+              €{item.price.toFixed(2)}
             </span>
 
             <button

@@ -259,7 +259,7 @@ const initials = userName ? userName.charAt(0).toUpperCase() : "P";
                   <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
                 </svg>
                 {balanceLoaded ? (
-                  <span className="tabular-nums">${balance.toFixed(2)}</span>
+                  <span className="tabular-nums">€{balance.toFixed(2)}</span>
                 ) : (
                   <span className="inline-block h-3.5 w-12 animate-pulse rounded bg-on-surface/10" />
                 )}

@@ -166,7 +166,7 @@ export function PaymentMethodModal({
                 <span className="ml-auto text-sm text-on-surface-variant">
                   Balance:{" "}
                   <span className="font-headline font-bold text-secondary">
-                    {balanceLoading ? "…" : (balance === 0 ? "$0.00" : formatPrice(balance))}
+                    {balanceLoading ? "…" : (balance === 0 ? "€0.00" : formatPrice(balance))}
                   </span>
                 </span>
               </div>

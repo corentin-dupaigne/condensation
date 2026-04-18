@@ -317,7 +317,7 @@ function WalletSection() {
           <div>
             <p className="text-sm font-medium text-on-surface">Current Balance</p>
             <p className="mt-0.5 font-headline text-2xl font-bold text-primary tabular-nums">
-              ${balance.toFixed(2)}
+              €{balance.toFixed(2)}
             </p>
           </div>
           <button

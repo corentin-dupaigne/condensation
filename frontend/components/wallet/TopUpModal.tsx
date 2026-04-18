@@ -63,7 +63,7 @@ export function TopUpModal({ open, onClose }: TopUpModalProps) {
   async function handleContinue() {
     const dollars = parseFloat(amount);
     if (!Number.isFinite(dollars) || dollars < 1) {
-      setState({ type: "error", message: "Minimum top-up is $1.00" });
+      setState({ type: "error", message: "Minimum top-up is €1.00" });
       return;
     }
     const cents = Math.round(dollars * 100);

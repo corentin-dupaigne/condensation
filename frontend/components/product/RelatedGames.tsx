@@ -55,7 +55,7 @@ export function RelatedGames({ games }: { games: RelatedGame[] }) {
               {game.name}
             </p>
             <p className="text-sm font-semibold text-on-surface-variant">
-              ${(game.priceFinal / 100).toFixed(2)}
+              €{(game.priceFinal / 100).toFixed(2)}
             </p>
           </a>
         ))}

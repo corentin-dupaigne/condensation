@@ -12,6 +12,7 @@ import { addToCart, cartItemFromGame, clearCart } from "@/lib/cart-store";
 import { fetchBalance } from "@/lib/balance-store";
 import { PaymentMethodModal } from "@/components/checkout/PaymentMethodModal";
 import { useRouter } from "next/navigation";
+import { faKey } from "@fortawesome/free-solid-svg-icons/faKey";
 
 type MediaItem =
   | { kind: "movie"; id: number; name: string; thumbnail: string; hls: string }
@@ -81,7 +82,7 @@ export function ProductHero({ game, isLoggedIn = false }: { game: BackendGameDet
     fetch(`/api/steam/${game.id}/key_counts`)
       .then((r) => r.json())
       .then((data) => setKeyCounts(data.key_counts ?? null))
-      .catch(() => {});
+      .catch(() => { });
   }, [game.id]);
 
   const media: MediaItem[] = [
@@ -101,13 +102,11 @@ export function ProductHero({ game, isLoggedIn = false }: { game: BackendGameDet
   ];
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [selectedEdition, setSelectedEdition] = useState<"standard" | "deluxe">(
-    "standard",
-  );
   const active = media[activeIndex];
 
   const finalPrice = game.priceFinal / 100;
   const initialPrice = game.priceInitial / 100;
+  const savings = initialPrice - finalPrice;
   const ageText = String(game.requiredAge || "E");
   const genreText =
     game.genres.length > 0
@@ -242,62 +241,60 @@ export function ProductHero({ game, isLoggedIn = false }: { game: BackendGameDet
             </div>
           </div>
 
-          {/* Edition Selector */}
-          <div className="space-y-4">
-            <div className="space-y-3">
-              {/* Standard Edition */}
-              <button
-                onClick={() => setSelectedEdition("standard")}
-                className={`w-full text-right p-4 rounded-xl border transition-all group ${selectedEdition === "standard"
-                  ? "border-secondary/30 bg-secondary/5"
-                  : "border-outline-variant/20 bg-surface-container-high hover:border-secondary/20"
-                  }`}
-              >
-                <div className="flex justify-between items-center mb-1 h-fit">
-                  <div className="flex flex-col gap-2">
-                    <span className="font-headline font-bold text-lg uppercase group-hover:text-secondary transition-colors">
-                      Steam key
-                    </span>
-                    <span className="w-fit font-extrabold text-xs px-3 py-2 rounded-2xl border-amber-300 border-2 text-amber-300">
-                      {game.reductionPercentage}%</span>
-                  </div>
-                  <div className="flex flex-col items-end h-full">
-                    <span className="text-xl font-headline font-black text-secondary">
-                      {formatPrice(finalPrice)}
-                    </span>
-                    {keyCounts !== null && (
-                      <span className="text-xs text-on-surface-variant mt-4">
-                        {keyCounts} keys left in stock
-                      </span>
-                    )}
-                  </div>
-                </div>
+          {/* Offer Card — our key price anchored against Steam retail */}
+          <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faSteam} className="text-on-surface" />
+                <span className="font-headline font-bold text-sm uppercase tracking-wider text-on-surface">
+                  Steam Key
+                </span>
+              </div>
+              {game.reductionPercentage > 0 && (
+                <span className="font-extrabold text-xs px-2.5 py-1 rounded-full bg-amber-300/10 border border-amber-300 text-amber-300">
+                  −{game.reductionPercentage}%
+                </span>
+              )}
+            </div>
 
-              </button>
-
-              {/* Digital Deluxe */}
-              <button
-                onClick={() => setSelectedEdition("deluxe")}
-                className={`w-full text-left p-4 rounded-xl border transition-all group ${selectedEdition === "deluxe"
-                  ? "border-primary/30 bg-primary/5"
-                  : "border-outline-variant/20 bg-surface-container-high hover:border-primary/20"
-                  }`}
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <div className="">
-                    <FontAwesomeIcon icon={faSteam} />
-                    <span className="ml-2 font-headline font-bold text-lg uppercase group-hover:text-primary transition-colors">
-                      Steam price
-                    </span>
-                  </div>
-                  <span className="text-xl font-headline font-black text-on-surface">
-                    {formatPrice(
-                      initialPrice,
-                    )}
+            <div className="flex items-end justify-between gap-4">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
+                  Our price
+                </span>
+                <span className="text-3xl font-headline font-black text-secondary leading-none mt-1">
+                  {formatPrice(finalPrice)}
+                </span>
+              </div>
+              {initialPrice > finalPrice && (
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
+                    Steam retail
+                  </span>
+                  <span className="text-base font-headline font-bold text-on-surface-variant line-through leading-none mt-1">
+                    {formatPrice(initialPrice)}
                   </span>
                 </div>
-              </button>
+              )}
             </div>
+
+            {savings > 0 && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-amber-300">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span>You save {formatPrice(savings)} vs Steam</span>
+              </div>
+            )}
+
+            {keyCounts !== null && (
+              <div className="flex items-center gap-2 pt-3 border-t border-outline-variant/20 text-sm text-on-surface-variant">
+                <FontAwesomeIcon icon={faKey} />
+                <span>
+                  <span className="font-bold text-on-surface">{keyCounts}</span> keys left in stock
+                </span>
+              </div>
+            )}
           </div>
 
           {/* CTA Buttons */}
@@ -315,23 +312,8 @@ export function ProductHero({ game, isLoggedIn = false }: { game: BackendGameDet
             >
               {balanceLoading || stripeLoading ? "Processing…" : "Buy Now"}
             </button>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="">
               <ProductAddToCartButton game={game} />
-              <button className="flex items-center justify-center gap-2 py-3 bg-surface-container-highest text-on-surface font-headline font-bold uppercase text-sm rounded-xl hover:bg-surface-bright transition-colors">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                </svg>
-                Wishlist
-              </button>
             </div>
           </div>
 

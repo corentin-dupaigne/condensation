@@ -19,14 +19,14 @@
   --surface-variant: #23262a;
   --surface-tint: #a1faff;
 
-  /* Primary = Cyan (coolant — high-action triggers, sparingly) */
-  --primary: #a1faff;
-  --primary-container: #00f4fe;
-  --primary-dim: #00e5ee;
-  --on-primary: #00393b;
-  --on-primary-container: #00575b;
-  --on-primary-fixed: #004346;
-  --inverse-primary: #00f4fe;
+  /* Primary = Cyan-Blue (saturated, brand-forward) */
+  --primary: #22daff;
+  --primary-container: #00b8e0;
+  --primary-dim: #0095b8;
+  --on-primary: #00232b;
+  --on-primary-container: #00404d;
+  --on-primary-fixed: #002f3a;
+  --inverse-primary: #00b8e0;
 
   /* Secondary = Neon Purple (energy source — discovery, rare, premium) */
   --secondary: #d575ff;
@@ -154,7 +154,7 @@ body {
 
 /* Ambient glow — floating state, 40px blur, 10% opacity, primary color */
 .ambient-glow {
-  box-shadow: 0 0 40px rgba(161, 250, 255, 0.10);
+  box-shadow: 0 0 40px rgba(34, 218, 255, 0.10);
 }
 
 /* Ghost border — 1px outline-variant at 20% opacity (accessibility fallback) */

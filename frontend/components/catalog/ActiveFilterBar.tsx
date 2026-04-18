@@ -21,7 +21,7 @@ export function ActiveFilterBar({
   if (filters.priceMin !== defaults.priceMin || filters.priceMax !== defaults.priceMax) {
     chips.push({
       key: "price",
-      label: `$${filters.priceMin}–$${filters.priceMax}`,
+      label: `€${filters.priceMin}–€${filters.priceMax}`,
       type: "price",
       value: "price",
     });

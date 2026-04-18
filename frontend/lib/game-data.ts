@@ -99,10 +99,10 @@ export async function getDealTiers(): Promise<DealTier[]> {
   ].filter((g) => g.reductionPercentage > 0 && g.priceFinal > 0);
 
   return [
-    buildDealTier("Under $5", 500, allDiscounted),
-    buildDealTier("Under $10", 1000, allDiscounted),
-    buildDealTier("Under $20", 2000, allDiscounted),
-    buildDealTier("Under $50", 5000, allDiscounted),
+    buildDealTier("Under €5", 500, allDiscounted),
+    buildDealTier("Under €10", 1000, allDiscounted),
+    buildDealTier("Under €20", 2000, allDiscounted),
+    buildDealTier("Under €50", 5000, allDiscounted),
   ];
 }
 
