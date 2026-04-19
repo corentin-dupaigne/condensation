@@ -14,7 +14,7 @@ public class SettingsTests : AuthenticatedBaseTest
     [SetUp]
     public async Task SetUp()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/settings", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/settings");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
@@ -222,12 +222,12 @@ public class SettingsTests : AuthenticatedBaseTest
     [Test]
     public async Task SettingsPage_ShouldBeAccessibleFromUserMenu()
     {
-        await Page.GotoAsync(TestSettings.BaseUrl, new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync(TestSettings.BaseUrl);
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         await Page.Locator("button[aria-label='User menu']").ClickAsync();
         await Page.Locator("header a[href='/settings']").ClickAsync();
-        await Page.WaitForURLAsync("**/settings");
+        await Page.WaitForURLAsync("**/settings", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         Assert.That(Page.Url, Does.Contain("/settings"));
     }

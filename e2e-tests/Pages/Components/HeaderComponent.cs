@@ -37,7 +37,10 @@ public class HeaderComponent
 
     public async Task SearchAsync(string query)
     {
+        // Click first to guarantee React handlers are attached (header is a client component).
+        await SearchInput.ClickAsync();
         await SearchInput.FillAsync(query);
+        // PressSequentiallyAsync dispatches native keydown events React will process.
         await SearchInput.PressAsync("Enter");
     }
 

@@ -2,12 +2,12 @@
 <RunSettings>
   <Playwright>
     <BrowserName>chromium</BrowserName>
-    <ExpectTimeout>10000</ExpectTimeout>
+    <ExpectTimeout>5000</ExpectTimeout>
     <LaunchOptions>
-      <Headless>false</Headless>
+      <Headless>true</Headless>
     </LaunchOptions>
   </Playwright>
   <NUnit>
-    <DefaultTimeout>30000</DefaultTimeout>
+    <DefaultTimeout>20000</DefaultTimeout>
   </NUnit>
 </RunSettings>

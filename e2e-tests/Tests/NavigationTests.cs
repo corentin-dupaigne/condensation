@@ -17,7 +17,7 @@ public class NavigationTests : BaseTest
     public async Task SetUp()
     {
         // Start every test from the home page
-        await Page.GotoAsync(TestSettings.BaseUrl, new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync(TestSettings.BaseUrl);
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
@@ -27,12 +27,12 @@ public class NavigationTests : BaseTest
     public async Task Header_Logo_ShouldNavigateToHome()
     {
         // Navigate away first
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/games");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var catalogPage = new CatalogPage(Page);
         await catalogPage.Header.ClickLogoAsync();
-        await Page.WaitForURLAsync(url => !url.Contains("/games"));
+        await Page.WaitForURLAsync(url => !url.Contains("/games"), new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         Assert.That(Page.Url.TrimEnd('/'), Is.EqualTo(TestSettings.BaseUrl.TrimEnd('/')));
     }
@@ -44,7 +44,7 @@ public class NavigationTests : BaseTest
     {
         var cartLink = Page.Locator("header a[aria-label='Cart']");
         await cartLink.ClickAsync(new LocatorClickOptions { Force = true });
-        await Page.WaitForURLAsync("**/cart");
+        await Page.WaitForURLAsync("**/cart", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
         Assert.That(Page.Url, Does.Contain("/cart"));
     }
 
@@ -64,7 +64,7 @@ public class NavigationTests : BaseTest
     {
         var homePage = new HomePage(Page);
         await homePage.Header.ClickNavLinkAsync("Browse");
-        await Page.WaitForURLAsync("**/games");
+        await Page.WaitForURLAsync("**/games", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
         Assert.That(Page.Url, Does.Contain("/games"));
     }
 
@@ -72,12 +72,12 @@ public class NavigationTests : BaseTest
     public async Task Header_StoreNavLink_ShouldNavigateToHome()
     {
         // Start from catalog so "Store" actually causes a navigation
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/games");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var catalogPage = new CatalogPage(Page);
         await catalogPage.Header.ClickNavLinkAsync("Store");
-        await Page.WaitForURLAsync(url => !url.Contains("/games"));
+        await Page.WaitForURLAsync(url => !url.Contains("/games"), new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         Assert.That(Page.Url.TrimEnd('/'), Is.EqualTo(TestSettings.BaseUrl.TrimEnd('/')));
     }
@@ -111,7 +111,7 @@ public class NavigationTests : BaseTest
         var homePage = new HomePage(Page);
         await homePage.Header.SearchAsync("counter-strike");
 
-        await Page.WaitForURLAsync("**/search?q=**");
+        await Page.WaitForURLAsync("**/search?q=**", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
         Assert.Multiple(() =>
         {
             Assert.That(Page.Url, Does.Contain("/search"));
@@ -122,12 +122,8 @@ public class NavigationTests : BaseTest
     [Test]
     public async Task Header_Search_Typing_ShouldShowPreviewDropdown()
     {
-        var searchInput = Page.Locator("header input[placeholder*='Search']");
-        await searchInput.FillAsync("elden");
-        // 300 ms debounce + network round-trip
-        await Page.WaitForTimeoutAsync(900);
+        await Page.Locator("header input[placeholder*='Search']").FillAsync("elden");
 
-        // A preview dropdown should appear inside the search container
         var preview = Page.Locator("header div[class*='absolute'][class*='top-full']");
         await Expect(preview).ToBeVisibleAsync();
     }
@@ -137,11 +133,11 @@ public class NavigationTests : BaseTest
     {
         var searchInput = Page.Locator("header input[placeholder*='Search']");
         await searchInput.FillAsync("elden");
-        await Page.WaitForTimeoutAsync(900);
-
-        await searchInput.PressAsync("Escape");
 
         var preview = Page.Locator("header div[class*='absolute'][class*='top-full']");
+        await Expect(preview).ToBeVisibleAsync();
+
+        await searchInput.PressAsync("Escape");
         await Expect(preview).ToBeHiddenAsync();
     }
 

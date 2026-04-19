@@ -61,36 +61,25 @@ public class HeroCarouselTests : BaseTest
     [Test]
     public async Task HeroCarousel_NextButton_ShouldAdvanceSlide()
     {
-        // Hover the carousel to pause auto-advance
         await Carousel.HoverAsync();
-
         var labelBefore = await ActiveDot.GetAttributeAsync("aria-label");
 
         await NextButton.ClickAsync();
-        // Allow the 700 ms CSS transition to complete
-        await Page.WaitForTimeoutAsync(900);
-
-        var labelAfter = await ActiveDot.GetAttributeAsync("aria-label");
-        Assert.That(labelAfter, Is.Not.EqualTo(labelBefore));
+        await Expect(ActiveDot).Not.ToHaveAttributeAsync("aria-label", labelBefore ?? "");
     }
 
     [Test]
     public async Task HeroCarousel_PrevButton_ShouldGoToPreviousSlide()
     {
-        // Hover the carousel to pause auto-advance
         await Carousel.HoverAsync();
 
-        // Advance first so we're not already on slide 1
+        var firstLabel = await ActiveDot.GetAttributeAsync("aria-label");
         await NextButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(900);
+        await Expect(ActiveDot).Not.ToHaveAttributeAsync("aria-label", firstLabel ?? "");
 
         var labelAfterNext = await ActiveDot.GetAttributeAsync("aria-label");
-
         await PrevButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(900);
-
-        var labelAfterPrev = await ActiveDot.GetAttributeAsync("aria-label");
-        Assert.That(labelAfterPrev, Is.Not.EqualTo(labelAfterNext));
+        await Expect(ActiveDot).Not.ToHaveAttributeAsync("aria-label", labelAfterNext ?? "");
     }
 
     // ── Dot navigation ────────────────────────────────────────────────────────
@@ -106,18 +95,13 @@ public class HeroCarouselTests : BaseTest
     [Test]
     public async Task HeroCarousel_DotClick_ShouldActivateCorrespondingSlide()
     {
-        // Hover the carousel to pause auto-advance
         await Carousel.HoverAsync();
 
-        // Click the third dot (index 2)
         var thirdDot = DotButtons.Nth(2);
         var thirdDotLabel = await thirdDot.GetAttributeAsync("aria-label");
 
         await thirdDot.ClickAsync();
-        await Page.WaitForTimeoutAsync(900);
-
-        var activeLabel = await ActiveDot.GetAttributeAsync("aria-label");
-        Assert.That(activeLabel, Is.EqualTo(thirdDotLabel));
+        await Expect(ActiveDot).ToHaveAttributeAsync("aria-label", thirdDotLabel ?? "");
     }
 
     [Test]
@@ -148,7 +132,7 @@ public class HeroCarouselTests : BaseTest
 
         var buyNow = Carousel.Locator("a:has-text('BUY NOW')");
         await buyNow.ClickAsync(new LocatorClickOptions { Force = true });
-        await Page.WaitForURLAsync("**/games/**");
+        await Page.WaitForURLAsync("**/games/**", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         Assert.That(Page.Url, Does.Contain("/games/"));
     }

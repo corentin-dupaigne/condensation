@@ -7,9 +7,9 @@ public class SearchPage : BasePage
 {
     protected override string PagePath => "/search";
 
-    // Search hero
-    private ILocator SearchInput => Page.Locator("input[type='search'], input[placeholder*='search' i]").Last;
-    private ILocator SearchButton => Page.Locator("button[type='submit']:has-text('Search')");
+    // Search hero (page-level, not the header search bar)
+    private ILocator SearchInput => Page.Locator("section form input[type='search']");
+    private ILocator SearchButton => Page.Locator("section form button[type='submit']:has-text('Search')");
     private ILocator ResultCount => Page.Locator("span:has-text('Retrieved'), p:has-text('result')").First;
 
     // Results — GameCard renders as <a href="/games/{id}">
@@ -26,15 +26,20 @@ public class SearchPage : BasePage
 
     public async Task NavigateWithQueryAsync(string query)
     {
-        await Page.GotoAsync($"{BaseUrl}/search?q={Uri.EscapeDataString(query)}", new PageGotoOptions { Timeout = 30_000 });
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Page.GotoAsync(
+            $"{BaseUrl}/search?q={Uri.EscapeDataString(query)}",
+            new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded }
+        );
     }
 
     public async Task SearchAsync(string query)
     {
         await SearchInput.FillAsync(query);
-        await SearchInput.PressAsync("Enter");
-        await Page.WaitForURLAsync(url => url.Contains("/search") && url.Contains(Uri.EscapeDataString(query)));
+        await SearchButton.ClickAsync();
+        await Page.WaitForURLAsync(
+            url => url.Contains("/search?q="),
+            new() { WaitUntil = WaitUntilState.DOMContentLoaded }
+        );
     }
 
     public async Task<int> GetResultCardCountAsync() => await ResultCards.CountAsync();

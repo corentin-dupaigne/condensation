@@ -17,7 +17,7 @@ public class LoginTests : BaseTest
     [SetUp]
     public async Task SetUp()
     {
-        await Page.GotoAsync(TestSettings.BaseUrl, new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync(TestSettings.BaseUrl);
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
@@ -39,7 +39,7 @@ public class LoginTests : BaseTest
     [Test]
     public async Task Auth_SignInLink_ShouldBeVisibleOnCatalogPage()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/games");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var signInLink = Page.Locator("header a:has-text('Sign In')");
@@ -49,7 +49,7 @@ public class LoginTests : BaseTest
     [Test]
     public async Task Auth_SignInLink_ShouldBeVisibleOnCartPage()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/cart");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var signInLink = Page.Locator("header a:has-text('Sign In')");
@@ -59,7 +59,7 @@ public class LoginTests : BaseTest
     [Test]
     public async Task Auth_SignInLink_ShouldBeVisibleOnSearchPage()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/search", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/search");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var signInLink = Page.Locator("header a:has-text('Sign In')");

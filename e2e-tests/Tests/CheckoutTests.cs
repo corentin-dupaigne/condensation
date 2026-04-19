@@ -23,40 +23,15 @@ public class CheckoutTests : AuthenticatedBaseTest
         await catalogPage.NavigateAsync();
 
         var firstGameLink = Page.Locator("main a[href*='/games/']").First;
-        var href = await firstGameLink.GetAttributeAsync("href", new LocatorGetAttributeOptions { Timeout = 10_000 });
-        if (string.IsNullOrEmpty(href))
-        {
-            Assert.Ignore("No game cards found — backend may be unavailable.");
-            return;
-        }
+        var href = await firstGameLink.GetAttributeAsync("href");
 
-        // Navigate directly to the product page
-        await Page.GotoAsync($"{TestSettings.BaseUrl}{href}", new PageGotoOptions
-        {
-            Timeout = 30_000,
-            WaitUntil = WaitUntilState.DOMContentLoaded,
-        });
+        await GoToAsync($"{TestSettings.BaseUrl}{href}");
 
-        var addToCartButton = Page.Locator("button:has-text('Add to Cart')").First;
-        try
-        {
-            await addToCartButton.WaitForAsync(new() { Timeout = 10_000 });
-        }
-        catch (TimeoutException)
-        {
-            Assert.Ignore($"Product page at {href} did not render an 'Add to Cart' button — backend likely missing this appid or returning non-OK.");
-            return;
-        }
-        await addToCartButton.ClickAsync();
-        await Page.Locator("button:has-text('Added!')").WaitForAsync(new() { Timeout = 5_000 });
+        await Page.Locator("button:has-text('Add to Cart')").First.ClickAsync();
+        await Expect(Page.Locator("button:has-text('Added!')")).ToBeVisibleAsync();
 
-        // Go to cart
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart", new PageGotoOptions
-        {
-            Timeout = 30_000,
-            WaitUntil = WaitUntilState.DOMContentLoaded,
-        });
-        await Page.Locator("h1").First.WaitForAsync(new() { Timeout = 10_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/cart");
+        await Expect(Page.Locator("h1").First).ToBeVisibleAsync();
     }
 
     // ── Payment method modal ────────────────────────────────────────────────────
@@ -140,12 +115,10 @@ public class CheckoutTests : AuthenticatedBaseTest
         await AddItemToCartAndGoToCartAsync();
         await Page.Locator("button:has-text('Proceed to Checkout')").ClickAsync();
 
-        // Wait for modal to be fully visible
-        await Page.Locator("text=Choose Payment Method").WaitForAsync(new() { Timeout = 5_000 });
+        var modalTitle = Page.Locator("text=Choose Payment Method");
+        await Expect(modalTitle).ToBeVisibleAsync();
 
         await Page.Locator("button:has-text('Cancel')").ClickAsync();
-
-        var modalTitle = Page.Locator("text=Choose Payment Method");
         await Expect(modalTitle).ToBeHiddenAsync();
     }
 }

@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Microsoft.Playwright;
 using Condensation.E2E.Tests.Pages;
 
 namespace Condensation.E2E.Tests.Tests;
@@ -100,7 +101,7 @@ public class HomeTests : BaseTest
         var firstCard = Page.Locator("main a[href*='/games/']").First;
         var href = await firstCard.GetAttributeAsync("href");
         await firstCard.ClickAsync();
-        await Page.WaitForURLAsync("**/games/**");
+        await Page.WaitForURLAsync("**/games/**", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         Assert.Multiple(() =>
         {

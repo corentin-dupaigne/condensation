@@ -15,7 +15,7 @@ public class OrderTests : AuthenticatedBaseTest
     [SetUp]
     public async Task SetUp()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/orders", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/orders");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
@@ -62,12 +62,12 @@ public class OrderTests : AuthenticatedBaseTest
     [Test]
     public async Task OrdersPage_ShouldBeAccessibleFromUserMenu()
     {
-        await Page.GotoAsync(TestSettings.BaseUrl, new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync(TestSettings.BaseUrl);
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         await Page.Locator("button[aria-label='User menu']").ClickAsync();
         await Page.Locator("header a[href='/orders']").ClickAsync();
-        await Page.WaitForURLAsync("**/orders");
+        await Page.WaitForURLAsync("**/orders", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         Assert.That(Page.Url, Does.Contain("/orders"));
     }
@@ -77,7 +77,7 @@ public class OrderTests : AuthenticatedBaseTest
     {
         var browseLink = Page.Locator("a[href='/games'], a[href*='/games']:has-text('Browse')").First;
         await browseLink.ClickAsync();
-        await Page.WaitForURLAsync("**/games");
+        await Page.WaitForURLAsync("**/games", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         Assert.That(Page.Url, Does.Contain("/games"));
     }

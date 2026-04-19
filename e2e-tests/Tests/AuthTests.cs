@@ -14,7 +14,7 @@ public class AuthTests : BaseTest
     [SetUp]
     public async Task SetUp()
     {
-        await Page.GotoAsync(TestSettings.BaseUrl, new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync(TestSettings.BaseUrl);
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
@@ -23,17 +23,11 @@ public class AuthTests : BaseTest
     [Test]
     public async Task Auth_SignInLink_ShouldRedirectToLoginForm()
     {
-        var signInLink = Page.Locator("header a:has-text('Sign In')");
-        await signInLink.ClickAsync();
+        await Page.Locator("header a:has-text('Sign In')").ClickAsync();
 
-        await Page.Locator("#email").WaitForAsync(new() { Timeout = 30_000 });
-
-        Assert.Multiple(async () =>
-        {
-            Assert.That(await Page.Locator("#email").IsVisibleAsync(), Is.True);
-            Assert.That(await Page.Locator("#password").IsVisibleAsync(), Is.True);
-            Assert.That(await Page.Locator("button[type='submit']").IsVisibleAsync(), Is.True);
-        });
+        await Expect(Page.Locator("#email")).ToBeVisibleAsync();
+        await Expect(Page.Locator("#password")).ToBeVisibleAsync();
+        await Expect(Page.Locator("button[type='submit']")).ToBeVisibleAsync();
     }
 
     // ── Successful login ────────────────────────────────────────────────────────
@@ -132,7 +126,7 @@ public class AuthTests : BaseTest
     {
         await LoginAsync();
 
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/games");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var userMenu = Page.Locator("button[aria-label='User menu']");
@@ -144,7 +138,7 @@ public class AuthTests : BaseTest
     {
         await LoginAsync();
 
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/cart");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var userMenu = Page.Locator("button[aria-label='User menu']");
@@ -156,7 +150,7 @@ public class AuthTests : BaseTest
     {
         await LoginAsync();
 
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/search", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/search");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var userMenu = Page.Locator("button[aria-label='User menu']");

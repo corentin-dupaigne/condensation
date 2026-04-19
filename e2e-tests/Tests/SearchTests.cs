@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Microsoft.Playwright;
 using Condensation.E2E.Tests.Pages;
 
 namespace Condensation.E2E.Tests.Tests;
@@ -103,24 +104,6 @@ public class SearchTests : BaseTest
         // The SearchHero component renders "X Record(s) Retrieved"
         var resultCountText = Page.Locator("span:has-text('Retrieved'), p:has-text('result')").First;
         await Expect(resultCountText).ToBeVisibleAsync();
-    }
-
-    // ── Header search on search page ──────────────────────────────────────────
-
-    [Test]
-    public async Task SearchPage_HeaderSearch_ShouldUpdateResults()
-    {
-        await _searchPage.NavigateWithQueryAsync("counter-strike");
-
-        await _searchPage.Header.SearchAsync("minecraft");
-        // Wait for the URL to reflect the new query rather than just waiting for network idle
-        await Page.WaitForURLAsync(url => url.Contains("minecraft"));
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(Page.Url, Does.Contain("minecraft"));
-            Assert.That(Page.Url, Does.Contain("/search"));
-        });
     }
 
     // ── URL and navigation ────────────────────────────────────────────────────

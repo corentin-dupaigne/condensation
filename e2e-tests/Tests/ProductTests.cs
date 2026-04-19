@@ -13,22 +13,10 @@ public class ProductTests : BaseTest
     [SetUp]
     public async Task SetUp()
     {
-        // Discover the first game URL from catalog links (works without clicking game cards)
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/games", new PageGotoOptions { Timeout = 30_000 });
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await GoToAsync($"{TestSettings.BaseUrl}/games");
 
-        // Find the first link pointing to a product page (/games/<id>)
-        var firstGameLink = Page.Locator("a[href*='/games/']").First;
-        var href = await firstGameLink.GetAttributeAsync("href", new LocatorGetAttributeOptions { Timeout = 3000 });
-
-        if (string.IsNullOrEmpty(href))
-        {
-            Assert.Ignore("No game links found in catalog — backend may be unavailable.");
-            return;
-        }
-
-        await Page.GotoAsync($"{TestSettings.BaseUrl}{href}", new PageGotoOptions { Timeout = 30_000 });
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        var href = await Page.Locator("a[href*='/games/']").First.GetAttributeAsync("href");
+        await GoToAsync($"{TestSettings.BaseUrl}{href}");
 
         _productPage = new ProductPage(Page);
     }
@@ -65,7 +53,7 @@ public class ProductTests : BaseTest
     public async Task ProductPage_BreadcrumbHome_ShouldNavigateToHomePage()
     {
         await _productPage.ClickBreadcrumbAsync("Home");
-        await Page.WaitForURLAsync(url => !url.Contains("/games/"));
+        await Page.WaitForURLAsync(url => !url.Contains("/games/"), new() { WaitUntil = WaitUntilState.DOMContentLoaded });
         Assert.That(Page.Url.TrimEnd('/'), Is.EqualTo(TestSettings.BaseUrl.TrimEnd('/')));
     }
 
@@ -105,10 +93,9 @@ public class ProductTests : BaseTest
     public async Task ProductPage_AddToCart_ShouldIncrementHeaderCartBadge()
     {
         await _productPage.ClickAddToCartAsync();
-        await Page.WaitForTimeoutAsync(300); // wait for zustand store update
 
-        // The cart badge in the header should now show a count ≥ 1
         var cartBadge = Page.Locator("header a[aria-label='Cart'] span");
+        await Expect(cartBadge).ToBeVisibleAsync();
         var countText = await cartBadge.InnerTextAsync();
         Assert.That(int.Parse(countText.Trim()), Is.GreaterThanOrEqualTo(1));
     }
@@ -164,14 +151,12 @@ public class ProductTests : BaseTest
         if (screenshotIndex < 0)
             Assert.Inconclusive("No screenshot thumbnails found to test switching.");
 
-        // Click the screenshot thumbnail to ensure the main area shows an <img>
         await thumbnails.Nth(screenshotIndex).ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         var mainImg = Page.Locator("section.mx-auto div.aspect-video img").First;
+        await Expect(mainImg).ToBeVisibleAsync();
         var srcBefore = await mainImg.GetAttributeAsync("src");
 
-        // Find a different screenshot thumbnail
         var secondIndex = -1;
         for (int i = 0; i < count; i++)
         {
@@ -188,9 +173,6 @@ public class ProductTests : BaseTest
             Assert.Inconclusive("Only one screenshot thumbnail — cannot test switching.");
 
         await thumbnails.Nth(secondIndex).ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-
-        var srcAfter = await mainImg.GetAttributeAsync("src");
-        Assert.That(srcAfter, Is.Not.EqualTo(srcBefore));
+        await Expect(mainImg).Not.ToHaveAttributeAsync("src", srcBefore ?? "");
     }
 }

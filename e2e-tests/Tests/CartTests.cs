@@ -46,25 +46,21 @@ public class CartTests : BaseTest
     [Test]
     public async Task CartPage_EmptyCart_ShouldDisplayEmptyMessage()
     {
-        var isVisible = await _cartPage.IsEmptyCartVisibleAsync();
-        Assert.That(isVisible, Is.True);
+        await Expect(_cartPage.EmptyCartMessage).ToBeVisibleAsync();
     }
 
     [Test]
     public async Task CartPage_EmptyCart_ShouldDisplayRecoveryLinks()
     {
-        Assert.Multiple(async () =>
-        {
-            Assert.That(await _cartPage.IsBrowseGamesLinkVisibleAsync(), Is.True);
-            Assert.That(await _cartPage.IsBackToHomeLinkVisibleAsync(), Is.True);
-        });
+        await Expect(_cartPage.BrowseGamesLink).ToBeVisibleAsync();
+        await Expect(_cartPage.BackToHomeLink).ToBeVisibleAsync();
     }
 
     [Test]
     public async Task CartPage_EmptyCart_BrowseGamesLink_ShouldNavigateToCatalog()
     {
         await _cartPage.ClickBrowseGamesAsync();
-        await Page.WaitForURLAsync("**/games");
+        await Page.WaitForURLAsync("**/games", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
         Assert.That(Page.Url, Does.Contain("/games"));
     }
 
@@ -72,7 +68,7 @@ public class CartTests : BaseTest
     public async Task CartPage_EmptyCart_BackToHomeLink_ShouldNavigateHome()
     {
         await _cartPage.ClickBackToHomeAsync();
-        await Page.WaitForURLAsync(url => !url.Contains("/cart"));
+        await Page.WaitForURLAsync(url => !url.Contains("/cart"), new() { WaitUntil = WaitUntilState.DOMContentLoaded });
         Assert.That(Page.Url.TrimEnd('/'), Is.EqualTo(TestSettings.BaseUrl.TrimEnd('/')));
     }
 
@@ -90,44 +86,16 @@ public class CartTests : BaseTest
         var catalogPage = new CatalogPage(Page);
         await catalogPage.NavigateAsync();
 
-        // Guard: if no game links rendered, the backend is unavailable — skip gracefully
         var firstGameLink = Page.Locator("main a[href*='/games/']").First;
-        var href = await firstGameLink.GetAttributeAsync("href", new LocatorGetAttributeOptions { Timeout = 10_000 });
-        if (string.IsNullOrEmpty(href))
-        {
-            Assert.Ignore("No game cards found in catalog — backend may be unavailable.");
-            return;
-        }
+        var href = await firstGameLink.GetAttributeAsync("href");
 
-        // Navigate directly to the product page to avoid overlay/click issues
-        await Page.GotoAsync($"{TestSettings.BaseUrl}{href}", new PageGotoOptions
-        {
-            Timeout = 30_000,
-            WaitUntil = WaitUntilState.DOMContentLoaded,
-        });
+        await GoToAsync($"{TestSettings.BaseUrl}{href}");
 
-        // Click the "Add to Cart" button and wait for the "Added!" confirmation label
-        var addToCartButton = Page.Locator("button:has-text('Add to Cart')").First;
-        try
-        {
-            await addToCartButton.WaitForAsync(new() { Timeout = 10_000 });
-        }
-        catch (TimeoutException)
-        {
-            Assert.Ignore($"Product page at {href} did not render an 'Add to Cart' button — backend likely missing this appid or returning non-OK.");
-            return;
-        }
-        await addToCartButton.ClickAsync();
-        await Page.Locator("button:has-text('Added!')").WaitForAsync(new() { Timeout = 5_000 });
+        await Page.Locator("button:has-text('Add to Cart')").First.ClickAsync();
+        await Expect(Page.Locator("button:has-text('Added!')")).ToBeVisibleAsync();
 
-        // Now navigate to the cart page
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/cart", new PageGotoOptions
-        {
-            Timeout = 30_000,
-            WaitUntil = WaitUntilState.DOMContentLoaded,
-        });
-        // Wait for the cart to hydrate and display the item
-        await Page.Locator("h1").First.WaitForAsync(new() { Timeout = 10_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/cart");
+        await Expect(_cartPage.CartHeading).ToBeVisibleAsync();
     }
 
     [Test]
@@ -150,32 +118,28 @@ public class CartTests : BaseTest
     public async Task CartPage_WithItem_ShouldDisplayOrderSummary()
     {
         await AddFirstGameToCartAndOpenCartPageAsync();
-        var isVisible = await _cartPage.IsOrderSummaryVisibleAsync();
-        Assert.That(isVisible, Is.True);
+        await Expect(_cartPage.OrderSummaryHeading).ToBeVisibleAsync();
     }
 
     [Test]
     public async Task CartPage_WithItem_ShouldDisplayCheckoutButton()
     {
         await AddFirstGameToCartAndOpenCartPageAsync();
-        var isVisible = await _cartPage.IsCheckoutButtonVisibleAsync();
-        Assert.That(isVisible, Is.True);
+        await Expect(_cartPage.CheckoutButton).ToBeVisibleAsync();
     }
 
     [Test]
     public async Task CartPage_WithItem_ShouldDisplayClearCartButton()
     {
         await AddFirstGameToCartAndOpenCartPageAsync();
-        var isVisible = await _cartPage.IsClearCartButtonVisibleAsync();
-        Assert.That(isVisible, Is.True);
+        await Expect(_cartPage.ClearCartButton).ToBeVisibleAsync();
     }
 
     [Test]
     public async Task CartPage_WithItem_ShouldDisplayCompleteOrderSection()
     {
         await AddFirstGameToCartAndOpenCartPageAsync();
-        var isVisible = await _cartPage.IsCompleteOrderSectionVisibleAsync();
-        Assert.That(isVisible, Is.True);
+        await Expect(_cartPage.CompleteOrderHeading).ToBeVisibleAsync();
     }
 
     [Test]
@@ -183,15 +147,11 @@ public class CartTests : BaseTest
     {
         await AddFirstGameToCartAndOpenCartPageAsync();
 
-        // Read the qty display before increasing
         var qtySpan = Page.Locator("button[aria-label^='Decrease quantity'] ~ span").First;
-        var before = await qtySpan.InnerTextAsync();
+        var before = int.Parse((await qtySpan.InnerTextAsync()).Trim());
 
         await _cartPage.ClickIncreaseQuantityAsync();
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-
-        var after = await qtySpan.InnerTextAsync();
-        Assert.That(int.Parse(after.Trim()), Is.GreaterThan(int.Parse(before.Trim())));
+        await Expect(qtySpan).ToHaveTextAsync((before + 1).ToString());
     }
 
     [Test]
@@ -199,10 +159,7 @@ public class CartTests : BaseTest
     {
         await AddFirstGameToCartAndOpenCartPageAsync();
         await _cartPage.ClickRemoveItemAsync();
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-
-        var isEmptyVisible = await _cartPage.IsEmptyCartVisibleAsync();
-        Assert.That(isEmptyVisible, Is.True);
+        await Expect(_cartPage.EmptyCartMessage).ToBeVisibleAsync();
     }
 
     [Test]
@@ -210,9 +167,6 @@ public class CartTests : BaseTest
     {
         await AddFirstGameToCartAndOpenCartPageAsync();
         await _cartPage.ClickClearCartAsync();
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-
-        var isEmptyVisible = await _cartPage.IsEmptyCartVisibleAsync();
-        Assert.That(isEmptyVisible, Is.True);
+        await Expect(_cartPage.EmptyCartMessage).ToBeVisibleAsync();
     }
 }

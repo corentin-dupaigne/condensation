@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Microsoft.Playwright;
 using Condensation.E2E.Tests.Pages;
 
 namespace Condensation.E2E.Tests.Tests;
@@ -48,7 +49,7 @@ public class CatalogTests : BaseTest
     {
         var initialUrl = Page.Url;
         await _catalogPage.ClickGameCardAsync(0);
-        await Page.WaitForURLAsync("**/games/**", new() { Timeout = 30_000 });
+        await Page.WaitForURLAsync("**/games/**", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
         Assert.That(Page.Url, Is.Not.EqualTo(initialUrl));
     }
 

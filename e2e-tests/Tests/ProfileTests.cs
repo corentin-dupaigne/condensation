@@ -15,7 +15,7 @@ public class ProfileTests : AuthenticatedBaseTest
     [SetUp]
     public async Task SetUp()
     {
-        await Page.GotoAsync($"{TestSettings.BaseUrl}/profile", new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync($"{TestSettings.BaseUrl}/profile");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
@@ -138,12 +138,12 @@ public class ProfileTests : AuthenticatedBaseTest
     [Test]
     public async Task ProfilePage_ShouldBeAccessibleFromUserMenu()
     {
-        await Page.GotoAsync(TestSettings.BaseUrl, new PageGotoOptions { Timeout = 30_000 });
+        await GoToAsync(TestSettings.BaseUrl);
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
         await Page.Locator("button[aria-label='User menu']").ClickAsync();
         await Page.Locator("a:has-text('My Profile')").ClickAsync();
-        await Page.WaitForURLAsync("**/profile");
+        await Page.WaitForURLAsync("**/profile", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         Assert.That(Page.Url, Does.Contain("/profile"));
     }
