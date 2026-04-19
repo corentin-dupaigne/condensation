@@ -1,210 +1,241 @@
-# Rapport — Suite de tests E2E Condensation
+# Rapport — Suite de tests e2e Condensation
 
-## Stack technique
+## Stack
 
 | Élément | Valeur |
 |---|---|
-| Framework | Microsoft Playwright 1.58.0 |
-| Runner | NUnit 4.5.1 |
-| Langage | C# / .NET 10.0 |
-| Navigateur | Chromium (headless, 1920×1080) |
-| Configuration | `E2E_BASE_URL` (défaut : `http://localhost:4000`) |
-| Timeout | `E2E_TIMEOUT` en ms (défaut : 30 000) |
+| Framework | Microsoft.Playwright 1.58.0 |
+| Runner | NUnit 4.5.1 + Microsoft.Playwright.NUnit |
+| Langage | C# / .NET 10 |
+| Navigateur | Chromium headless, 1920 × 1080 |
+| Config runtime | `E2E_BASE_URL` (défaut `http://localhost:4000`), `E2E_TIMEOUT` ms (défaut `15000`), `E2E_TEST_EMAIL`/`E2E_TEST_PASSWORD` |
+| Config fichier | `.runsettings` — `ExpectTimeout=5000`, `NUnit.DefaultTimeout=20000`, `Headless=true` |
+
+Résultat de la dernière exécution complète : **163 réussis · 0 échec · 1 conditionnellement ignoré · 40 min 43 s**.
 
 ---
 
-## Architecture
-
-### Structure des répertoires
+## Architecture — Page Object Model
 
 ```
 e2e-tests/
-├── Config/
-│   └── TestSettings.cs          # BaseUrl et Timeout depuis variables d'environnement
-├── Pages/                       # Couche Page Object Model
-│   ├── BasePage.cs              # Classe abstraite — NavigateAsync, Header, Footer
-│   ├── CartPage.cs
-│   ├── CatalogPage.cs
-│   ├── HomePage.cs
-│   ├── LoginPage.cs
-│   ├── ProductPage.cs
-│   ├── RegisterPage.cs
-│   ├── SearchPage.cs
-│   └── Components/
-│       ├── HeaderComponent.cs   # Logo, recherche, cart badge, auth links
-│       └── FooterComponent.cs
+├── Config/TestSettings.cs              # BaseUrl, Timeout, credentials via env
+├── Pages/
+│   ├── BasePage.cs                     # PagePath abstrait, NavigateAsync, Header, Footer
+│   ├── Components/
+│   │   ├── HeaderComponent.cs          # Logo, nav, recherche, cart badge, auth links
+│   │   └── FooterComponent.cs          # Sélecteur excluant l'overlay dev Next.js
+│   ├── HomePage.cs · CatalogPage.cs · ProductPage.cs · CartPage.cs
+│   ├── SearchPage.cs · LoginPage.cs · RegisterPage.cs
 └── Tests/
-    ├── BaseTest.cs              # Hérite de PageTest — contexte Playwright par test
-    ├── CartTests.cs
-    ├── CatalogTests.cs
-    ├── HeroCarouselTests.cs
-    ├── HomeTests.cs
-    ├── LoginTests.cs
-    ├── NavigationTests.cs
-    ├── ProductTests.cs
-    ├── RegisterTests.cs
-    └── SearchTests.cs
+    ├── BaseTest.cs                     # PageTest + LoginAsync, LogoutAsync, GoToAsync
+    ├── AuthenticatedBaseTest.cs        # BaseTest + SetUp qui fait LoginAsync
+    └── <une fixture par feature>.cs
 ```
 
-### Layering POM
+### Layering
 
 ```
-BasePage (abstract)
-  ├── PagePath        → propriété abstraite, ex. "/cart"
-  ├── NavigateAsync() → GotoAsync + WaitForLoadState(NetworkIdle)
-  ├── Header          → HeaderComponent (composant partagé)
-  └── Footer          → FooterComponent (composant partagé)
-
-CartPage, CatalogPage, HomePage … (extends BasePage)
-  ├── Locators privés  (ILocator — jamais exposés)
-  └── Méthodes publiques sémantiques
-        IsEmptyCartVisibleAsync() → bool
-        ClickAddToCartAsync()     → Task
-        GetCartItemCountAsync()   → int
+PageTest (Microsoft.Playwright.NUnit)
+  └── BaseTest
+        ├── ContextOptions  → viewport 1920×1080, BaseURL, IgnoreHTTPSErrors
+        ├── BaseSetUp       → SetDefaultTimeout / SetDefaultNavigationTimeout
+        ├── GoToAsync(url)  → GotoAsync(DOMContentLoaded) + best-effort Load 5s
+        ├── LoginAsync()    → OAuth/PKCE complet, attend userMenu visible
+        └── LogoutAsync()   → ouvre menu, clique Logout, attend Sign In visible
+              │
+              └── AuthenticatedBaseTest ─ [SetUp] LoginAsync()
 ```
 
-**Règles d'encapsulation :**
-- Les `ILocator` sont toujours **privés** ; les tests ne manipulent jamais de locator directement.
-- Les méthodes publiques retournent des types métier (`bool`, `string`, `int`) ou `Task`.
-- Un seul endroit définit chaque locator — pas de duplication entre tests et POM.
+```
+BasePage (abstraite)
+  ├── PagePath                 (override par sous-classe)
+  ├── NavigateAsync            GotoAsync(DOMContentLoaded) + Load best-effort 5s
+  └── Header, Footer           composants partagés
+
+CartPage, CatalogPage, …
+  ├── ILocator publics         exposés pour usage avec Expect() dans les tests
+  └── Méthodes d'action        ClickAddToCartAsync, GetCartItemCountAsync, …
+```
 
 ---
 
 ## Méthodologie
 
-### Hiérarchie de sélecteurs (du plus stable au moins stable)
+### Hiérarchie de sélecteurs
 
 | Priorité | Type | Exemple |
 |---|---|---|
 | 1 | ARIA (`aria-label`, `aria-current`, `role`) | `button[aria-label='Next slide']` |
-| 2 | Sémantique HTML (`type`, `name`, `id`) | `input[type='checkbox']`, `#email` |
-| 3 | Texte visible (`:has-text`) | `button:has-text('Add to Cart')` |
-| 4 | Attribut structurel (`href`) | `a[href='/games']` |
-| 5 *(évité)* | Classes CSS / Tailwind | fragile lors de refactos de style |
+| 2 | Sémantique HTML (`type`, `name`, `id`) | `#email`, `input[type='checkbox']` |
+| 3 | Structure DOM + texte | `section form button:has-text('Search')` |
+| 4 | Attribut fonctionnel (`href`) | `a[href='/games']` |
+| évité | Classes CSS / Tailwind | fragile en cas de refacto de style |
 
-> Le HeroCarousel est entièrement testé via ARIA — aucune classe CSS dans ses sélecteurs.
+Le HeroCarousel et le menu utilisateur sont intégralement testés via ARIA.
 
-### Attentes réseau
+### Attentes (auto-wait plutôt que sleep)
 
-- `WaitForLoadStateAsync(NetworkIdle)` après chaque navigation.
-- `WaitForAsync()` sur un élément précis plutôt que `WaitForTimeoutAsync` fixe.
-- Exemple pour le feedback "Add to Cart" :
+- **`Expect(locator).ToBeVisibleAsync()` / `ToHaveTextAsync` / `ToHaveAttributeAsync`** — le polling est géré par Playwright (5 s), plus fiable qu'un `WaitForTimeoutAsync` fixe.
+- **`WaitForURLAsync(predicate, { WaitUntil = DOMContentLoaded })`** — Next.js dev ne déclenche pas toujours `load` à cause des WebSockets HMR, d'où le choix de `DOMContentLoaded`.
+- **Aucun `WaitForTimeoutAsync(N)`** dans les tests : tous remplacés par des waits événementiels.
 
-```csharp
-await addToCartButton.ClickAsync();
-// Attend le retour visuel de l'app, pas un délai arbitraire
-await Page.Locator("button:has-text('Added!')").WaitForAsync(new() { Timeout = 5_000 });
-```
+### Timeouts (réduits au minimum utile)
 
-- `WaitForTimeoutAsync` utilisé **uniquement** pour les transitions CSS/debounce documentées
-  (ex. : 700 ms de fondu du carousel, 300 ms de debounce de recherche + 300 ms réseau = 900 ms).
+| Scope | Valeur | Justification |
+|---|---|---|
+| `Page.SetDefaultTimeout` / `SetDefaultNavigationTimeout` | 15 000 ms | OAuth chain (form → redirect → callback) + compilation Next.js dev |
+| `ExpectTimeout` (runsettings) | 5 000 ms | Assertions UI après action stable |
+| `WaitForLoadStateAsync(Load)` best-effort | 5 000 ms | Donne à React le temps d'hydrater ; `catch (TimeoutException)` pour ne pas bloquer |
+| `NUnit.DefaultTimeout` | 20 000 ms | Filet de sécurité par test |
 
-### Isolation des tests
+### Isolation
 
-Chaque test reçoit un contexte Playwright frais (héritage `PageTest` de NUnit).  
-Le store Zustand du panier repart à zéro à chaque test — aucun état partagé.
+- Chaque test reçoit un `IBrowserContext` frais (`PageTest`) ; cookies, localStorage et store Zustand repartent à zéro.
+- Les fixtures auth-only redéclenchent le flow OAuth complet dans `[SetUp]` — lent mais sans couplage.
 
 ### Tests conditionnels
 
-`Assert.Inconclusive` est utilisé quand une précondition ne peut pas être garantie par les données de test (ex. : moins de 2 miniatures sur un jeu), évitant ainsi les faux négatifs.
+`Assert.Inconclusive` est utilisé quand la donnée de backend ne garantit pas la précondition (ex. `SearchPage_ResultCard_Click_ShouldNavigateToProductPage` nécessite ≥ 1 résultat pour « counter-strike »). Évite les faux négatifs en CI.
 
 ---
 
-## Couverture des tests
+## Couverture par fixture
 
-### Récapitulatif par fixture
-
-| Fixture | Tests | Cas couverts |
-|---|---|---|
-| `HomeTests` | 15 | Sections page (Recommended, Bestsellers, New Releases, Pre-Orders), game cards, newsletter (input, bouton, saisie), navigation premier jeu |
-| `HeroCarouselTests` | 9 | Visibilité, rôle ARIA carousel, flèches Prev/Next, 5 dots, clic dot actif, premier dot par défaut, CTA BUY NOW lien et navigation |
-| `CatalogTests` | 13 | Chargement, header/footer, game cards (count ≥ 4, liens `/games/\d+`), filter sidebar, checkboxes genre, toggle label, sort dropdown (ouverture, sélection, mise à jour label) |
-| `ProductTests` | 14 | Titre, header/footer, breadcrumbs (count ≥ 2, navigation Home), Buy Now / Add to Cart / Wishlist visibles, feedback "Added!", badge cart header, éditions Standard (Steam key) et Deluxe (Steam price), galerie miniatures (count ≥ 1, clic change média) |
-| `SearchTests` | 11 | Chargement, résultats avec requête valide, no-results avec requête invalide, popular searches sans query, popular search clic navigation, form submit mise à jour URL, clic résultat → page produit, compteur résultats visible, header search met à jour |
-| `CartTests` | 17 | Empty state (message, liens Browse/Back to home, navigation), header/footer, with-item : titre, ≥ 1 ligne, order summary, checkout button, clear cart button, section Complete Your Order, increase qty, remove item → empty, clear cart → empty |
-| `NavigationTests` | 11 | Logo → home, cart icon (Link ARIA) → /cart, Browse nav → /games, Store nav → /, search submit → /search?q=, preview dropdown apparition/Escape, Sign In/Up pointent vers auth, breadcrumb Home et Catalog |
-| `LoginTests` | 12 | Chargement (titre "SIGN IN"), email + submit visibles, toggle password (show/restore), 5 OAuth providers, Sign up → /register, remplissage formulaire, Forgot password visible + navigation, formulaire vide bloqué, email invalide bloqué, tous OAuth visibles |
-| `RegisterTests` | 11 | Chargement (titre "SIGN UP"), bouton disabled par défaut, enable après terms, toggle password, 5 OAuth providers, Sign in → /login, remplissage complet, double toggle terms restaure état, confirm password toggle, tous OAuth visibles, submit bloqué sans terms |
-| **TOTAL** | **115** | |
+| Fixture | Tests | Auth | Portée |
+|---|---:|:---:|---|
+| `AuthTests` | 16 | — | Flow OAuth complet, liens Sign In/Up, user menu, persistance de session, logout |
+| `LoginTests` | 8 | — | Visibilité et href des liens Sign In sur home/catalog/cart/search |
+| `RegisterTests` | 5 | — | Accès au form de register via Sign Up, présence des champs |
+| `NavigationTests` | 11 | — | Header : logo, cart, nav Browse/Store, recherche + preview dropdown, Escape |
+| `HomeTests` | 13 | — | Sections (Recommended, Bestsellers, New Releases, Pre-Orders), trust bar, premier game card |
+| `HeroCarouselTests` | 10 | — | ARIA carousel, flèches, 5 dots, activation dot, CTA BUY NOW |
+| `CatalogTests` | 13 | — | Game cards (≥ 4, liens `/games/\d+`), filter sidebar, checkboxes genre, sort dropdown |
+| `ProductTests` | 14 | — | Titre, breadcrumbs, Buy Now / Add to Cart / Wishlist, feedback « Added! », badge header, éditions, miniatures |
+| `SearchTests` | 10 | — | Hero form submit, popular searches, result click, URL direct `?q=`, no-results |
+| `CartTests` | 15 | — | Empty state + flow UI complet : add, +1 qty, remove, clear |
+| `CheckoutTests` | 8 | ✅ | Modal de paiement : Balance, Stripe, total, Cancel |
+| `OrderTests` | 6 | ✅ | Heading, accès depuis user menu, empty OR populated |
+| `ProfileTests` | 14 | ✅ | Header profil, stats, tabs (Overview/Badges/Order History), section Steam |
+| `SettingsTests` | 21 | ✅ | Account, Wallet (incl. modal Top Up + validation min 1 $), Linked Accounts, Notifications, Privacy |
+| **TOTAL** | **164** | | 1 test parfois ignoré si backend sans résultats → **163 effectivement exécutés** |
 
 ### Répartition fonctionnelle
 
 ```
-Navigation & routing ........ 11 tests  (NavigationTests)
-Carousel & home ............. 24 tests  (HomeTests + HeroCarouselTests)
-Catalogue & filtres ......... 13 tests  (CatalogTests)
-Page produit ................ 14 tests  (ProductTests)
-Panier ...................... 17 tests  (CartTests)
-Recherche ................... 11 tests  (SearchTests)
-Authentification ............ 23 tests  (LoginTests + RegisterTests)
+Authentification & session ........ 29 tests   (Auth + Login + Register)
+Navigation & header ............... 11 tests   (NavigationTests)
+Home & carrousel .................. 23 tests   (Home + HeroCarousel)
+Catalogue ......................... 13 tests   (CatalogTests)
+Page produit ...................... 14 tests   (ProductTests)
+Recherche ......................... 10 tests   (SearchTests)
+Panier & checkout ................. 23 tests   (Cart + Checkout)
+Espace utilisateur ................ 41 tests   (Profile + Orders + Settings)
 ```
 
 ---
 
-## Fichiers créés / modifiés
+## Couverture — ce qui n'est pas testé
 
-### Nouveaux fichiers
+**Parcours d'achat bout-en-bout** — paiement réel (Stripe, Balance), création d'une order en base + apparition dans `/orders`, décrément du solde.
 
-| Fichier | Rôle |
-|---|---|
-| `Pages/CartPage.cs` | POM de la page `/cart` — état vide et panier rempli |
-| `Tests/CartTests.cs` | 17 tests (empty state + flux UI complet add-to-cart) |
-| `Tests/NavigationTests.cs` | 11 tests de navigation inter-pages via le header |
-| `Tests/HeroCarouselTests.cs` | 9 tests du carousel via attributs ARIA |
+**Authentification** — inscription réelle, reset password, OAuth secondaires (Google/Steam/Xbox/PlayStation/Discord), erreurs d'auth (mauvais mot de passe, compte verrouillé).
 
-### Fichiers étendus
+**Catalogue** — pagination, filtres multi-critères combinés, filtre Platform, « Clear All Filters » après sélection, vue grille vs liste, tri reflété sur l'ordre des cartes.
 
-| Fichier | Tests ajoutés |
-|---|---|
-| `Tests/HomeTests.cs` | +6 (newsletter, clic game card, Pre-Orders) |
-| `Tests/CatalogTests.cs` | +8 (filtre genre, sort dropdown, liens game cards) |
-| `Tests/ProductTests.cs` | +9 (CTA buttons, feedback, éditions, galerie) |
-| `Tests/SearchTests.cs` | +5 (popular search, form submit, clic résultat, compteur) |
-| `Tests/LoginTests.cs` | +5 (validation, forgot password, toggle restore) |
-| `Tests/RegisterTests.cs` | +4 (double toggle, confirm password, validation) |
+**Produit** — Wishlist persistant, Buy Now direct, bascule édition Standard/Deluxe change le prix, related games, lecteur vidéo.
+
+**Panier** — `Decrease quantity`, persistance après reload/re-login, recalcul du total, guest vs authentifié.
+
+**Recherche** — debounce mesuré, résultats triés/filtrés, pagination, `SearchPage_ResultCard_Click_ShouldNavigateToProductPage` skippé quand 0 résultat.
+
+**Espace utilisateur** — édition effective du profil (submit + persistance), suppression de compte, Top Up jusqu'à Stripe, détail d'une order, linked accounts Steam OAuth.
+
+**Transverse** — responsive mobile, accessibilité clavier/lecteur d'écran, performance/Lighthouse, erreurs 404/500/backend indisponible, i18n, sessions expirées.
 
 ---
 
 ## Lancer les tests
 
+### Prérequis
+
 ```bash
-# Prérequis : application démarrée sur localhost:4000
-# (docker-compose up depuis la racine du projet)
+# Depuis la racine du repo
+docker compose up -d auth frontend backend postgres postgres-game kafka
 
-# Tous les tests
+# Seed du user de test si absent (test@example.com / password)
+docker exec condensation-auth-1 php artisan db:seed --force
+```
+
+Vérification rapide :
+```bash
+curl -o /dev/null -w "%{http_code}\n" http://localhost:4000
+curl -o /dev/null -w "%{http_code}\n" http://localhost:8000
+curl -o /dev/null -w "%{http_code}\n" http://localhost:8080/api/games
+```
+
+### Exécution locale
+
+```bash
 cd e2e-tests
-dotnet test
 
-# Avec navigateur visible (debug)
-dotnet test -- Playwright.LaunchOptions.Headless=false
+dotnet test                                                   # suite complète (~40 min)
+dotnet test --filter "FullyQualifiedName~CartTests"           # une fixture
+dotnet test --filter "Name=HomePage_ShouldLoadSuccessfully"   # un test
+dotnet test --logger "console;verbosity=detailed"             # logs par test
 
-# Filtrer par fixture
-dotnet test --filter "CartTests"
-dotnet test --filter "HeroCarousel"
-dotnet test --filter "Navigation"
+E2E_TIMEOUT=20000 E2E_BASE_URL=http://localhost:4000 dotnet test
+```
 
-# Avec URL personnalisée
-E2E_BASE_URL=https://staging.example.com dotnet test
+### Exécution en conteneur (CI)
 
-# Avec timeout personnalisé (ms)
-E2E_TIMEOUT=60000 dotnet test
+```bash
+./e2e-tests/run-tests.sh
+```
+
+Le script vérifie le seed puis lance `docker compose up --build --abort-on-container-exit` avec le profil `e2e`. Le `Dockerfile` installe Chromium avec `--with-deps` et utilise `-c Release`.
+
+### Mode graphique (debug)
+
+Éditer `.runsettings` :
+```xml
+<Headless>false</Headless>
 ```
 
 ---
 
 ## Points de vigilance
 
-### Sélecteur cart icon
-Le composant `Header` utilise un `<Link>` Next.js qui se rend en `<a>`, pas un `<button>`.  
-Le sélecteur correct est `header a[aria-label='Cart']` et non `header button[aria-label='Cart']`.
+### Hydratation Next.js
 
-### Formulaires d'authentification
-Les pages `/login` et `/register` appartiennent au service Laravel (port 8000).  
-Elles sont accessibles via le même domaine grâce au proxy Docker.  
-Les tests de soumission de formulaire vérifient uniquement le comportement front-end (validation HTML5, état activé/désactivé) — aucun compte réel n'est créé.
+Le `load` event n'est jamais déclenché par Turbopack dev à cause des WebSockets HMR. La convention adoptée :
+
+- Toute navigation passe par `GoToAsync` (ou `NavigateAsync` du POM) qui combine `DOMContentLoaded` + un wait best-effort de 5 s sur `Load` (tolérant l'`TimeoutException`).
+- Avant d'interagir avec un composant client (input contrôlé, dropdown), le wait Load laisse à React le temps d'attacher ses handlers.
+
+### Sélecteur footer
+
+Next.js dev injecte un `<footer class="error-overlay-footer">` qui capturait le `.Last`. Le sélecteur est maintenant :
+```
+body > footer, footer:not([data-nextjs-error-overlay-footer])
+```
+
+### Cart icon
+
+Le composant `Header` rend un `<Link>` Next.js → balise `<a>`, pas un `<button>`. Sélecteur correct : `header a[aria-label='Cart']`.
+
+### Formulaires d'auth
+
+`/login` et `/register` sont servis par le service Laravel (port 8000, accessible via redirect OAuth). Les tests de register vérifient uniquement la présence des champs — **aucun compte réel n'est créé**.
 
 ### Panier Zustand
-Le store est en mémoire (par onglet/contexte). Chaque test Playwright démarrant dans un contexte vierge, le panier est toujours vide en début de test. Les tests "with item" reproduisent le flux utilisateur complet (Catalogue → Produit → Add to Cart → Cart).
 
-### Données de test
-Les tests s'appuient sur les données réelles de la base de données de développement. Si la base est vide, plusieurs tests échoueront (game cards, résultats de recherche). Prévoir un jeu de données minimal pour l'environnement CI.
+Store en mémoire par contexte. Chaque test démarrant dans un contexte vierge, le panier est toujours vide au `[SetUp]`. Les tests « with item » reproduisent le parcours utilisateur complet (Catalogue → Produit → Add to Cart → Cart).
+
+### Données backend requises
+
+Les tests dépendent de données réelles servies par `GET /api/games`. Sans seed :
+- `Catalog_ShouldDisplayAtLeastFourGameCards` échoue
+- `Search_*` avec requêtes spécifiques (« counter-strike », « elden ring ») deviennent `Inconclusive`
+
+Prévoir un seed minimal pour la CI (déjà présent via `scripts/seed_games.sql`).
