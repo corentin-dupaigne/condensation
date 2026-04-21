@@ -1,14 +1,18 @@
 <x-condensation-guest-layout>
-  <a href="{{ config('app.frontend_url', '/') }}"
-     class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface">
-    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 12H5" /><path d="m12 19-7-7 7-7" />
-    </svg>
-    {{ __('Return to Home') }}
-  </a>
-
-  <div class="glass-panel rounded-2xl border border-outline-variant/10 p-10 shadow-2xl">
+  <div class="w-full h-full flex gap-6 items-center">
+    <div class="w-full h-full object-fill">
+      <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2399830/ss_f54032df135de28a4f4880057cd48c1c8b259870.1920x1080.jpg?t=1766710980" alt="" class="h-full w-full object-cover rounded-2xl shadow-2xl">
+    </div>
+    <div class="w-1/3 mx-20">
+      <a href="{{ config('app.frontend_url', '/') }}"
+         class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface">
+        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5" /><path d="m12 19-7-7 7-7" />
+        </svg>
+        {{ __('Return to Home') }}
+      </a>
+      <div class="glass-panel rounded-2xl border border-outline-variant/10 p-10 shadow-2xl">
     <header class="mb-8 text-center">
       <h1 class="mb-2 font-headline text-5xl font-black uppercase tracking-tighter text-on-surface">Sign Up</h1>
       <p class="font-medium tracking-tight text-on-surface-variant">Forge your account. Enter the armory.</p>
@@ -119,14 +123,17 @@
       </button>
     </form>
 
-    <div class="mt-8 text-center">
-      <p class="text-sm text-on-surface-variant">
-        {{ __('Already have an account?') }}
-        <a href="{{ route('login', request()->query()) }}" class="ml-1 font-bold text-primary hover:underline">
-          {{ __('Sign in') }}
-        </a>
-      </p>
+        <div class="mt-8 text-center">
+          <p class="text-sm text-on-surface-variant">
+            {{ __('Already have an account?') }}
+            <a href="{{ route('login', request()->query()) }}" class="ml-1 font-bold text-primary hover:underline">
+              {{ __('Sign in') }}
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
+    
   </div>
 
   <script>

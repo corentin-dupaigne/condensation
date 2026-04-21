@@ -26,6 +26,13 @@ services:
       - CACHE_STORE=database
       - SESSION_DRIVER=database
       - QUEUE_CONNECTION=database
+    volumes:
+      # Mount source for live edits without rebuilding
+      - ./authentication:/var/www/html
+      # Protect vendor built inside the image from being overwritten by host
+      - /var/www/html/vendor
+      # Preserve storage permissions set by the image
+      - /var/www/html/storage
     depends_on:
       postgres:
         condition: service_healthy
