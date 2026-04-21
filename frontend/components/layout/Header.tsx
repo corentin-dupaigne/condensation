@@ -12,7 +12,6 @@ import { formatCents } from "@/lib/format-price";
 const navLinks = [
   { label: "Store", href: "/" },
   { label: "Browse", href: "/games" },
-  { label: "Deals", href: "#" },
   { label: "Support", href: "#" },
 ];
 
@@ -89,7 +88,7 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
-if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setSearchFocused(false);
       }
     }
@@ -97,7 +96,7 @@ if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-const initials = userName ? userName.charAt(0).toUpperCase() : "P";
+  const initials = userName ? userName.charAt(0).toUpperCase() : "P";
 
   return (
     <header className="glass-panel sticky top-0 z-50">

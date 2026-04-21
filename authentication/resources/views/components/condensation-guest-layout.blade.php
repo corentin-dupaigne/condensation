@@ -100,7 +100,8 @@
     }
   </script>
 </head>
-<body class="font-headline antialiased bg-surface text-on-surface">
+<body class="font-headline antialiased text-on-surface"
+      style="background-image: url('{{ asset('bg.png') }}'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;">
 
   <!-- Ambient glow blobs -->
   <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -109,24 +110,11 @@
   </div>
 
   <div class="flex min-h-screen flex-col">
-    <main class="flex grow items-center justify-center px-6 pt-12 pb-16">
-      <div class="z-10 w-full max-w-[480px]">
+    <main class="flex grow items-center justify-center p-4 h-screen">
+      <div class="z-10 w-full h-full">
         {{ $slot }}
       </div>
     </main>
-
-    <footer class="flex flex-col items-center gap-3 py-8">
-      <div class="flex flex-wrap justify-center gap-6">
-        @foreach(['Terms of Service', 'Privacy Policy', 'Cookie Settings', 'Support'] as $label)
-          <a href="#" class="text-xs uppercase tracking-widest text-primary/60 transition-all hover:text-secondary">
-            {{ $label }}
-          </a>
-        @endforeach
-      </div>
-      <p class="text-xs uppercase tracking-widest text-on-surface-variant/40">
-        &copy; {{ date('Y') }} Condensation. All rights reserved.
-      </p>
-    </footer>
   </div>
 </body>
 </html>
