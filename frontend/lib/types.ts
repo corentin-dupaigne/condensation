@@ -138,3 +138,31 @@ export interface Order {
     genres: string[];
   };
 }
+
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+}
+
+export interface AdminOrder {
+  id: number;
+  userId: number;
+  gamesId: number;
+  key: string;
+  status?: string;
+  createdAt?: string;
+}
+
+export interface AdminGame {
+  id: number;
+  steamAppId: number;
+  name: string;
+  slug: string;
+  headerImage: string;
+  priceFinal: number;
+  reductionPercentage: number;
+  releaseDate: string;
+}

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Passport\RefreshToken;
@@ -67,5 +68,14 @@ Route::middleware('auth:api')->group(function () {
         $request->user()->tokens()->update(['revoked' => true]);
 
         return response()->json(['message' => 'All tokens revoked successfully.']);
+    });
+
+    // Admin-only user management (role checked by the caller)
+    Route::prefix('admin')->group(function () {
+        Route::get('/users', [UserController::class, 'index']);
+        Route::post('/users', [UserController::class, 'store']);
+        Route::get('/users/{id}', [UserController::class, 'show']);
+        Route::put('/users/{id}', [UserController::class, 'update']);
+        Route::delete('/users/{id}', [UserController::class, 'destroy']);
     });
 });
