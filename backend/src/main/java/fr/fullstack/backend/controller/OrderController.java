@@ -1,5 +1,6 @@
 package fr.fullstack.backend.controller;
 
+import fr.fullstack.backend.config.AuthServiceIntrospector.SimpleOAuth2Principal;
 import fr.fullstack.backend.dto.OrderDto;
 import fr.fullstack.backend.dto.OrderRequest;
 import fr.fullstack.backend.entity.Order;
@@ -7,7 +8,6 @@ import fr.fullstack.backend.mapper.CatalogMapper;
 import fr.fullstack.backend.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,26 +26,24 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, List<OrderDto>>> getUserOrders(@AuthenticationPrincipal Jwt jwt) {
-        int userId = Integer.parseInt(jwt.getSubject());
-        List<Order> orders = orderService.getUserOrders(userId);
+    public ResponseEntity<Map<String, List<OrderDto>>> getUserOrders(@AuthenticationPrincipal SimpleOAuth2Principal principal) {
+        List<Order> orders = orderService.getUserOrders(principal.userId());
         return ResponseEntity.ok(Map.of("orders", mapper.toOrderDtoList(orders)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, OrderDto>> getOrderDetails(
             @PathVariable Integer id,
-            @AuthenticationPrincipal Jwt jwt) {
-        int userId = Integer.parseInt(jwt.getSubject());
-        Order order = orderService.getOrderDetails(id, userId);
+            @AuthenticationPrincipal SimpleOAuth2Principal principal) {
+        Order order = orderService.getOrderDetails(id, principal.userId());
         return ResponseEntity.ok(Map.of("order", mapper.toOrderDto(order)));
     }
 
     @PostMapping
     public ResponseEntity<Map<String, String>> createOrder(
             @RequestBody OrderRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
-        int userId = Integer.parseInt(jwt.getSubject());
+            @AuthenticationPrincipal SimpleOAuth2Principal principal) {
+        int userId = principal.userId();
         List<OrderService.OrderRequestItem> items = request.games().stream()
                 .map(g -> {
                     OrderService.OrderRequestItem item = new OrderService.OrderRequestItem();

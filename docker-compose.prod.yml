@@ -1,0 +1,133 @@
+version: '3.8'
+
+name: condensation
+
+services:
+  auth:
+    build:
+      context: ./authentication
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8000:80"
+    environment:
+      - APP_NAME=Laravel
+      - APP_ENV=local
+      - APP_KEY=base64:9FmWeE2e3HkFtk58XQjWxwZkG/f2iK45Lq/GgqPqF+o=
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=auth_db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - CLIENT_ID=ead85488-0ee1-41f9-9703-eac26103f5f4
+      - CACHE_STORE=database
+      - SESSION_DRIVER=database
+      - QUEUE_CONNECTION=database
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: runner
+    ports:
+      - "4000:3000"
+    environment:
+      - AUTH_URL=http://localhost:8000
+      - API_URL=http://auth:80
+      - BACKEND_URL=http://backend:8080
+      - CLIENT_ID=ead85488-0ee1-41f9-9703-eac26103f5f4
+      - REDIRECT_URI=http://localhost:4000/api/auth/callback
+      - NODE_ENV=production
+    depends_on:
+      - auth
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  postgres-game:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: game_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d game_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_game_data:/var/lib/postgresql/data
+      - ./scripts/V1__create_game_catalog_schema.sql:/docker-entrypoint-initdb.d/V1__create_game_catalog_schema.sql:ro
+      - ./scripts/seed_games.sql:/docker-entrypoint-initdb.d/seed_games.sql:ro
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: catalog_kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - kafka_data:/bitnami/kafka
+
+  backend:
+    build:
+      context: ./backend
+    container_name: catalog_backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      postgres-game:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  e2e-tests:
+    build:
+      context: ./e2e-tests
+      dockerfile: Dockerfile
+    network_mode: host
+    environment:
+      - E2E_BASE_URL=http://localhost:4000
+      - E2E_TIMEOUT=30000
+
+volumes:
+  postgres_data:
+  postgres_game_data:
+  kafka_data:

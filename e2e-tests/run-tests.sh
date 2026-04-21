@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
 if ! docker exec condensation-postgres-1 psql -U postgres -d auth_db -tAc \

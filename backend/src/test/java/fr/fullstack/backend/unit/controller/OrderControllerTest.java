@@ -1,5 +1,6 @@
 package fr.fullstack.backend.unit.controller;
 
+import fr.fullstack.backend.config.AuthServiceIntrospector.SimpleOAuth2Principal;
 import fr.fullstack.backend.controller.OrderController;
 import fr.fullstack.backend.dto.OrderDto;
 import fr.fullstack.backend.dto.OrderRequest;
@@ -14,9 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -38,15 +37,6 @@ class OrderControllerTest {
     @InjectMocks
     private OrderController orderController;
 
-    private Jwt jwtForUser(int userId) {
-        return Jwt.withTokenValue("token")
-                .header("alg", "RS256")
-                .subject(String.valueOf(userId))
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
-    }
-
     @Test
     void getUserOrders_returnsMappedDtos() {
         Order o = new Order();
@@ -56,7 +46,7 @@ class OrderControllerTest {
         when(orderService.getUserOrders(7)).thenReturn(List.of(o));
         when(mapper.toOrderDtoList(List.of(o))).thenReturn(List.of(dto));
 
-        ResponseEntity<Map<String, List<OrderDto>>> response = orderController.getUserOrders(jwtForUser(7));
+        ResponseEntity<Map<String, List<OrderDto>>> response = orderController.getUserOrders(new SimpleOAuth2Principal(7));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).containsKey("orders");
@@ -70,7 +60,7 @@ class OrderControllerTest {
         when(orderService.getOrderDetails(1, 7)).thenReturn(o);
         when(mapper.toOrderDto(o)).thenReturn(dto);
 
-        ResponseEntity<Map<String, OrderDto>> response = orderController.getOrderDetails(1, jwtForUser(7));
+        ResponseEntity<Map<String, OrderDto>> response = orderController.getOrderDetails(1, new SimpleOAuth2Principal(7));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).containsKey("order");
@@ -85,7 +75,7 @@ class OrderControllerTest {
         ));
         when(orderService.createOrder(eq(7), any())).thenReturn(List.of());
 
-        ResponseEntity<Map<String, String>> response = orderController.createOrder(req, jwtForUser(7));
+        ResponseEntity<Map<String, String>> response = orderController.createOrder(req, new SimpleOAuth2Principal(7));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).containsEntry("message", "Commande effectuée avec succès");
@@ -99,7 +89,7 @@ class OrderControllerTest {
         ));
         when(orderService.createOrder(eq(7), any())).thenReturn(List.of());
 
-        orderController.createOrder(req, jwtForUser(7));
+        orderController.createOrder(req, new SimpleOAuth2Principal(7));
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<OrderService.OrderRequestItem>> captor =
@@ -119,7 +109,7 @@ class OrderControllerTest {
         OrderRequest req = new OrderRequest(List.of());
         when(orderService.createOrder(eq(7), any())).thenReturn(List.of());
 
-        ResponseEntity<Map<String, String>> response = orderController.createOrder(req, jwtForUser(7));
+        ResponseEntity<Map<String, String>> response = orderController.createOrder(req, new SimpleOAuth2Principal(7));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(orderService).createOrder(eq(7), any());
