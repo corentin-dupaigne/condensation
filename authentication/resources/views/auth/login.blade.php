@@ -1,6 +1,6 @@
 <x-condensation-guest-layout>
   <div class="w-full h-full flex gap-6 items-center">
-    <div class="w-1/3 mx-20">
+    <div class="w-1/2 mx-20">
       <a href="{{ config('app.frontend_url', '/') }}"
         class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface">
         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
