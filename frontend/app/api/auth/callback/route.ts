@@ -5,6 +5,12 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
+  const error = url.searchParams.get('error');
+
+  if (error) {
+    const description = url.searchParams.get('error_description') ?? error;
+    return new Response(`Authorization denied: ${description}`, { status: 400 });
+  }
 
   const cookieStore = await cookies();
   const code_verifier = cookieStore.get('code_verifier')?.value;

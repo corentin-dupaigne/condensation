@@ -163,3 +163,71 @@ test('request with wrong scope is rejected', function () {
     $response = $this->getJson('/api/user');
     $response->assertStatus(200);
 });
+
+test('full PKCE flow: get code then exchange for tokens', function () {
+    [$verifier, $challenge] = generatePkceChallenge();
+    $state = Str::random(40);
+
+    // Step 1: get authorization code
+    $authResponse = $this->actingAs($this->user)->get('/oauth/authorize?' . http_build_query([
+        'client_id'             => $this->client->id,
+        'redirect_uri'          => 'http://localhost:4200/callback',
+        'response_type'         => 'code',
+        'scope'                 => 'read-profile',
+        'state'                 => $state,
+        'code_challenge'        => $challenge,
+        'code_challenge_method' => 'S256',
+    ]));
+
+    $authResponse->assertStatus(302);
+    $redirectUrl = $authResponse->headers->get('Location');
+    expect($redirectUrl)->toContain('code=');
+
+    parse_str(parse_url($redirectUrl, PHP_URL_QUERY), $params);
+    $code = $params['code'];
+    expect($params['state'])->toBe($state);
+
+    // Step 2: exchange code + verifier for tokens
+    $tokenResponse = $this->postJson('/oauth/token', [
+        'grant_type'    => 'authorization_code',
+        'client_id'     => $this->client->id,
+        'redirect_uri'  => 'http://localhost:4200/callback',
+        'code_verifier' => $verifier,
+        'code'          => $code,
+    ]);
+
+    $tokenResponse->assertStatus(200);
+    $tokenResponse->assertJsonStructure(['token_type', 'expires_in', 'access_token', 'refresh_token']);
+    expect($tokenResponse->json('token_type'))->toBe('Bearer');
+});
+
+test('token exchange fails when code_verifier does not match challenge', function () {
+    [$verifier, $challenge] = generatePkceChallenge();
+    $state = Str::random(40);
+
+    // Get a valid auth code with one challenge
+    $authResponse = $this->actingAs($this->user)->get('/oauth/authorize?' . http_build_query([
+        'client_id'             => $this->client->id,
+        'redirect_uri'          => 'http://localhost:4200/callback',
+        'response_type'         => 'code',
+        'scope'                 => 'read-profile',
+        'state'                 => $state,
+        'code_challenge'        => $challenge,
+        'code_challenge_method' => 'S256',
+    ]));
+
+    parse_str(parse_url($authResponse->headers->get('Location'), PHP_URL_QUERY), $params);
+    $code = $params['code'];
+
+    // Try to exchange with a different verifier
+    [$wrongVerifier] = generatePkceChallenge();
+    $tokenResponse = $this->postJson('/oauth/token', [
+        'grant_type'    => 'authorization_code',
+        'client_id'     => $this->client->id,
+        'redirect_uri'  => 'http://localhost:4200/callback',
+        'code_verifier' => $wrongVerifier,
+        'code'          => $code,
+    ]);
+
+    $tokenResponse->assertStatus(400);
+});

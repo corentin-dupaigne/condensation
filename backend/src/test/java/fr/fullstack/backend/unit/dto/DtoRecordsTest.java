@@ -11,16 +11,15 @@ class DtoRecordsTest {
 
     @Test
     void balanceRequest_holdsValues() {
-        BalanceRequest req = new BalanceRequest(7, 250);
+        BalanceRequest req = new BalanceRequest(250);
 
-        assertThat(req.userid()).isEqualTo(7);
         assertThat(req.amount()).isEqualTo(250);
     }
 
     @Test
     void balanceRequest_supportsEqualsAndHashcode() {
-        BalanceRequest a = new BalanceRequest(7, 250);
-        BalanceRequest b = new BalanceRequest(7, 250);
+        BalanceRequest a = new BalanceRequest(250);
+        BalanceRequest b = new BalanceRequest(250);
 
         assertThat(a).isEqualTo(b);
         assertThat(a.hashCode()).isEqualTo(b.hashCode());
@@ -29,9 +28,8 @@ class DtoRecordsTest {
     @Test
     void orderRequest_holdsValuesAndNestedItems() {
         OrderRequest.OrderRequestItem item = new OrderRequest.OrderRequestItem(10L, 2);
-        OrderRequest req = new OrderRequest(3, List.of(item));
+        OrderRequest req = new OrderRequest(List.of(item));
 
-        assertThat(req.userid()).isEqualTo(3);
         assertThat(req.games()).hasSize(1);
         assertThat(req.games().get(0).gameIds()).isEqualTo(10L);
         assertThat(req.games().get(0).quantity()).isEqualTo(2);
