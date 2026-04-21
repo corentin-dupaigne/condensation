@@ -10,6 +10,10 @@ function base64URLEncode(buffer: Buffer) {
 }
 
 export async function GET() {
+  if (!process.env.AUTH_URL || !process.env.CLIENT_ID || !process.env.REDIRECT_URI) {
+    return new Response('OAuth configuration error inside environment variables', { status: 500 });
+  }
+
   const code_verifier = base64URLEncode(crypto.randomBytes(32));
   const code_challenge = base64URLEncode(
     crypto.createHash('sha256').update(code_verifier).digest()
@@ -32,10 +36,6 @@ export async function GET() {
     maxAge: 60 * 10,
     sameSite: 'lax',
   });
-
-  if (!process.env.AUTH_URL || !process.env.CLIENT_ID || !process.env.REDIRECT_URI) {
-    return new Response('OAuth configuration error inside environment variables', { status: 500 });
-  }
 
   const authUrl = new URL(`${process.env.AUTH_URL}/auth/oauth-init`);
   authUrl.searchParams.append('client_id', process.env.CLIENT_ID);
