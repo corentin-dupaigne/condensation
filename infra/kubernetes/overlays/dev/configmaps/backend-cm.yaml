@@ -5,3 +5,4 @@ metadata:
 data:
   SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
   SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  AUTH_URL: "http://auth-svc"
