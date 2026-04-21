@@ -34,7 +34,7 @@ export default async function CatalogPage({ searchParams }: Props) {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main>
         <CatalogClient
           games={gamesResult.games}

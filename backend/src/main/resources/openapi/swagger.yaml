@@ -14,6 +14,12 @@ tags:
     description: Mise en avant du catalogue
   - name: Orders
     description: Gestion des commandes
+  - name: Admin - Users
+    description: Gestion des utilisateurs (proxié vers le service d'authentification Laravel). Requiert un token Bearer admin.
+  - name: Admin - Orders
+    description: Gestion des commandes (CRUD direct sur game_db). Requiert un token Bearer admin.
+  - name: Admin - Games
+    description: Gestion du catalogue de jeux (CRUD direct sur game_db). Requiert un token Bearer admin.
 paths:
   /games:
     get:
@@ -290,7 +296,364 @@ paths:
                   order:
                     $ref: '#/components/schemas/Order'
 
+  /admin/users:
+    get:
+      tags:
+        - Admin - Users
+      summary: Lister tous les utilisateurs
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminUser'
+        '403':
+          description: Accès interdit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    post:
+      tags:
+        - Admin - Users
+      summary: Créer un utilisateur
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUserRequest'
+      responses:
+        '201':
+          description: Utilisateur créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+        '403':
+          description: Accès interdit
+
+  /admin/users/{id}:
+    get:
+      tags:
+        - Admin - Users
+      summary: Obtenir un utilisateur par ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+        '403':
+          description: Accès interdit
+        '404':
+          description: Utilisateur non trouvé
+    put:
+      tags:
+        - Admin - Users
+      summary: Mettre à jour un utilisateur
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUserRequest'
+      responses:
+        '200':
+          description: Utilisateur mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+        '403':
+          description: Accès interdit
+        '404':
+          description: Utilisateur non trouvé
+    delete:
+      tags:
+        - Admin - Users
+      summary: Supprimer un utilisateur
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Utilisateur supprimé
+        '403':
+          description: Accès interdit
+        '404':
+          description: Utilisateur non trouvé
+
+  /admin/orders:
+    get:
+      tags:
+        - Admin - Orders
+      summary: Lister toutes les commandes
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Liste des commandes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminOrderDto'
+        '403':
+          description: Accès interdit
+    post:
+      tags:
+        - Admin - Orders
+      summary: Créer une commande
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminOrderRequest'
+      responses:
+        '201':
+          description: Commande créée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminOrderDto'
+        '403':
+          description: Accès interdit
+        '404':
+          description: Jeu ou utilisateur non trouvé
+
+  /admin/orders/{id}:
+    get:
+      tags:
+        - Admin - Orders
+      summary: Obtenir une commande par ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Commande trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminOrderDto'
+        '403':
+          description: Accès interdit
+        '404':
+          description: Commande non trouvée
+    put:
+      tags:
+        - Admin - Orders
+      summary: Mettre à jour une commande
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminOrderRequest'
+      responses:
+        '200':
+          description: Commande mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminOrderDto'
+        '403':
+          description: Accès interdit
+        '404':
+          description: Commande non trouvée
+    delete:
+      tags:
+        - Admin - Orders
+      summary: Supprimer une commande
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Commande supprimée
+        '403':
+          description: Accès interdit
+        '404':
+          description: Commande non trouvée
+
+  /admin/games:
+    get:
+      tags:
+        - Admin - Games
+      summary: Lister tous les jeux
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Liste des jeux
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameSummary'
+        '403':
+          description: Accès interdit
+    post:
+      tags:
+        - Admin - Games
+      summary: Créer un jeu
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminGameRequest'
+      responses:
+        '201':
+          description: Jeu créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSummary'
+        '400':
+          description: Données invalides
+        '403':
+          description: Accès interdit
+
+  /admin/games/{id}:
+    get:
+      tags:
+        - Admin - Games
+      summary: Obtenir les détails complets d'un jeu (admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Détails du jeu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminGameDetail'
+        '403':
+          description: Accès interdit
+        '404':
+          description: Jeu non trouvé
+    put:
+      tags:
+        - Admin - Games
+      summary: Mettre à jour un jeu
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminGameRequest'
+      responses:
+        '200':
+          description: Jeu mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminGameDetail'
+        '400':
+          description: Données invalides
+        '403':
+          description: Accès interdit
+        '404':
+          description: Jeu non trouvé
+    delete:
+      tags:
+        - Admin - Games
+      summary: Supprimer un jeu (admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Jeu supprimé
+        '403':
+          description: Accès interdit
+        '404':
+          description: Jeu non trouvé
+
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Token Passport OAuth2 émis par le service d'authentification Laravel. Le rôle "admin" est requis.
   schemas:
     GameSummary:
       type: object
@@ -544,3 +907,179 @@ components:
         position:
           type: integer
           description: SMALLINT (position)
+
+    AdminUser:
+      type: object
+      description: Utilisateur géré par le service d'authentification Laravel.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [user, admin]
+
+    AdminUserRequest:
+      type: object
+      description: Payload pour créer ou mettre à jour un utilisateur.
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        role:
+          type: string
+          enum: [user, admin]
+          default: user
+
+    AdminOrderDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        gamesId:
+          type: integer
+          format: int64
+        key:
+          type: string
+
+    AdminOrderRequest:
+      type: object
+      required:
+        - userId
+        - gamesId
+        - key
+      properties:
+        userId:
+          type: integer
+        gamesId:
+          type: integer
+          format: int64
+        key:
+          type: string
+
+    AdminGameRequest:
+      type: object
+      description: Payload pour créer ou mettre à jour un jeu.
+      properties:
+        steamAppId:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        headerImage:
+          type: string
+          format: uri
+        priceFinal:
+          type: integer
+          description: Prix en centimes
+        reductionPercentage:
+          type: integer
+        releaseDate:
+          type: string
+          format: date
+          nullable: true
+        releaseDateRaw:
+          type: string
+          description: Texte brut de la date (ex. "TBD", "Q1 2024")
+        requiredAge:
+          type: integer
+        metacriticScore:
+          type: integer
+          nullable: true
+        recommendationsTotal:
+          type: integer
+        currency:
+          type: string
+          example: EUR
+        platformWindows:
+          type: boolean
+        platformMac:
+          type: boolean
+        platformLinux:
+          type: boolean
+        detailedDescription:
+          type: string
+        aboutTheGame:
+          type: string
+        supportedLanguages:
+          type: string
+        pcRequirements:
+          type: string
+          description: JSON sérialisé de la configuration requise PC
+        macRequirements:
+          type: string
+        linuxRequirements:
+          type: string
+
+    AdminGameDetail:
+      type: object
+      description: Détails complets d'un jeu exposés à l'admin (inclut les champs de plateforme).
+      properties:
+        id:
+          type: integer
+          format: int64
+        steamAppId:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        headerImage:
+          type: string
+          format: uri
+        priceFinal:
+          type: integer
+        reductionPercentage:
+          type: integer
+        recommendationsTotal:
+          type: integer
+        releaseDate:
+          type: string
+          format: date
+          nullable: true
+        releaseDateRaw:
+          type: string
+        requiredAge:
+          type: integer
+        metacriticScore:
+          type: integer
+          nullable: true
+        currency:
+          type: string
+        platformWindows:
+          type: boolean
+        platformMac:
+          type: boolean
+        platformLinux:
+          type: boolean
+        detailedDescription:
+          type: string
+        aboutTheGame:
+          type: string
+        supportedLanguages:
+          type: string
+        pcRequirements:
+          type: object
+          additionalProperties: true
+        macRequirements:
+          type: object
+          additionalProperties: true
+        linuxRequirements:
+          type: object
+          additionalProperties: true

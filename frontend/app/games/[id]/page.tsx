@@ -57,7 +57,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main className="min-h-screen">
         <div className="mx-auto max-w-7xl">
           <Breadcrumb items={breadcrumbItems} />

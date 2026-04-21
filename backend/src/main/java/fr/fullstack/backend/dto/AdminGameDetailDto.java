@@ -1,17 +1,24 @@
 package fr.fullstack.backend.dto;
 
-public record AdminGameRequest(
+import com.fasterxml.jackson.annotation.JsonInclude;
+import tools.jackson.databind.JsonNode;
+
+import java.time.LocalDate;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record AdminGameDetailDto(
+        Long id,
         Integer steamAppId,
         String name,
         String slug,
         String headerImage,
         Integer priceFinal,
         Integer reductionPercentage,
-        String releaseDate,
+        Integer recommendationsTotal,
+        LocalDate releaseDate,
         String releaseDateRaw,
         Short requiredAge,
         Short metacriticScore,
-        Integer recommendationsTotal,
         String currency,
         Boolean platformWindows,
         Boolean platformMac,
@@ -19,7 +26,7 @@ public record AdminGameRequest(
         String detailedDescription,
         String aboutTheGame,
         String supportedLanguages,
-        String pcRequirements,
-        String macRequirements,
-        String linuxRequirements
+        JsonNode pcRequirements,
+        JsonNode macRequirements,
+        JsonNode linuxRequirements
 ) {}

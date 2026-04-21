@@ -3,12 +3,13 @@ import { cookies } from "next/headers";
 export async function getAuthState(): Promise<{
   isLoggedIn: boolean;
   userName: string | null;
+  isAdmin: boolean;
 }> {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
 
   if (!token) {
-    return { isLoggedIn: false, userName: null };
+    return { isLoggedIn: false, userName: null, isAdmin: false };
   }
 
   try {
@@ -22,11 +23,15 @@ export async function getAuthState(): Promise<{
     const contentType = res.headers.get("content-type");
     if (res.ok && contentType?.includes("application/json")) {
       const user = await res.json();
-      return { isLoggedIn: true, userName: user.name ?? null };
+      return {
+        isLoggedIn: true,
+        userName: user.name ?? null,
+        isAdmin: user.role === "admin",
+      };
     }
   } catch (e) {
     console.error("Failed to fetch user data", e);
   }
 
-  return { isLoggedIn: false, userName: null };
+  return { isLoggedIn: false, userName: null, isAdmin: false };
 }

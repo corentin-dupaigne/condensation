@@ -51,7 +51,7 @@ export default async function OrderDetailPage({
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main className="mx-auto max-w-3xl px-6 py-12">
         <div className="mb-10">
           <h1 className="font-headline text-5xl font-black tracking-tight text-on-surface">

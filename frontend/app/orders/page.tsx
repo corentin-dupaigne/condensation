@@ -41,7 +41,7 @@ export default async function OrdersPage() {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <OrdersClientToast />
       <main className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-10">

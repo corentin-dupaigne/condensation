@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const { isLoggedIn, userName } = await getAuthState();
+  const { isLoggedIn, userName, isAdmin } = await getAuthState();
 
   if (!isLoggedIn) {
     redirect("/api/auth/login");
@@ -20,7 +20,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main>
         <SettingsClient userName={userName} />
       </main>

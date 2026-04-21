@@ -1,5 +1,6 @@
 package fr.fullstack.backend.service;
 
+import fr.fullstack.backend.dto.AdminGameDetailDto;
 import fr.fullstack.backend.dto.AdminGameRequest;
 import fr.fullstack.backend.dto.GameSummaryDto;
 import fr.fullstack.backend.entity.Game;
@@ -32,10 +33,10 @@ public class AdminGameService {
     }
 
     @Transactional(readOnly = true)
-    public GameSummaryDto findById(Long id) {
+    public AdminGameDetailDto findById(Long id) {
         Game game = gameRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Game not found: " + id));
-        return catalogMapper.toGameSummaryDto(game);
+        return catalogMapper.toAdminGameDetailDto(game);
     }
 
     @Transactional
@@ -68,6 +69,20 @@ public class AdminGameService {
         if (req.name() != null) game.setName(req.name());
         if (req.slug() != null) game.setSlug(req.slug());
         if (req.headerImage() != null) game.setHeaderImage(req.headerImage());
+        if (req.releaseDateRaw() != null) game.setReleaseDateRaw(req.releaseDateRaw());
+        if (req.requiredAge() != null) game.setRequiredAge(req.requiredAge());
+        if (req.metacriticScore() != null) game.setMetacriticScore(req.metacriticScore());
+        if (req.recommendationsTotal() != null) game.setRecommendationsTotal(req.recommendationsTotal());
+        if (req.currency() != null) game.setCurrency(req.currency());
+        if (req.platformWindows() != null) game.setPlatformWindows(req.platformWindows());
+        if (req.platformMac() != null) game.setPlatformMac(req.platformMac());
+        if (req.platformLinux() != null) game.setPlatformLinux(req.platformLinux());
+        if (req.detailedDescription() != null) game.setDetailedDescription(req.detailedDescription());
+        if (req.aboutTheGame() != null) game.setAboutTheGame(req.aboutTheGame());
+        if (req.supportedLanguages() != null) game.setSupportedLanguages(req.supportedLanguages());
+        if (req.pcRequirements() != null) game.setPcRequirements(req.pcRequirements());
+        if (req.macRequirements() != null) game.setMacRequirements(req.macRequirements());
+        if (req.linuxRequirements() != null) game.setLinuxRequirements(req.linuxRequirements());
 
         Integer reduction = req.reductionPercentage() != null ? req.reductionPercentage() : 0;
         game.setReductionPercentage(reduction);

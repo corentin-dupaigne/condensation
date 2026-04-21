@@ -166,3 +166,28 @@ export interface AdminGame {
   reductionPercentage: number;
   releaseDate: string;
 }
+
+export interface AdminGameDetail {
+  id: number;
+  steamAppId: number;
+  name: string;
+  slug: string;
+  headerImage?: string;
+  priceFinal?: number;
+  reductionPercentage?: number;
+  recommendationsTotal?: number;
+  releaseDate?: string;
+  releaseDateRaw?: string;
+  requiredAge?: number;
+  metacriticScore?: number;
+  currency?: string;
+  platformWindows?: boolean;
+  platformMac?: boolean;
+  platformLinux?: boolean;
+  detailedDescription?: string;
+  aboutTheGame?: string;
+  supportedLanguages?: string;
+  pcRequirements?: Record<string, string>;
+  macRequirements?: Record<string, string>;
+  linuxRequirements?: Record<string, string>;
+}

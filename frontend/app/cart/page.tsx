@@ -19,7 +19,7 @@ export default async function CartPage() {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main>
         <CartPageClient recommendedGames={recommendedGames} isLoggedIn={isLoggedIn} />
       </main>

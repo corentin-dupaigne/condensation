@@ -20,7 +20,7 @@ interface PreviewResult {
   total: number;
 }
 
-export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: boolean, userName?: string | null }) {
+export function Header({ isLoggedIn = false, userName = null, isAdmin = false }: { isLoggedIn?: boolean, userName?: string | null, isAdmin?: boolean }) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -99,7 +99,7 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
   const initials = userName ? userName.charAt(0).toUpperCase() : "P";
 
   return (
-    <header className="glass-panel sticky top-0 z-50">
+    <header className="glass-panel sticky top-0 z-50 py-1">
       <div className="mx-auto flex h-16 items-center gap-6 px-6">
         <Link href="/" className="shrink-0 font-headline text-xl font-bold tracking-tight text-primary">
           CONDENSATION
@@ -311,6 +311,14 @@ export function Header({ isLoggedIn = false, userName = null }: { isLoggedIn?: b
                     </p>
                   </div>
                   <div className="py-1">
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        className="block px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-surface-container-highest"
+                      >
+                        Admin Dashboard
+                      </Link>
+                    )}
                     <Link
                       href="/profile"
                       className="block px-4 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-highest hover:text-on-surface"
