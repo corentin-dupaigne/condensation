@@ -42,6 +42,13 @@ spec:
   - matches:
     - path:
         type: PathPrefix
+        value: /pgadmin
+    backendRefs:
+    - name: pgadmin-svc
+      port: 80
+  - matches:
+    - path:
+        type: PathPrefix
         value: /
     backendRefs:
     - name: frontend-svc
