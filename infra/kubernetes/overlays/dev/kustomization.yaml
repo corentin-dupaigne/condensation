@@ -8,10 +8,12 @@ resources:
   - secrets/postgres-game-secret.yaml
   - secrets/backend-secret.yaml
   - secrets/frontend-secret.yaml
+  - secrets/pgadmin-secret.yaml
   - configmaps/frontend-cm.yaml
   - configmaps/auth-cm.yaml
   - configmaps/backend-cm.yaml
   - configmaps/kafka-cm.yaml
+  - configmaps/pgadmin-cm.yaml
 images:
   - name: ghcr.io/corentin-dupaigne/fullstack_project/auth
     newTag: dev
