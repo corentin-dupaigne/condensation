@@ -27,11 +27,18 @@ public class BaseTest : PageTest
     /// <summary>
     /// Navigate using DOMContentLoaded — Next.js dev pages may never fire the `load` event
     /// because of long-lived HMR sockets and streaming responses.
+    /// Fails fast on a 5xx response so tests don't sit on Playwright's polling timeout.
     /// Includes a best-effort short Load wait so React hydrates before interactions.
     /// </summary>
     protected async Task GoToAsync(string url)
     {
-        await Page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
+        var response = await Page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
+        if (response is not null && response.Status >= 500)
+        {
+            var body = await Page.ContentAsync();
+            var hint = body.Contains("oauth-private.key") ? " (Passport private key unreadable — regenerate it)" : "";
+            Assert.Fail($"Navigation to {url} returned HTTP {response.Status}{hint}");
+        }
         try { await Page.WaitForLoadStateAsync(LoadState.Load, new() { Timeout = 5_000 }); }
         catch (TimeoutException) { }
     }
@@ -45,7 +52,22 @@ public class BaseTest : PageTest
         await GoToAsync(TestSettings.BaseUrl);
         await Page.Locator("header a:has-text('Sign In')").ClickAsync();
 
-        await Page.Locator("#email").FillAsync(TestSettings.TestUserEmail);
+        // Race: either the login form renders, or the auth service returned an error page.
+        // Whichever appears first decides — avoids waiting the full DefaultTimeout when
+        // Laravel blows up on the /oauth/authorize redirect (e.g. Passport key unreadable).
+        var emailField = Page.Locator("#email");
+        var errorPage = Page.Locator("text=/Internal Server Error|LogicException|RuntimeException/");
+        var which = await Task.WhenAny(
+            emailField.WaitForAsync(new() { State = WaitForSelectorState.Visible }),
+            errorPage.WaitForAsync(new() { State = WaitForSelectorState.Visible })
+        );
+        await which;
+        if (await errorPage.IsVisibleAsync())
+        {
+            Assert.Fail($"Auth service error page at {Page.Url} — check auth container logs");
+        }
+
+        await emailField.FillAsync(TestSettings.TestUserEmail);
         await Page.Locator("#password").FillAsync(TestSettings.TestUserPassword);
         await Page.Locator("button[type='submit']").ClickAsync();
 

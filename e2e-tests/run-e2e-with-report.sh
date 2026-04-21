@@ -10,12 +10,15 @@
 #   ./run-e2e-with-report.sh --list                        # liste les tests disponibles (ne lance rien)
 #   ./run-e2e-with-report.sh --headed                      # navigateur visible (par défaut headless)
 #   ./run-e2e-with-report.sh --headed --slow-mo 250        # headed + 250 ms entre chaque action
+#   ./run-e2e-with-report.sh --timeout 1500                # ajuste le timeout fast-fail (défaut 3000 ms)
+#   ./run-e2e-with-report.sh --no-fast-fail                # désactive fast-fail (timeouts longs : 30/5/20 s)
 #
 # Variables d'env :
 #   KEEP_SERVICES=1  laisse les services tournants à la fin
 #   SKIP_SERVICES=1  suppose que les services tournent déjà
 #   FILTER=…         équivalent à --filter (l'argument CLI a priorité)
 #   HEADED=1         équivalent à --headed
+#   FAST_FAIL=0      désactive le fast-fail (activé par défaut)
 
 set -euo pipefail
 
@@ -28,6 +31,8 @@ FILTER="${FILTER:-}"
 LIST_ONLY=0
 HEADED="${HEADED:-0}"
 SLOW_MO=""
+FAST_FAIL="${FAST_FAIL:-1}"
+FAST_FAIL_TIMEOUT=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -f|--filter)       FILTER="$2"; shift 2 ;;
@@ -37,6 +42,9 @@ while [[ $# -gt 0 ]]; do
         --headed)          HEADED=1; shift ;;
         --headless)        HEADED=0; shift ;;
         --slow-mo)         SLOW_MO="$2"; shift 2 ;;
+        --fast-fail)       FAST_FAIL=1; shift ;;
+        --no-fast-fail)    FAST_FAIL=0; shift ;;
+        --timeout)         FAST_FAIL_TIMEOUT="$2"; shift 2 ;;
         -h|--help)         usage 0 ;;
         *) echo "Option inconnue : $1" >&2; usage 1 ;;
     esac
@@ -49,6 +57,21 @@ if [[ "$HEADED" == "1" ]]; then
 fi
 if [[ -n "$SLOW_MO" ]]; then
     PW_ARGS+=("Playwright.LaunchOptions.SlowMo=$SLOW_MO")
+fi
+
+# Fast-fail : réduit les timeouts Playwright et NUnit pour qu'un test qui plante
+# (élément manquant, écran d'erreur Next.js…) échoue rapidement au lieu
+# d'attendre 15 s de polling sur l'action et 5 s de polling sur l'assertion.
+# Valeur par défaut 8000 ms : compromis pour laisser à Next.js dev le temps
+# de compiler une page à la volée au premier hit (peut prendre 3–6 s).
+if [[ "$FAST_FAIL" == "1" ]]; then
+    FF_TIMEOUT="${FAST_FAIL_TIMEOUT:-8000}"
+    # Expect polling : ~2/3 du timeout d'action — laisse un peu de marge aux assertions.
+    FF_EXPECT=$(( FF_TIMEOUT * 2 / 3 ))
+    # NUnit hard cap par test : généreux (3×) pour inclure setUp/login/teardown.
+    FF_NUNIT=$(( FF_TIMEOUT * 3 ))
+    export E2E_TIMEOUT="$FF_TIMEOUT"
+    PW_ARGS+=("Playwright.ExpectTimeout=$FF_EXPECT" "NUnit.DefaultTimeout=$FF_NUNIT")
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -125,6 +148,11 @@ fi
 # --- 3. Tests ------------------------------------------------------------
 mkdir -p "$REPORT_DIR"
 mode_label="headless"; [[ "$HEADED" == "1" ]] && mode_label="headed"
+if [[ "$FAST_FAIL" == "1" ]]; then
+    mode_label="$mode_label, fast-fail ${FF_TIMEOUT}ms"
+else
+    mode_label="$mode_label, no fast-fail"
+fi
 if [[ -n "$FILTER" ]]; then
     log "Lancement des tests e2e ($mode_label — filtre : $FILTER)…"
 else
@@ -143,9 +171,19 @@ dotnet test "$SCRIPT_DIR/Condensation.E2E.Tests.csproj" \
     || test_rc=$?
 
 TRX_PATH="$REPORT_DIR/$TRX_FILE"
+# Si le TRX attendu n'existe pas (dotnet test interrompu avant la fin, build
+# cancel, Ctrl+C…), on tente de récupérer le plus récent dans le dossier avant
+# d'abandonner — utile aussi quand dotnet écrit sous un nom légèrement différent.
 if [[ ! -f "$TRX_PATH" ]]; then
-    err "Fichier TRX introuvable : $TRX_PATH"
-    exit 1
+    fallback_trx="$(ls -t "$REPORT_DIR"/*.trx 2>/dev/null | head -n1 || true)"
+    if [[ -n "$fallback_trx" ]]; then
+        warn "TRX attendu introuvable — utilisation du plus récent : $fallback_trx"
+        TRX_PATH="$fallback_trx"
+    else
+        err "Aucun fichier TRX produit — dotnet test a probablement été interrompu avant d'écrire ses résultats."
+        err "Voir la sortie console ci-dessus pour le détail des erreurs. Code de sortie dotnet : ${test_rc:-?}"
+        exit "${test_rc:-1}"
+    fi
 fi
 
 # --- 4. Rapport HTML -----------------------------------------------------
