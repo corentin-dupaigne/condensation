@@ -21,3 +21,4 @@ skills-lock.json
 
 # Kubernetes secrets (contain sensitive credentials)
 infra/kubernetes/**/secrets/
+slides

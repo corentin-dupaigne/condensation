@@ -11,36 +11,57 @@ on:
         required: true
 
 jobs:
-  build-push-backend:
-    name: Build, push & scan backend
+  retag-backend:
+    name: Retag backend dev → ${{ inputs.image-tag || github.ref_name }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    uses: ./.github/workflows/_docker-build.yaml
-    with:
-      image-name: ghcr.io/${{ github.repository_owner }}/fullstack_project/backend
-      image-tag: ${{ inputs.image-tag || github.ref_name }}
-      also-tag-latest: false
-      validate-tag: true
-      dockerfile-context: ./backend
-    secrets:
-      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Validate tag format
+        run: |
+          TAG="${{ inputs.image-tag || github.ref_name }}"
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Invalid tag '$TAG'. Expected format: v<major>.<minor>.<patch> (e.g. v1.0.0)"
+            exit 1
+          fi
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Retag dev image
+        run: |
+          docker buildx imagetools create \
+            --tag ghcr.io/${{ github.repository_owner }}/fullstack_project/backend:${{ inputs.image-tag || github.ref_name }} \
+            ghcr.io/${{ github.repository_owner }}/fullstack_project/backend:dev
 
-  build-push-postgres-game:
-    name: Build, push & scan postgres-game
+  retag-postgres-game:
+    name: Retag postgres-game dev → ${{ inputs.image-tag || github.ref_name }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    uses: ./.github/workflows/_docker-build.yaml
-    with:
-      image-name: ghcr.io/${{ github.repository_owner }}/fullstack_project/postgres-game
-      image-tag: ${{ inputs.image-tag || github.ref_name }}
-      also-tag-latest: false
-      validate-tag: true
-      dockerfile-context: .
-      dockerfile-path: infra/docker/postgres-game/Dockerfile
-    secrets:
-      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Validate tag format
+        run: |
+          TAG="${{ inputs.image-tag || github.ref_name }}"
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Invalid tag '$TAG'. Expected format: v<major>.<minor>.<patch> (e.g. v1.0.0)"
+            exit 1
+          fi
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Retag dev image
+        run: |
+          docker buildx imagetools create \
+            --tag ghcr.io/${{ github.repository_owner }}/fullstack_project/postgres-game:${{ inputs.image-tag || github.ref_name }} \
+            ghcr.io/${{ github.repository_owner }}/fullstack_project/postgres-game:dev
 
   deploy-backend:
     needs: build-push-backend
