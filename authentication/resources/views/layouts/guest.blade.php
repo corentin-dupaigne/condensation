@@ -14,8 +14,8 @@
         <!-- Scripts -->
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
-    <body class="font-sans text-gray-900 antialiased"
-          style="background-image: url('{{ asset('bg.png') }}'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;">
+    <body class="font-sans text-gray-900 antialiased bg-cover bg-center bg-no-repeat bg-fixed"
+          style="--bg-url: url('https://media.discordapp.net/attachments/1152679908976377997/1496023265511080007/bg.png?ex=69e85fbd&is=69e70e3d&hm=ddc55c6a2d8ba222ff6d929ca231e3ec002df29cb217d1ead9e874f374b088e9&=&format=webp&quality=lossless'); background-image: var(--bg-url);">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
             <div>
                 <a href="/">
