@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CartPage() {
-  const [recommendedGames, { isLoggedIn, userName }] = await Promise.all([
+  const [recommendedGames, { isLoggedIn, userName, isAdmin }] = await Promise.all([
     getRecommendedGames(),
     getAuthState(),
   ]);

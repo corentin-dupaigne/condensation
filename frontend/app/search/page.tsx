@@ -22,7 +22,7 @@ export default async function SearchPage({ searchParams }: Props) {
   const { q, size, genreId } = await searchParams;
   const query = q?.trim() ?? "";
 
-  const [searchResult, { isLoggedIn, userName }] = await Promise.all([
+  const [searchResult, { isLoggedIn, userName, isAdmin }] = await Promise.all([
     query
       ? searchSteamGames({
           search: query,

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import AdminTable, { Column } from "@/components/admin/AdminTable";
 import ConfirmModal from "@/components/admin/ConfirmModal";
 import AdminFormField from "@/components/admin/AdminFormField";
@@ -25,7 +24,6 @@ const COLUMNS: Column<AdminUser>[] = [
 const EMPTY_FORM = { name: "", email: "", role: "user", password: "" };
 
 export default function AdminUsersPage() {
-  const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);

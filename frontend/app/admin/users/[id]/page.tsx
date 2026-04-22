@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import AdminFormField from "@/components/admin/AdminFormField";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
@@ -9,7 +9,6 @@ import Link from "next/link";
 import type { AdminUser } from "@/lib/types";
 
 export default function EditUserPage() {
-  const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const [form, setForm] = useState({ name: "", email: "", role: "user" });
   const [loading, setLoading] = useState(true);

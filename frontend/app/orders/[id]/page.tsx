@@ -26,7 +26,7 @@ export default async function OrderDetailPage({
   const token = cookieStore.get("access_token")?.value;
   if (!token) redirect("/api/auth/login");
 
-  const [userid, { isLoggedIn, userName }] = await Promise.all([
+  const [userid, { isLoggedIn, userName, isAdmin }] = await Promise.all([
     getUserId(token),
     getAuthState(),
   ]);
