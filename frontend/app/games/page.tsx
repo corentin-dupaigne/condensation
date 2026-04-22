@@ -25,7 +25,7 @@ export default async function CatalogPage({ searchParams }: Props) {
   const { genre } = await searchParams;
   const genreId = genre ? parseInt(genre, 10) : null;
 
-  const [gamesResult, { isLoggedIn, userName }] = await Promise.all([
+  const [gamesResult, { isLoggedIn, userName, isAdmin }] = await Promise.all([
     genreId !== null && !isNaN(genreId)
       ? getCatalogGamesByGenre(genreId)
       : getCatalogGames(),
@@ -34,7 +34,7 @@ export default async function CatalogPage({ searchParams }: Props) {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main>
         <CatalogClient
           games={gamesResult.games}

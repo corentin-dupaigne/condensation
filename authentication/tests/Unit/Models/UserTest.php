@@ -8,6 +8,7 @@ test('user has correct fillable attributes', function () {
     expect($user->getFillable())->toBe([
         'name',
         'email',
+        'role',
         'password',
     ]);
 });

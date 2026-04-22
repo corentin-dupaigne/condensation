@@ -31,6 +31,12 @@ public interface CatalogMapper {
     @Mapping(target = "companies", source = "gameCompanies")
     GameDetailDto toGameDetailDto(Game game);
 
+    @Mapping(target = "priceFinal", expression = "java(calculatePriceFinal(game.getPriceInitial(), game.getReductionPercentage()))")
+    @Mapping(target = "pcRequirements", source = "pcRequirements", qualifiedByName = "stringToJsonNode")
+    @Mapping(target = "macRequirements", source = "macRequirements", qualifiedByName = "stringToJsonNode")
+    @Mapping(target = "linuxRequirements", source = "linuxRequirements", qualifiedByName = "stringToJsonNode")
+    AdminGameDetailDto toAdminGameDetailDto(Game game);
+
     @Mapping(target = "company", source = "company")
     @Mapping(target = "role", source = "role")
     GameCompanyDto toGameCompanyDto(GameCompany gameCompany);

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -69,12 +71,15 @@ public class Game {
     @Column(name = "price_initial")
     private Integer priceInitial;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "pc_requirements", columnDefinition = "jsonb")
     private String pcRequirements;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "mac_requirements", columnDefinition = "jsonb")
     private String macRequirements;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "linux_requirements", columnDefinition = "jsonb")
     private String linuxRequirements;
 

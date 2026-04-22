@@ -26,6 +26,10 @@ services:
       - CACHE_STORE=database
       - SESSION_DRIVER=database
       - QUEUE_CONNECTION=database
+      # Local dev admin account (override in .env or CI secrets for other environments)
+      - ADMIN_EMAIL=admin@admin.com
+      - ADMIN_PASSWORD=admin
+      - ADMIN_NAME=Admin
     volumes:
       # Mount source for live edits without rebuilding
       - ./authentication:/var/www/html
@@ -126,6 +130,7 @@ services:
     environment:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - AUTH_SERVICE_URL=http://auth:80
     depends_on:
       postgres-game:
         condition: service_healthy

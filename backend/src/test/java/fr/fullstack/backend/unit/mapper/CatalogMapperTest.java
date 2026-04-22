@@ -1,5 +1,6 @@
 package fr.fullstack.backend.unit.mapper;
 
+import fr.fullstack.backend.dto.AdminGameDetailDto;
 import fr.fullstack.backend.dto.OrderDto;
 import fr.fullstack.backend.dto.PageDto;
 import fr.fullstack.backend.entity.Game;
@@ -31,6 +32,11 @@ class CatalogMapperTest {
 
         @Override
         public fr.fullstack.backend.dto.GameCompanyDto toGameCompanyDto(fr.fullstack.backend.entity.GameCompany gameCompany) {
+            return null;
+        }
+
+        @Override
+        public AdminGameDetailDto toAdminGameDetailDto(Game game) {
             return null;
         }
 

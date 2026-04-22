@@ -12,14 +12,14 @@ export const metadata: Metadata = {
 };
 
 export default async function CartPage() {
-  const [recommendedGames, { isLoggedIn, userName }] = await Promise.all([
+  const [recommendedGames, { isLoggedIn, userName, isAdmin }] = await Promise.all([
     getRecommendedGames(),
     getAuthState(),
   ]);
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main>
         <CartPageClient recommendedGames={recommendedGames} isLoggedIn={isLoggedIn} />
       </main>

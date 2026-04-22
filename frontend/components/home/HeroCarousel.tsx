@@ -43,7 +43,7 @@ const slides: HeroSlideData[] = [
     genres: ["Action", "RPG"],
     ctaLink: "/games/6",
     image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_943bf6fe62352757d9070c1d33e50b92fe8539f1.1920x1080.jpg?t=1767883716",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_ef61b771ee6b269b1f0cb484233e07a0bfb5f81b.1920x1080.jpg?t=1767883716",
     accentFrom: "#744106",
     accentTo: "#1a1205",
   },

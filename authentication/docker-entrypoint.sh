@@ -40,6 +40,9 @@ fi
 # Seed the PKCE client if the database was just initialized
 php artisan db:seed --class=Database\\Seeders\\OAuthClientSeeder --force
 
+# Ensure the admin account exists (idempotent — safe on every restart)
+php artisan db:seed --class=Database\\Seeders\\AdminUserSeeder --force
+
 echo "Clearing and caching config..."
 php artisan config:cache
 php artisan route:cache

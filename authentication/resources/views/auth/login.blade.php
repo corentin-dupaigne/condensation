@@ -87,7 +87,7 @@
       </div>
     </div>
     <div class="w-full h-full object-fill">
-      <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8c9333bf3f28194cb8113af455ecaf1aa45a0050/ss_8c9333bf3f28194cb8113af455ecaf1aa45a0050.1920x1080.jpg?t=1772090941" alt="" class="h-full w-full object-cover rounded-2xl shadow-2xl">
+      <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_b1b91299d7e4b94201ac840aa64de54d9f5cb7f3.1920x1080.jpg?t=1767883716" alt="" class="h-full w-full object-cover rounded-2xl shadow-2xl">
     </div>
   </div>
 </x-condensation-guest-layout>

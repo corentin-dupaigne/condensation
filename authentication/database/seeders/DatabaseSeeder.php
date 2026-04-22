@@ -16,10 +16,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a test user
+        // Create a regular test user
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'role' => 'user',
+        ]);
+
+        // Create an admin user
+        User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('adminpassword'),
+            'role' => 'admin',
         ]);
 
         // Create a PKCE public OAuth client (no secret)

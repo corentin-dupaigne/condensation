@@ -21,7 +21,7 @@ import {
 import { getAuthState } from "@/lib/auth";
 
 export default async function Home() {
-  const { isLoggedIn, userName } = await getAuthState();
+  const { isLoggedIn, userName, isAdmin } = await getAuthState();
 
   // Retrieve our live dynamic dashboard data streams concurrently!
   const [
@@ -40,7 +40,7 @@ export default async function Home() {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main>
         <HeroCarousel />
         <GameCardGrid title="Recommended For You" games={recommendedGames} />

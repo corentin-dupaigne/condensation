@@ -8,9 +8,7 @@ import { setBalance, useBalance } from "@/lib/balance-store";
 const sections = [
   "Account",
   "Wallet",
-  "Linked Accounts",
   "Notifications",
-  "Privacy",
 ] as const;
 type Section = (typeof sections)[number];
 
@@ -45,9 +43,7 @@ export function SettingsClient({ userName }: { userName: string | null }) {
         <div className="min-w-0 flex-1">
           {activeSection === "Account" && <AccountSection userName={userName} />}
           {activeSection === "Wallet" && <WalletSection />}
-          {activeSection === "Linked Accounts" && <LinkedAccountsSection />}
           {activeSection === "Notifications" && <NotificationsSection />}
-          {activeSection === "Privacy" && <PrivacySection />}
         </div>
       </div>
     </div>
@@ -129,55 +125,6 @@ function AccountSection({ userName }: { userName: string | null }) {
   );
 }
 
-/* ── Linked Accounts ── */
-
-function LinkedAccountsSection() {
-  return (
-    <div className="space-y-6">
-      <SettingsCard title="Steam">
-        <div className="flex items-center justify-between rounded-lg bg-surface-container-highest p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-container">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-on-surface-variant">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-on-surface">Steam Account</p>
-              <p className="text-xs text-on-surface-variant">
-                Not connected — link your Steam account for library sync and personalized recommendations
-              </p>
-            </div>
-          </div>
-          <button className="shrink-0 rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary transition-opacity hover:opacity-90">
-            Connect
-          </button>
-        </div>
-        <div className="mt-4 rounded-lg border border-outline-variant/10 bg-surface-container p-4">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-            What linking enables
-          </h4>
-          <ul className="mt-2 space-y-1.5 text-xs text-on-surface-variant">
-            <li className="flex items-center gap-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tertiary"><path d="M20 6 9 17l-5-5" /></svg>
-              Personalized game recommendations based on your library
-            </li>
-            <li className="flex items-center gap-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tertiary"><path d="M20 6 9 17l-5-5" /></svg>
-              Automatic library sync to avoid duplicate purchases
-            </li>
-            <li className="flex items-center gap-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tertiary"><path d="M20 6 9 17l-5-5" /></svg>
-              Display Steam profile and achievements on your profile
-            </li>
-          </ul>
-        </div>
-      </SettingsCard>
-    </div>
-  );
-}
-
 /* ── Notifications ── */
 
 function NotificationsSection() {
@@ -233,63 +180,6 @@ function NotificationsSection() {
           </Link>{" "}
           and add games to your watchlist to receive price drop alerts.
         </p>
-      </SettingsCard>
-    </div>
-  );
-}
-
-/* ── Privacy ── */
-
-function PrivacySection() {
-  const [profilePublic, setProfilePublic] = useState(true);
-  const [showBadges, setShowBadges] = useState(true);
-  const [showActivity, setShowActivity] = useState(false);
-
-  return (
-    <div className="space-y-6">
-      <SettingsCard title="Profile Visibility">
-        <div className="space-y-3">
-          <ToggleRow
-            label="Public profile"
-            description="Allow other users to see your profile page"
-            checked={profilePublic}
-            onChange={setProfilePublic}
-          />
-          <ToggleRow
-            label="Show badges"
-            description="Display your earned badges on your public profile"
-            checked={showBadges}
-            onChange={setShowBadges}
-          />
-          <ToggleRow
-            label="Show recent activity"
-            description="Display your recent purchases and reviews publicly"
-            checked={showActivity}
-            onChange={setShowActivity}
-          />
-        </div>
-      </SettingsCard>
-
-      <SettingsCard title="Data & Steam">
-        <div className="space-y-4">
-          <div className="rounded-lg bg-surface-container-highest p-4">
-            <p className="text-sm font-medium text-on-surface">Steam Library Data</p>
-            <p className="mt-1 text-xs text-on-surface-variant">
-              When your Steam account is linked, we sync your game library periodically to power recommendations. Your data is never shared with third parties.
-            </p>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-surface-container-highest p-4">
-            <div>
-              <p className="text-sm font-medium text-on-surface">Export Your Data</p>
-              <p className="text-xs text-on-surface-variant">
-                Download a copy of your account data
-              </p>
-            </div>
-            <button className="rounded-lg border border-outline-variant/30 px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:border-primary/40 hover:text-on-surface">
-              Export
-            </button>
-          </div>
-        </div>
       </SettingsCard>
     </div>
   );

@@ -31,7 +31,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const appid = Number(id);
   if (isNaN(appid)) notFound();
 
-  const [steamData, { isLoggedIn, userName }] = await Promise.all([
+  const [steamData, { isLoggedIn, userName, isAdmin }] = await Promise.all([
     fetchSteamAppDetails(appid),
     getAuthState(),
   ]);
@@ -61,7 +61,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} userName={userName} />
+      <Header isLoggedIn={isLoggedIn} userName={userName} isAdmin={isAdmin} />
       <main className="min-h-screen">
         <div className="mx-auto max-w-7xl">
           <Breadcrumb items={breadcrumbItems} />
