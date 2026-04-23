@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8080";
+const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -48,10 +49,10 @@ export async function POST(req: NextRequest) {
       // Fund the wallet first so createOrder's balance check passes,
       // then the order creation deducts the same amount — net effect is zero.
       try {
-        const balanceRes = await fetch(`${BACKEND_URL}/api/balance`, {
+        const balanceRes = await fetch(`${BACKEND_URL}/api/internal/balance`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userid, amount: amountCents, payment_intent_id: paymentIntentId }),
+          headers: { "Content-Type": "application/json", "X-Internal-Secret": INTERNAL_SECRET },
+          body: JSON.stringify({ userid, amount: amountCents }),
         });
         if (!balanceRes.ok) {
           console.error("Webhook: backend POST /balance failed before order creation", balanceRes.status);
@@ -79,10 +80,10 @@ export async function POST(req: NextRequest) {
     } else {
       // Balance top-up
       try {
-        const res = await fetch(`${BACKEND_URL}/api/balance`, {
+        const res = await fetch(`${BACKEND_URL}/api/internal/balance`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userid, amount: amountCents, payment_intent_id: paymentIntentId }),
+          headers: { "Content-Type": "application/json", "X-Internal-Secret": INTERNAL_SECRET },
+          body: JSON.stringify({ userid, amount: amountCents }),
         });
         if (!res.ok) {
           console.error("Webhook: backend POST /balance failed", res.status);
