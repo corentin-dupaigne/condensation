@@ -64,13 +64,13 @@ export async function POST(req: NextRequest) {
       }
 
       try {
-        const res = await fetch(`${BACKEND_URL}/api/orders`, {
+        const res = await fetch(`${BACKEND_URL}/api/internal/orders`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-Internal-Secret": INTERNAL_SECRET },
           body: JSON.stringify({ userid, games }),
         });
         if (!res.ok) {
-          console.error("Webhook: backend POST /orders failed", res.status);
+          console.error("Webhook: backend POST /internal/orders failed", res.status);
           return NextResponse.json({ error: "Backend error" }, { status: 500 });
         }
       } catch (err) {
