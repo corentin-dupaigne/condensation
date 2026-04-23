@@ -166,6 +166,46 @@ paths:
                 properties:
                   success:
                     type: boolean
+  /internal/balance:
+    post:
+      tags:
+        - Balance
+      summary: Mettre à jour le solde (usage interne uniquement)
+      description: Endpoint réservé aux appels serveur-à-serveur (ex. webhook Stripe). Protégé par le header `X-Internal-Secret` à la place du token OAuth2.
+      security: []
+      parameters:
+        - name: X-Internal-Secret
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userid
+                - amount
+              properties:
+                userid:
+                  type: integer
+                amount:
+                  type: integer
+      responses:
+        '200':
+          description: Solde mis à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '403':
+          description: Secret invalide
+
   /feature:
     get:
       tags:

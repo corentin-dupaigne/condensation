@@ -57,6 +57,7 @@ services:
       - CLIENT_ID=ead85488-0ee1-41f9-9703-eac26103f5f4
       - REDIRECT_URI=http://localhost:4000/api/auth/callback
       - NODE_ENV=development
+      - INTERNAL_SECRET=${INTERNAL_SECRET:-webhook-internal-secret}
     volumes:
       # We mount the source code for hot-reloading in dev
       - ./frontend:/app
@@ -131,6 +132,7 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - AUTH_SERVICE_URL=http://auth:80
+      - INTERNAL_SECRET=${INTERNAL_SECRET:-webhook-internal-secret}
     depends_on:
       postgres-game:
         condition: service_healthy

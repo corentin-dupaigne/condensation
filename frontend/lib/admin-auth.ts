@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8080";
+const AUTH_URL = process.env.API_URL ?? process.env.AUTH_URL ?? "http://localhost:8000";
 
 /**
  * Returns the bearer token if the current session belongs to an admin user,
@@ -12,7 +12,7 @@ export async function getAdminToken(): Promise<string | null> {
   if (!token) return null;
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/user`, {
+    const res = await fetch(`${AUTH_URL}/api/user`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
