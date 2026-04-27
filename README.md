@@ -1,6 +1,6 @@
 # Condensation — Technical Documentation
 
-Condensation is a game key marketplace (think CDKeys / Green Man Gaming) where users can browse a catalog of games, top up a wallet via Stripe, and purchase Steam keys delivered instantly.
+Condensation is a game key marketplace where users can browse a catalog of games, top up a wallet via Stripe, and purchase Steam keys delivered instantly.
 
 ## Table of Contents
 
