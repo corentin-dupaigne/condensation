@@ -1,0 +1,27 @@
+flowchart LR
+    Browser["🌐 Browser"]
+
+    subgraph Cluster["k3s Cluster — VPS"]
+        MetalLB["MetalLB\n:80/:443"]
+        Envoy["Envoy Gateway\nTLS termination"]
+
+        subgraph Routing["Path routing"]
+            Auth["auth-svc\nLaravel"]
+            FE["frontend-svc\nNext.js"]
+            BE["backend-svc\nSpring Boot"]
+        end
+
+        PG[("postgres")]
+        Kafka[["kafka"]]
+        PGGame[("postgres-game")]
+    end
+
+    Browser -->|HTTPS| MetalLB
+    MetalLB --> Envoy
+    Envoy -->|"/auth /login"| Auth
+    Envoy -->|"/"| FE
+    FE -->|"session / token"| Auth
+    FE --> BE
+    Auth --> PG
+    BE --> Kafka
+    BE --> PGGame

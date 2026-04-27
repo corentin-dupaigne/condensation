@@ -1,0 +1,5 @@
+flowchart LR
+  P1([Git tag v*.*.*]) --> P2[Semver check] --> P3["Retag :dev → :v1.2.3"] --> P4[Push GHCR] --> P5([set image])
+
+  style P1 fill:#7247b8,stroke:#091060,color:#ffffff
+  style P5 fill:#7247b8,stroke:#091060,color:#ffffff

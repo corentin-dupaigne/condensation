@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant Frontend as Frontend
+    participant Auth as Auth
+    participant Backend as Backend
+
+    Frontend->>Auth: /oauth/authorize + code_challenge (S256)
+    Auth->>Frontend: auth code
+    Frontend->>Auth: /oauth/token + code_verifier
+    Note over Auth: SHA256(verifier) == challenge ✓
+    Auth->>Frontend: access_token (JWT)
+    Frontend->>Backend: Bearer JWT
+    Backend->>Auth: GET /api/user (Bearer JWT)
+    Auth->>Backend: { id, name, email, ... }
+    Note over Backend: active → grant access
+    Backend->>Frontend: protected resource

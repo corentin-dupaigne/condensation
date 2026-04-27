@@ -1,0 +1,5 @@
+flowchart LR
+  D1([Push to master]) --> D2[Path filter] --> D3["Build :dev"] --> D4[Push GHCR] --> D5([rollout restart])
+
+  style D1 fill:#7247b8,stroke:#091060,color:#ffffff
+  style D5 fill:#7247b8,stroke:#091060,color:#ffffff
